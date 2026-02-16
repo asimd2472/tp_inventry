@@ -1,0 +1,15 @@
+@mixin frontInput{
+    .front-input-style{
+        height: 50px;
+        border-radius: 0.5rem;
+    }
+}
+@mixin frontSelect{
+    .front-select-style{
+        height: 50px;
+        border-radius: 0.5rem;
+        &:focus{
+            box-shadow: none;
+        }
+    }
+}

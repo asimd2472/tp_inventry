@@ -1,0 +1,40 @@
+.faq-wrap{
+    .faq-cata-name{
+        h4{
+            color: $color3;
+        }
+    }
+    .accordion{
+        .accordion-item{
+            margin-bottom: 1rem;
+            background-color: $color1;
+            border-top: 1px solid #dee2e6;
+            .accordion-header{
+                .accordion-button{
+                    box-shadow: none;
+                    color: $color8;
+                    background-color: $color1;
+                    font-weight: 600;
+                    &:not(.collapsed){
+                        background-color: rgba($color: $color3, $alpha: 0.04);
+                        color: $color3;
+                    }
+                    &::after{
+                        filter: contrast(0) sepia(37);
+                    }
+                }
+            }
+            .accordion-body{
+                color: $color2;
+                p{
+                    color: $color2;
+                }
+            }
+        }
+    }
+    + {
+        .faq-wrap{
+            margin-top: 2rem;
+        }
+    }
+}

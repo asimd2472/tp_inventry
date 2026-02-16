@@ -1,0 +1,31 @@
+.site-Footer{
+    padding: 1.5rem 0;
+    background-color: #454b99;
+}
+.copyright-text{
+    font-size: 0.875rem;
+    color: $color1;
+    font-weight: 600;
+}
+.info-mail{
+    a{
+        font-size: 0.875rem;
+        color: $color1;
+        font-weight: 600;
+    }
+}
+.footer-menu{
+    ul{
+        display: flex;
+        margin-left: -1rem;
+        margin-right: -1rem;
+        li{
+            padding-left: 1rem;
+            padding-right: 1rem;
+            a{
+                color: $color1;
+                font-size: 0.875rem;
+            }
+        }
+    }
+}

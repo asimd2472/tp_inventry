@@ -1,0 +1,36 @@
+.content-sec {
+	padding: 2rem 0;
+}
+.content-page {
+	p {
+		margin: 0.125rem 0;
+		&:not(:last-child) {
+			margin-bottom: 0.5rem;
+		}
+	}
+	h4 {
+		font-size: 1.125rem;
+	}
+	ol {
+		padding-left: 0;
+		li {
+			list-style: unset;
+			list-style-position: inside;
+		}
+	}
+	ul {
+		padding-left: 0;
+		li {
+			margin: 0.125rem 0;
+            list-style: unset;
+            list-style-position: inside;
+		}
+	}
+}
+.content-heading{
+    margin-bottom: 2rem;
+    h3{
+        font-size: 2rem;
+        color: $color3;
+    }
+}

@@ -1,0 +1,381 @@
+// Home banner
+.home-banner{
+    height: 450px;
+    position: relative;
+    z-index: 0;
+    &::after{
+        position: absolute;
+        content: "";
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 100%;
+        background-color: rgba($color: $color2, $alpha: 0.5);
+        z-index: -1;
+    }
+}
+.banner-text {
+    h2{
+        font-size: 3rem;
+        font-weight: 800;
+        color: $color1;
+        text-align: center;
+    }
+}
+// Home banner End
+// Subscription
+.subscription-sec{
+    padding: 3rem 0;
+}
+.subscription-box{
+    background-color: $color1;
+    box-shadow: 0px 0px 6px 0px rgba($color2, 0.2);
+    border-radius: 1rem;
+    overflow: clip;
+    border-bottom: 5px solid #000;
+    .subscription-head{
+        font-size: 1.25rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        background-color: #000;
+        color: $color1;
+        text-align: center;
+        padding: 1rem 0;
+    }
+    .subscription-body{
+        padding: 1.5rem;
+        .plan-price{
+            text-align: center;
+            h3{
+                font-size: 2.5rem;
+                font-weight: 800;
+                line-height: 1;
+                margin-bottom: 0;
+                .discount-price{
+                    color: #f00;
+                    font-size: 0.875rem;
+                    strong{
+                        font-size: 1.5rem;
+                    }
+                }
+            }
+            p{
+                font-size: 0.875rem;
+            }
+        }
+        ul{
+            text-align: center;
+            margin-top: 1.5rem;
+            li{
+                font-weight: 600;
+                font-size: 1rem;
+                padding: 0.75rem 0;
+                border-bottom: 1px solid #000;
+                &:first-child{
+                    border-top: 1px solid #000;
+                }
+            }
+        }
+        .subscription-btn-wrap{
+            margin-top: 1.5rem;
+            .subscription-btn{
+                display: block;
+                height: 40px;
+                line-height: 40px;
+                padding: 0 1rem;
+                font-size: 1.125rem;
+                font-weight: 600;
+                background-color: #000;
+                color: $color1;
+                border-radius: 0.75rem;
+                text-align: center;
+            }
+        }
+    }
+    $gradient1:  linear-gradient(90deg, rgba(157,80,195,1) 0%, rgba(231,172,174,1) 100%);
+    $backGround1: rgb(157,80,195);
+
+    $gradient2:  linear-gradient(90deg, rgba(85,104,235,1) 0%, rgba(117,206,252,1) 100%);
+    $backGround2: rgb(85,104,235);
+
+    $gradient3:  linear-gradient(90deg, rgba(88,97,240,1) 0%, rgba(154,79,198,1) 100%);
+    $backGround3: rgba(154,79,198,1);
+
+    $backGround: ($backGround1, $backGround2, $backGround3);
+    $graDient: ($gradient1, $gradient2, $gradient3);
+    @for $numbers from 1 through 3{
+        &.subscription-plan-#{$numbers}{
+            border-bottom-color: nth($backGround, $numbers);
+            .subscription-head{
+                background-color: nth($backGround, $numbers);
+                background: nth($graDient, $numbers);
+            }
+            .subscription-body{
+                color: nth($backGround, $numbers);
+                ul{
+                    li{
+                        border-bottom-color: nth($backGround, $numbers);
+                        &:first-child{
+                            border-top-color: nth($backGround, $numbers);
+                        }
+                    }
+                }
+                .subscription-btn-wrap{
+                    .subscription-btn{
+                        background: nth($graDient, $numbers);
+                    }
+                }
+            }
+        }
+    }
+}
+// Subscription End
+// Receive advice Start
+.receive-advice{
+    padding: 3rem 0;
+}
+.receive-advice-text{
+    text-align: center;
+    color: $color1;
+    h3{
+        font-size: 2.5rem;
+        color: $color1;
+        font-weight: 500;
+        margin-bottom: 1rem;
+    }
+}
+.parallax {
+    position: relative;
+    background-attachment: fixed;
+    background-position: center 0;
+    background-repeat: no-repeat;
+    background-size: cover !important;
+    -moz-background-size: cover !important;
+    -webkit-background-size: cover !important;
+    z-index: 1;
+}
+.paralaxBg{
+    z-index: 1;
+    position: relative;
+    &::after{
+        content: "";
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        background-color: rgba($color: $color2, $alpha: 0.6);
+        z-index: -1;
+    }
+}
+// Receive advice End
+// Papolar Service Start
+.papular-service{
+    padding: 3rem 0;
+    background-color: rgba(191, 221, 227,  0.1);
+}
+.service-wrap{
+    background: $color1;
+    padding: 2.5rem 1.875rem;
+    height: 100%;
+    box-shadow: 0px 11px 16.17px 4.83px rgba(228, 228, 228, 0.5);
+    position: relative;
+    border-radius: 0.5rem;
+    &::before {
+        background: url(../images/pattern.png);
+        position: absolute;
+        top: 0;
+        left: 0;
+        content: "";
+        width: 97%;
+        height: 100%;
+        transform: translate(30px,18px);
+        opacity: 0.2;
+        z-index: -1;
+        transition: all .6s ease;
+    }
+    .service-wrap-img{
+        display: block;
+        max-width: 70px;
+        margin-bottom: 1rem;
+    }
+    h4{
+        color: $color3;
+        font-size: 1.5rem;
+        font-weight: 500;
+    }
+    p{
+        strong{
+            color: $color3;
+        }
+    }
+}
+// Papolar Service End
+// Text Service Start
+.services-text-sec{
+    padding: 3rem 0;
+}
+.services-text-wrap{
+    text-align: center;
+    h3{
+        font-size: 2.5rem;
+        color: $color3;
+        font-weight: 500;
+        margin-bottom: 1rem;
+    }
+    p{
+        &:not(:last-child){
+            margin-bottom: 1rem;
+        }
+    }
+}
+.service-list-text{
+    padding: 1.5rem;
+    height: 100%;
+    text-align: center;
+    background: $color1;
+    box-shadow: 0px 11px 16.17px 4.83px rgba(228, 228, 228, 0.5);
+    border-radius: 0.5rem;
+    h3{
+        font-size: 1.5rem;
+        color: $color3;
+        margin-bottom: 0;
+    }
+}
+// Text Service End
+// Content page Start
+.content-sec{
+    padding: 3rem 0;
+}
+// Content page End
+
+.home-sec-three{
+    ul{
+        list-style: inherit;
+        list-style-position: inside;
+        padding: 0;
+        li{
+            list-style: inherit;
+        }
+    }
+    ol{
+        list-style: auto;
+        list-style-position: inside;
+        padding: 0;
+        li{
+            list-style: inherit;
+        }
+    }
+    p{
+        font-size: 1rem;
+        + {
+            p{
+                margin-top: 0.5rem;
+            }
+            ul,
+            ol{
+                margin-top: 0.5rem;
+            }
+        }
+    }
+}
+
+
+.file-upload {
+    height: 100px;
+    width: 100%;
+    border: 1px dashed var(--bs-border-color);
+    cursor: pointer;
+    position: relative;
+    input {
+        opacity: 0;
+        height: 100%;
+        width: 100%;
+        position: relative;
+        z-index: 1;
+        cursor: pointer;
+        + {
+            label {
+                position: absolute;
+                top: 0;
+                height: 100%;
+                width: 100%;
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                color: $color5;
+                p{
+                    margin-block-start: 0.5rem;
+                }
+            }
+        }
+    }
+}
+
+
+
+// loader for pdf data start
+
+.loader-container-pdf-data-wrap{
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 100;
+    height: 100%;
+    width: 100%;
+    background-color: rgba($color: $color2, $alpha: 0.2);
+    align-items: center;
+    justify-content: center;
+    .loader-container-pdf-data {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        padding: 40px;
+        text-align: center;
+        width: 320px;
+        .loader-text-pdf-data {
+            font-size: 18px;
+            font-weight: bold;
+            color: #f97316;
+            margin-bottom: 20px;
+          }
+          .progress-bar-pdf-data {
+            width: 100%;
+            height: 6px;
+            background: #ddd;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            .progress-fill-pdf-data {
+                height: 100%;
+                width: 0;
+                background: #3b82f6;
+                transition: width 0.3s ease;
+              }
+          }
+
+          .progress-desc-pdf-data {
+            font-size: 14px;
+            color: #555;
+          }
+    }
+}
+
+
+  // loader for pdf data end
+
+.other-calculate-note {
+    margin-top: 10px;
+    p {
+        margin: 0;
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #464c9a;
+    }
+}
+
+
+
+
+
+

@@ -1,0 +1,301 @@
+.log-reg-wrap{
+    padding: 1.5rem;
+    .log-reg-head-wrap{
+        margin-bottom: 1.875rem;
+        .log-reg-head{
+            h4{
+                font-size: 1.25rem;
+                color: #01478c;
+                margin-bottom: 0;
+            }
+        }
+        .log-reg-btn-wrap{
+            .log-reg-btn{
+                height: 36px;
+                line-height: 35px;
+                border: 1px solid #666;
+                color: #666;
+                background-color: transparent;
+                padding: 0 15px;
+                border-radius: 5px;
+                text-transform: capitalize;
+                font-size: 1rem;
+            }
+        }
+    }
+    .forget-pass-wrap {
+        .forget-pass-btn{
+            color: #01478c;
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
+    }
+}
+.log-reg-submit-wrap{
+    margin-top: 2rem;
+    .log-reg-submit-btn{
+        text-transform: uppercase;
+        font-size: 1rem;
+        background-color: $color3;
+        color: $color1;
+        padding: 0 30px;
+        height: 50px;
+        line-height: 50px;
+        text-align: center;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        border: none;
+        width: 100%;
+        &:hover{
+            background-color: $color4;
+            color: #fff;
+        }
+    }
+}
+.add-icon-lft {
+    .icon-lft{
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: $color3;
+        display: block;
+        line-height: 1;
+        font-size: 1rem;
+    }
+    .front-input-style {
+        padding-left: 2.313rem;
+    }
+}
+.add-icon-rgt {
+    .icon-rgt{
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: $color3;
+        display: block;
+        line-height: 1;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+    .front-input-style {
+        padding-right: 2.313rem;
+    }
+}
+.front-input {
+    @include frontInput;
+    margin-bottom: 1rem;
+    .front-input-style{
+        &::placeholder{
+            font-size: 0.813rem;
+        }
+        &.readonly{
+            &[readonly]{
+                &:focus{
+                    border-color: var(--bs-border-color);
+                }
+            }
+        }
+    }
+}
+.front-lbl{
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 0.125rem;
+}
+.front-select2{
+    .select2{
+        width: 100% !important;
+        height: 50px;
+        .selection{
+            .select2-selection{
+                height: 50px;
+                line-height: 48px;
+                border-radius: 0.5rem;
+                border-color: var(--bs-border-color);
+                .select2-selection__rendered,
+                .select2-selection__arrow{
+                    height: 48px;
+                    line-height: 48px;
+                }
+            }
+        }
+    }
+}
+.front-textare{
+    .front-textare-style{
+        resize: none;
+    }
+}
+.phone-input{
+    .iti{
+        width: 100%;
+        .iti__selected-flag{
+            background-color: #fff;
+            border-radius: 0.5rem 0 0 0.5rem;
+        }
+    }
+}
+.front-textare {
+    .front-textare-style{
+        box-shadow: none;
+        border-radius: 0.5rem;
+        &::placeholder{
+            font-size: 0.813rem;
+        }
+    }
+}
+.only-modal-body{
+    .modal-close{
+        position: absolute;
+        right: -10px;
+        top: -10px;
+        border: none;
+        height: 34px;
+        width: 34px;
+        line-height: 34px;
+        border-radius: 50%;
+        text-align: center;
+        background-color: #1f5693;
+        color: #fff;
+    }
+    .modal-content {
+        background-color: #f6fcfd;
+    }
+    .chat-with-me-head {
+        h3{
+            color: #01478c;
+        }
+    }
+}
+
+.package-account-wrap{
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+.package-details{
+    .package-header-text{
+        margin-bottom: 1.5rem;
+        h3{
+            font-weight: 500;
+            font-size: 1.5rem;
+            margin-bottom: 0;
+            span{
+                color: $color3;
+            }
+        }
+    }
+}
+.after-border{
+    position: relative;
+    &::before{
+        content: "";
+        position: absolute;
+        left: -10px;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 50%;
+        width: 1px;
+        box-shadow: 0px 0px 1px 0px rgba($color: $color2, $alpha: 0.5);
+        background-color: #e7e7e7;
+    }
+}
+.log-reg-wrap,
+.package-account-wrap{
+    .front-input,
+    .phone-input{
+        position: relative;
+        margin-bottom: 1.25rem;
+    }
+}
+input{
+    &.customerror {
+        + {
+            .customerror{
+                position: absolute;
+                font-size: 0.75rem;
+                color: #f00;
+                top: 100%;
+            }
+        }
+    }
+}
+.new-login-sec{
+    padding: 4rem 0;
+    min-height: 100vh;
+}
+.new-login-page{
+    padding: 1.25rem;
+    border-radius: 1rem;
+    background-color: $color1;
+    box-shadow: 0px 0px 9px rgba($color: $color2, $alpha: 0.2);
+}
+.new-login-logo{
+    .logoimg{
+        max-width: 120px;
+        margin: 0 auto 1.25rem;
+    }
+}
+.remember-wrap{
+    .forget-pass-btn {
+        color: #01478c;
+        font-weight: 700;
+        font-size: 0.75rem;
+    }
+    .checkbox{
+        label{
+            color: #01478c;
+        }
+    }
+}
+.logo-text-wrap{
+    span{
+        max-inline-size: 350px;
+        margin: 0 auto 2rem;
+        display: block;
+    }
+    
+}
+.logo-text{
+    text-align: center;
+    h4{
+        color: #01478c;
+        font-weight: 700;
+        text-align: center;
+        font-size: 1.5rem;
+    }
+}
+// Counter Start
+.sale-counter {
+    max-inline-size: 350px;
+    margin: 2rem auto 0;
+    ul{
+        margin: -0.25rem;
+        li{
+            padding: 0.25rem;
+            flex-grow: 1;
+            .counter-box{
+                border: 1px solid #dbdbdb;
+                text-align: center;
+                border-radius: 0.5rem;
+                padding-block: 0.5rem;
+                span{
+                    color: #ff481c;
+                    font-weight: bold;
+                    font-size: 1.5rem;
+                    display: block;
+                }
+                p{
+                    color: #808080;
+                    font-size: 12px;
+                    font-weight: 400;
+                }
+            }
+        }
+    }
+}
+// Counter End
