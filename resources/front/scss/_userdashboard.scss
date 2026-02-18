@@ -93,6 +93,17 @@ $wrapWidth: 300px;
     text-transform: capitalize;
     font-weight: 600;
 }
+
+.home-heading{
+    padding: 1.125rem;
+    color: $color3;
+    font-size: 2rem;
+    line-height: 1;
+    text-transform: capitalize;
+    font-weight: 600;
+    text-align: center;
+}
+
 .user-body{
     padding: 1.125rem;
 }
@@ -1217,6 +1228,66 @@ $plGap: 450px;
         }
     }
 }
+
+
+.stock-card {
+    max-width: 420px;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 18px;
+    // background: linear-gradient(135deg, #1f1f1f, #2c2c2c);
+    // box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    color: #fff;
+    font-family: 'Segoe UI', sans-serif;
+
+    .stock-title {
+        text-align: center;
+        margin-bottom: 18px;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .stock-grid {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+
+        .stock-item {
+            flex: 1; // 👈 equal width
+            text-align: center;
+            padding: 14px 6px;
+            border-radius: 12px;
+            transition: 0.3s ease;
+
+            .label {
+                display: block;
+                font-size: 12px;
+                opacity: 0.85;
+            }
+
+            .value {
+                font-size: 20px; // 👈 smaller for mobile fit
+                font-weight: 700;
+                margin-top: 4px;
+            }
+
+            &.tspl {
+                background: linear-gradient(135deg, #007bff, #0056b3);
+            }
+
+            &.all {
+                background: linear-gradient(135deg, #28a745, #1e7e34);
+            }
+
+            &.ultimate {
+                background: linear-gradient(135deg, #ff9800, #e65100);
+            }
+        }
+    }
+}
+
+
+
 // ================== Responsive here Start======================
 @media only screen and (max-width: 1366px){
 }
@@ -1374,6 +1445,10 @@ $plGap: 450px;
     .user-heading {
         padding: 1rem;
         font-size: 1rem;
+    }
+    .home-heading{
+        padding: 1rem;
+        font-size: 1.5rem;
     }
     .price-box-wrap {
         .price-box-btn {
