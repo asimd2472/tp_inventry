@@ -207,12 +207,38 @@ $(function() {
             $('#model').append('<option value="">Select Model</option>');
 
             $.each(data, function (key, value) {
-                $('#model').append('<option value="' + value + '">' + value + '</option>');
+                if(value != ''){
+                    $('#model').append('<option value="' + value + '">' + value + '</option>');
+                }
             });
         }).always(function () {
            $('.loader-wrap').hide();
         });
     });
+
+    // $('#model').change(function () {
+
+    //     resetBelow('model');
+
+    //     $('.loader-wrap').show();
+
+    //     $.post('/user/inventory/finishes', {
+    //         _token: $('meta[name="csrf-token"]').attr('content'),
+    //         type: $('#type').val(),
+    //         model: $(this).val()
+    //     }, function (data) {
+
+    //         $('#finish').append('<option value="">Select Finish</option>');
+
+    //         $.each(data, function (key, value) {
+    //             if(value != ''){
+    //                 $('#finish').append('<option value="' + value + '">' + value + '</option>');
+    //             }   
+    //         });
+    //     }).always(function () {
+    //        $('.loader-wrap').hide();
+    //     });
+    // });
 
     $('#model').change(function () {
 
@@ -224,19 +250,34 @@ $(function() {
             _token: $('meta[name="csrf-token"]').attr('content'),
             type: $('#type').val(),
             model: $(this).val()
-        }, function (data) {
+        }, function (response) {
 
-            $('#finish').append('<option value="">Select Finish</option>');
+            // Clear finish dropdown
+            $('#finish').empty().append('<option value="">Select Finish</option>');
 
-            $.each(data, function (key, value) {
-                if(value != ''){
-                    $('#finish').append('<option value="' + value + '">' + value + '</option>');
-                }   
+            // Add finishes
+            $.each(response.finishes, function (key, value) {
+                if (value !== '') {
+                    $('#finish').append(
+                        '<option value="' + value + '">' + value + '</option>'
+                    );
+                }
             });
+
+            // Show description
+            if (response.description) {
+                $('#modelDescription').html(
+                    '<span class="desc-box">' + response.description + '</span>'
+                );
+            } else {
+                $('#modelDescription').html('');
+            }
+
         }).always(function () {
-           $('.loader-wrap').hide();
+            $('.loader-wrap').hide();
         });
     });
+
 
     $('#finish').change(function () {
 
@@ -349,9 +390,14 @@ $(function() {
                 // alert("TSPL: " + data.tspl +
                 //     "\nALL: " + data.all_stock +
                 //     "\nUltimate: " + data.ultimate);
-                    $('.tspl_stock').text(data.tspl);
-                    $('.all_stock').text(data.all_stock);
-                    $('.ultimate_stock').text(data.ultimate);
+                    $('.d_alhada').text(data.d_alhada);
+                    $('.d_tspl').text(data.d_tspl);
+                    $('.d_ultimate').text(data.d_ultimate);
+                    $('.d_gmp').text(data.d_gmp);
+                    $('.h_alhada').text(data.h_alhada);
+                    $('.h_tspl').text(data.h_tspl);
+                    $('.h_ultimate').text(data.h_ultimate);
+                    $('.h_gmp').text(data.h_gmp);
             } else {
                 alert("No Stock Found");
             }

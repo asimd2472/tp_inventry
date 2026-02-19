@@ -29,6 +29,18 @@ class UserInventryController extends Controller
 
     public function getFinishes(Request $request)
     {
+        // $finishes = Inventory::where([
+        //     'type'  => $request->type,
+        //     'model' => $request->model,
+        // ])
+        // ->select('finish')
+        // ->distinct()
+        // ->pluck('finish');
+
+        // return response()->json($finishes);
+
+        // dd($request->all());
+
         $finishes = Inventory::where([
             'type'  => $request->type,
             'model' => $request->model,
@@ -37,7 +49,16 @@ class UserInventryController extends Controller
         ->distinct()
         ->pluck('finish');
 
-        return response()->json($finishes);
+        $description = Inventory::where([
+            'type'  => $request->type,
+            'model' => $request->model,
+        ])->value('description');
+
+        return response()->json([
+            'finishes'    => $finishes,
+            'description' => $description
+        ]);
+
     }
 
     public function getDesigns(Request $request)
@@ -108,9 +129,15 @@ class UserInventryController extends Controller
         return response()->json([
             'status'    => 1,
             'id' => $inventory->id,
-            'tspl'      => $inventory->tspl,
-            'all_stock' => $inventory->all_stock,
-            'ultimate'  => $inventory->ultimate,
+            'd_alhada'      => $inventory->d_alhada,
+            'd_tspl' => $inventory->d_tspl,
+            'd_ultimate'  => $inventory->d_ultimate,
+            'd_gmp'  => $inventory->d_gmp,
+
+            'h_alhada'  => $inventory->h_alhada,
+            'h_tspl'  => $inventory->h_tspl,
+            'h_ultimate'  => $inventory->h_ultimate,
+            'h_gmp'  => $inventory->h_gmp,
         ]);
     }
 

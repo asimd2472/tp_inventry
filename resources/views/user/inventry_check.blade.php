@@ -35,6 +35,7 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div id="modelDescription" class="model-description"></div>
                             </div>
                             <div class="col-lg-6 col-md-6 col-ms-6">
                                 <div class="front-input">
@@ -91,22 +92,52 @@
 
                     <div class="row result-section" style="display: none">
                         <div class="stock-card">
-                            <h3 class="stock-title">Available Stock</h3>
+                            <h3 class="stock-title">Available Stock in Delhi Warehouse</h3>
 
                             <div class="stock-grid">
                                 <div class="stock-item tspl">
-                                    <span class="label">TSPL</span>
-                                    <span class="value tspl_stock"></span>
+                                    <span class="label">Alhada</span>
+                                    <span class="value d_alhada"></span>
                                 </div>
 
                                 <div class="stock-item all">
-                                    <span class="label">ALL</span>
-                                    <span class="value all_stock"></span>
+                                    <span class="label">TSPL</span>
+                                    <span class="value d_tspl"></span>
                                 </div>
 
                                 <div class="stock-item ultimate">
                                     <span class="label">Ultimate</span>
-                                    <span class="value ultimate_stock"></span>
+                                    <span class="value d_ultimate"></span>
+                                </div>
+
+                                <div class="stock-item tspl">
+                                    <span class="label">GMP</span>
+                                    <span class="value d_gmp"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stock-card">
+                            <h3 class="stock-title">Available Stock in Hyderabad Warehouse</h3>
+
+                            <div class="stock-grid">
+                                <div class="stock-item tspl">
+                                    <span class="label">Alhada</span>
+                                    <span class="value h_alhada"></span>
+                                </div>
+
+                                <div class="stock-item all">
+                                    <span class="label">TSPL</span>
+                                    <span class="value h_tspl"></span>
+                                </div>
+
+                                <div class="stock-item ultimate">
+                                    <span class="label">Ultimate</span>
+                                    <span class="value h_ultimate"></span>
+                                </div>
+
+                                <div class="stock-item tspl">
+                                    <span class="label">GMP</span>
+                                    <span class="value h_gmp"></span>
                                 </div>
                             </div>
                         </div>
