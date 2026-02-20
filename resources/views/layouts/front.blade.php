@@ -6,7 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Home</title>
-    <link rel="icon" type="image/png" sizes="16x16" href="{{Vite::asset('resources/front/images/logo.png')}}">
+
+    <link rel="icon" type="image/png" sizes="16x16" href="{{Vite::asset('resources/front/images/Tata-Pravesh-Favicon.png')}}">
+    <link rel="icon" href="{{Vite::asset('resources/front/images/Tata-Pravesh-Favicon.png')}}" sizes="32x32" />
+    <link rel="icon" href="{{Vite::asset('resources/front/images/Tata-Pravesh-Favicon.png')}}" sizes="192x192" />
+    <link rel="apple-touch-icon" href="{{Vite::asset('resources/front/images/Tata-Pravesh-Favicon.png')}}" />
 
     {{-- Favicon --}}
     @vite(['resources/front/scss/style.scss', 'resources/front/js/app.js'])
@@ -18,7 +22,7 @@
 
 <body>
 
-    {{-- @include('front.includes.header') --}}
+    @include('admin.includes.header')
         @yield('content')
     {{-- @include('front.includes.footer') --}}
 

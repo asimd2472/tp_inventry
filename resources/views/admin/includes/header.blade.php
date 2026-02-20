@@ -1,19 +1,35 @@
 <header class="main-header start-style">
-        <div class="container">
+        <div class="container-fluid">
             <div class="row justify-content-between align-items-center">
-                <div class="logo-area">
+                {{-- <div class="logo-area">
                     <a href="{{url('/')}}" class="logoimg">
                        <span>
                             <img class="img-blog" src="{{Vite::asset('resources/front/images/tatasteel-logo-blue.png')}}" alt="Tatasteel Logo">
                             <img class="img-blog" src="{{Vite::asset('resources/front/images/logo.png')}}" alt="Logo">
                         </span>
                     </a>
+                </div> --}}
+                <div class="">
+                    <table width="100%">
+                        <tr>
+                            <td align="left">
+                                <a href="{{url('/')}}">
+                                    <img src="{{Vite::asset('resources/front/images/tatasteel-logo-blue.png')}}" alt="Tatasteel Logo">
+                                </a>
+                            </td>
+                            <td align="right">
+                                <a href="{{url('/')}}">
+                                    <img src="{{Vite::asset('resources/front/images/logo.png')}}" alt="Logo">
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
                 <div class="account-area">
                     <ul>
                         <li class="position-relative">
                             @if(empty(Session::get('user_session')))
-                                <span class="account-img" data-bs-toggle="modal" data-bs-target="#loginModal"><img src="{{ Vite::asset('resources/front/images/avatar.jpg')}}" alt=""></span>
+                                {{-- <span class="account-img" data-bs-toggle="modal" data-bs-target="#loginModal"><img src="{{ Vite::asset('resources/front/images/avatar.jpg')}}" alt=""></span> --}}
                             @else
                                 <div class="account-details">
                                     <div class="account-name account_name" onclick="lang_select()">
