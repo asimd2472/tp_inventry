@@ -3,7 +3,10 @@
             <div class="row justify-content-between align-items-center">
                 <div class="logo-area">
                     <a href="{{url('/')}}" class="logoimg">
-                        <img class="img-blog" src="{{!empty($site_setting) ? asset('storage/images/'.$site_setting->site_logo) : Vite::asset('resources/front/images/logo.png')}}" alt="">
+                       <span>
+                            <img class="img-blog" src="{{Vite::asset('resources/front/images/tatasteel-logo-blue.png')}}" alt="Tatasteel Logo">
+                            <img class="img-blog" src="{{Vite::asset('resources/front/images/logo.png')}}" alt="Logo">
+                        </span>
                     </a>
                 </div>
                 <div class="account-area">
