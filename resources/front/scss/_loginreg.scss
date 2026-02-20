@@ -235,6 +235,13 @@ input{
     box-shadow: 0px 0px 9px rgba($color: $color2, $alpha: 0.2);
 }
 .new-login-logo{
+    span{
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        gap: 10px;
+        margin-bottom: 30px;
+    }
     .logoimg{
         max-width: 120px;
         margin: 0 auto 1.25rem;

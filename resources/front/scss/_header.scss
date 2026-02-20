@@ -25,6 +25,16 @@
     }
 }
 .logo-area{
+    span{
+        display: flex; 
+        align-items: center; 
+        // justify-content: center; 
+        gap: 10px;
+        margin-bottom: 30px;
+    }
+    // img{
+    //    width: 100px; 
+    // }
     flex: 0 0 auto;
     width: 100px;
 }

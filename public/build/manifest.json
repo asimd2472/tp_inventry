@@ -235,6 +235,10 @@
     "file": "assets/MyriadPro-SemiboldIt-4a3d8b3a.woff2",
     "src": "resources/front/fonts/MyriadPro-SemiboldIt.woff2"
   },
+  "resources/front/images/@@logo.png": {
+    "file": "assets/@@logo-bc088433.png",
+    "src": "resources/front/images/@@logo.png"
+  },
   "resources/front/images/@logo.png": {
     "file": "assets/@logo-bae1e5bf.png",
     "src": "resources/front/images/@logo.png"
@@ -308,7 +312,7 @@
     "src": "resources/front/images/images.jpg"
   },
   "resources/front/images/logo.png": {
-    "file": "assets/logo-bc088433.png",
+    "file": "assets/logo-1152f1bb.png",
     "src": "resources/front/images/logo.png"
   },
   "resources/front/images/paralax-img.jpg": {
@@ -327,6 +331,10 @@
     "file": "assets/save-money-7bd44065.png",
     "src": "resources/front/images/save-money.png"
   },
+  "resources/front/images/tatasteel-logo-blue.png": {
+    "file": "assets/tatasteel-logo-blue-e0bd3b89.png",
+    "src": "resources/front/images/tatasteel-logo-blue.png"
+  },
   "resources/front/js/app.css": {
     "file": "assets/app-21fdfc57.css",
     "src": "resources/front/js/app.css"
@@ -343,7 +351,7 @@
     "src": "resources/front/js/app.js"
   },
   "resources/front/scss/style.scss": {
-    "file": "assets/style-6ff62514.css",
+    "file": "assets/style-c1cc225a.css",
     "isEntry": true,
     "src": "resources/front/scss/style.scss"
   },
