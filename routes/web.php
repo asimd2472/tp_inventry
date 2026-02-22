@@ -28,6 +28,10 @@ Route::get('/storagelink', function () {
 Route::get('/',[HomeController::class,'index'])->name('login');
 Route::post('login_check',[MyaccountController::class,'login_check'])->name('login_check');
 
+// new endpoints for OTP-based authentication
+Route::post('send-otp',[MyaccountController::class,'sendOtp'])->name('send_otp');
+Route::post('verify-otp',[MyaccountController::class,'verifyOtp'])->name('verify_otp');
+
 Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::middleware(['auth','is_admin'])->group(function () {
@@ -44,6 +48,7 @@ Route::prefix('user')->name('user.')->group(function () {
         Route::get('/user_logout', [MyaccountController::class, 'user_logout'])->name('user_logout');
         Route::get('/inventry-check',[UserInventryController::class,'index'])->name('inventry_check');
         
+        Route::post('/inventory/user-types', [UserInventryController::class, 'getUserTypes']);
         Route::post('/inventory/models', [UserInventryController::class, 'getModels']);
         Route::post('/inventory/finishes', [UserInventryController::class, 'getFinishes']);
         Route::post('/inventory/designs', [UserInventryController::class, 'getDesigns']);

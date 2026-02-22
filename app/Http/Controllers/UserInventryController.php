@@ -17,6 +17,17 @@ class UserInventryController extends Controller
         return view('user.inventry_check', compact('types'));
     }
 
+    public function getUserTypes(Request $request)
+    {
+        $userTypes = Inventory::where('type', $request->type)
+            ->select('user_type')
+            ->whereNotNull('user_type')
+            ->distinct()
+            ->pluck('user_type');
+
+        return response()->json($userTypes);
+    }
+
     public function getModels(Request $request)
     {
         $models = Inventory::where('type', $request->type)

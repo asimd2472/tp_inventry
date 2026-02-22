@@ -1,10 +1,12 @@
 import './bootstrap';
+
+// validation plugin must be imported before any scripts that call .validate()
+import 'jquery-validation/dist/jquery.validate.min.js';
+import 'jquery-validation/dist/additional-methods.min.js';
+
 import './custom';
 import './common';
 import './paralax';
-
-import 'jquery-validation/dist/jquery.validate.min.js';
-import 'jquery-validation/dist/additional-methods.min.js';
 
 import.meta.glob([
     '../images/**',

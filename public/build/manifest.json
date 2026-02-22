@@ -243,6 +243,10 @@
     "file": "assets/@logo-bae1e5bf.png",
     "src": "resources/front/images/@logo.png"
   },
+  "resources/front/images/Tata-Pravesh-Favicon.png": {
+    "file": "assets/Tata-Pravesh-Favicon-6f1d8add.png",
+    "src": "resources/front/images/Tata-Pravesh-Favicon.png"
+  },
   "resources/front/images/avatar.jpg": {
     "file": "assets/avatar-c4e6fe68.jpg",
     "src": "resources/front/images/avatar.jpg"
@@ -343,7 +347,7 @@
     "css": [
       "assets/app-21fdfc57.css"
     ],
-    "file": "assets/app-c805bc28.js",
+    "file": "assets/app-7f76f129.js",
     "imports": [
       "_additional-methods.min-6ba532ba.js"
     ],
@@ -351,7 +355,7 @@
     "src": "resources/front/js/app.js"
   },
   "resources/front/scss/style.scss": {
-    "file": "assets/style-c1cc225a.css",
+    "file": "assets/style-cf5d9f7e.css",
     "isEntry": true,
     "src": "resources/front/scss/style.scss"
   },
