@@ -239,9 +239,17 @@
     "file": "assets/@@logo-bc088433.png",
     "src": "resources/front/images/@@logo.png"
   },
+  "resources/front/images/@logo (2).png": {
+    "file": "assets/@logo (2)-8c79c57c.png",
+    "src": "resources/front/images/@logo (2).png"
+  },
   "resources/front/images/@logo.png": {
     "file": "assets/@logo-bae1e5bf.png",
     "src": "resources/front/images/@logo.png"
+  },
+  "resources/front/images/@tatasteel-logo-blue.png": {
+    "file": "assets/@tatasteel-logo-blue-e65220c6.png",
+    "src": "resources/front/images/@tatasteel-logo-blue.png"
   },
   "resources/front/images/Tata-Pravesh-Favicon.png": {
     "file": "assets/Tata-Pravesh-Favicon-6f1d8add.png",
@@ -315,8 +323,12 @@
     "file": "assets/images-d7e7e025.jpg",
     "src": "resources/front/images/images.jpg"
   },
+  "resources/front/images/logo.jpeg": {
+    "file": "assets/logo-33b67c7b.jpeg",
+    "src": "resources/front/images/logo.jpeg"
+  },
   "resources/front/images/logo.png": {
-    "file": "assets/logo-1152f1bb.png",
+    "file": "assets/logo-6dc997da.png",
     "src": "resources/front/images/logo.png"
   },
   "resources/front/images/paralax-img.jpg": {
@@ -355,7 +367,7 @@
     "src": "resources/front/js/app.js"
   },
   "resources/front/scss/style.scss": {
-    "file": "assets/style-cf5d9f7e.css",
+    "file": "assets/style-2730becc.css",
     "isEntry": true,
     "src": "resources/front/scss/style.scss"
   },
