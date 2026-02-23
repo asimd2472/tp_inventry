@@ -2,34 +2,43 @@ $(function() {
     "use strict";
 
 
+    // support two‑step OTP login: first send code, then verify
     $("#homeLoginForm").validate({
         ignore: [],
         rules: {
             "username": {
                 required: true,
+                email: true,
             },
+            // password no longer required in OTP workflow
             "user_password": {
-                required: true,
+                required: false
             },
-
+            "otp": {
+                required: function() {
+                    return $('.otp-input').is(':visible');
+                }
+            }
         },
         messages: {
             username: {
                 required: "User ID is required.",
+                email: "Enter a valid email address."
             },
-            user_password: {
-                required: "Password is required.",
-            },
+            otp: {
+                required: "OTP is required."
+            }
         },
         errorElement: 'span',
         submitHandler: function(form) {
-
-            var form = $('#homeLoginForm')[0];
-            var formData = new FormData(form);
             event.preventDefault();
+            var formEl = $('#homeLoginForm')[0];
+            var formData = new FormData(formEl);
+
+            var endpoint = $('.otp-input').is(':visible') ? '/verify-otp' : '/send-otp';
 
             $.ajax({
-                url: base_url + "/login_check",
+                url: base_url + endpoint,
                 type: 'POST',
                 processData: false,
                 contentType: false,
@@ -40,38 +49,119 @@ $(function() {
                 },
                 success: function(data) {
                     if (data.status == 1) {
-
-                        Swal.fire({
-                            title: 'Success',
-                            text: data.msg,
-                            icon: 'success',
-                        });
-
-                        $('#login_btn').html('Login');
-                        $("#login_btn").prop("disabled", false);
-                        form.reset();
-                        if (data.user_type == 'user') {
-                            window.location.href = base_url + "/user/inventry-check";
-                        }else if (data.user_type == 'admin') {
-                            window.location.href = base_url + "/admin/inventry-details";
+                        if (data.step && data.step === 'otp') {
+                            // first step succeeded: OTP sent
+                            Swal.fire({
+                                title: 'OTP Sent',
+                                text: data.msg,
+                                icon: 'success',
+                            });
+                            // show otp input, hide password
+                            $('.otp-input').show();
+                            $('.pass_input').closest('.front-input').hide();
+                            $('#login_btn').html('Verify OTP');
+                            // re-enable button for next click
+                            $("#login_btn").prop("disabled", false);
+                            // start countdown & display resend controls
+                            startOtpTimer(10); // 5 minutes in seconds
+                        } else {
+                            // final login success
+                            Swal.fire({
+                                title: 'Success',
+                                text: data.msg,
+                                icon: 'success',
+                            });
+                            $('#login_btn').html('Login');
+                            $("#login_btn").prop("disabled", false);
+                            formEl.reset();
+                            if (data.user_type == 'user') {
+                                window.location.href = base_url + "/user/inventry-check";
+                            } else if (data.user_type == 'admin') {
+                                window.location.href = base_url + "/admin/inventry-details";
+                            }
                         }
-
                     } else if (data.status == 0) {
-
                         $('#login_btn').html('Login');
                         $("#login_btn").prop("disabled", false);
-
                         Swal.fire({
                             title: 'Error',
                             text: data.msg,
                             icon: 'warning',
                         });
-
                     }
                 }
             });
         }
     });
+
+    // reset OTP stage when user modifies the email address
+    $('input[name="username"]').on('input', function() {
+        if ($('.otp-input').is(':visible')) {
+            $('.otp-input').hide();
+            $('.password-input').show();
+            $('.otp-controls').hide();
+            $('#login_btn').html('Login');
+        }
+    });
+
+    // resend OTP click
+    $(document).on('click', '.resend-otp', function() {
+        var formEl = $('#homeLoginForm')[0];
+        var formData = new FormData(formEl);
+        $.ajax({
+            url: base_url + '/send-otp',
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            data: formData,
+            beforeSend: function() {
+                $('.resend-otp').prop('disabled', true).text('Sending...');
+            },
+            success: function(data) {
+                if (data.status == 1) {
+                    Swal.fire({
+                        title: 'OTP Sent',
+                        text: data.msg,
+                        icon: 'success',
+                    });
+                    startOtpTimer(5 * 60);
+                    $('.resend-otp').hide().prop('disabled', false).text('Resend OTP');
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: data.msg,
+                        icon: 'warning',
+                    });
+                    $('.resend-otp').prop('disabled', false).text('Resend OTP');
+                }
+            }
+        });
+    });
+
+    // timer helper
+    function startOtpTimer(duration) {
+        clearInterval(window._otpTimer);
+        var timer = duration;
+        $('.otp-controls').show();
+        $('.resend-otp').hide();
+        updateTimerDisplay(timer);
+        window._otpTimer = setInterval(function() {
+            timer--;
+            if (timer <= 0) {
+                clearInterval(window._otpTimer);
+                $('.timer-value').text('00:00');
+                $('.resend-otp').show();
+                $('.otp-timer').hide();
+            } else {
+                updateTimerDisplay(timer);
+            }
+        }, 1000);
+    }
+    function updateTimerDisplay(sec) {
+        var m = Math.floor(sec / 60);
+        var s = sec % 60;
+        $('.timer-value').text((m<10?"0"+m:m)+":"+(s<10?"0"+s:s));
+    }
 
 
     $("#forgotpasswordForm").validate({
@@ -199,6 +289,22 @@ $(function() {
 
         $('.loader-wrap').show();
 
+        // Load user types first
+        $.post('/user/inventory/user-types', {
+            _token: $('meta[name="csrf-token"]').attr('content'),
+            type: $(this).val()
+        }, function (data) {
+
+            $('#user_type').empty().append('<option value="">Select User Type</option>');
+
+            $.each(data, function (key, value) {
+                if(value != ''){
+                    $('#user_type').append('<option value="' + value + '">' + value + '</option>');
+                }
+            });
+        });
+
+        // Load models
         $.post('/user/inventory/models', {
             _token: $('meta[name="csrf-token"]').attr('content'),
             type: $(this).val()

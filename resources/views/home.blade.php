@@ -1,4 +1,4 @@
-@extends('layouts.front')
+@extends('layouts.app')
 @section('content')
 <section class="new-login-sec d-flex justify-content-center align-items-center">
     <div class="container">
@@ -7,13 +7,16 @@
             <div class="row justify-content-center">
                 <div class="col-lg-5 col-md-8 col-ms-12 col-12">
                     <div class="new-login-page g-3">
-                        <div class="new-login-logo">
+                        <!-- <div class="new-login-logo">
                                 <a href="{{url('/')}}" class="logoimg">
                                     <span>
                                         <img class="img-blog" src="{{Vite::asset('resources/front/images/tatasteel-logo-blue.png')}}" alt="Tatasteel Logo">
                                         <img class="img-blog" src="{{Vite::asset('resources/front/images/logo.png')}}" alt="Logo">
                                     </span>
                                 </a>
+                        </div> -->
+                        <div class="logo-text">
+                            <h4>Login</h4>
                         </div>
                         <div class="front-input">
                             <div class="position-relative add-icon-lft">
@@ -21,15 +24,25 @@
                                 <input type="email" name="username" class="form-control front-input-style" placeholder="User ID:" value="{{@Session::get('remember_me')['username']}}" required>
                             </div>
                         </div>
-                        <div class="front-input">
+                        <div class="front-input password-input" style="display: none;">
                             <div class="position-relative add-icon-lft add-icon-rgt add_eye">
                                 <span class="icon-lft"><i class="fa-solid fa-lock"></i></span>
                                 <input type="password" name="user_password" class="form-control front-input-style pass_input"
-                                    placeholder="Password" value="{{@Session::get('remember_me')['user_password']}}" required>
+                                    placeholder="Password" value="{{@Session::get('remember_me')['user_password']}}">
                                 <span class="icon-rgt pass_eye"><i class="eye_change fa-solid fa-eye-slash"></i></span>
                             </div>
                         </div>
-                        <div class="remember-wrap row align-items-center justify-content-between g-2">
+                        <div class="front-input otp-input" style="display: none;">
+                            <div class="position-relative add-icon-lft">
+                                <span class="icon-lft"><i class="fa-solid fa-key"></i></span>
+                                <input type="text" name="otp" class="form-control front-input-style" placeholder="Enter OTP">
+                            </div>
+                        </div>
+                        <div class="otp-controls" style="display: none; text-align: center; margin-top: .5rem;">
+                            <span class="otp-timer text-muted">OTP expires in <span class="timer-value">00:10</span></span>
+                            <button type="button" class="btn btn-link resend-otp" style="display:none;">Resend OTP</button>
+                        </div>
+                        <div class="remember-wrap row align-items-center justify-content-between g-2" style="display: none;">
                             <div class="col-md-auto col-sm-12 col-12">
                                 <div class="checkbox ps-1">
                                     <input type="checkbox" id="remember_password" name="remember" value="1" @if(Session::get('remember_me')) checked @endif>
