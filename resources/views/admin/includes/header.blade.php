@@ -1,13 +1,13 @@
-<header class="main-header start-style">
+<header class="main-header start-style" style="padding: 0px 0;">
     <div class="container-fluid">
         <div class="row align-items-center justify-content-between">
 
             <!-- Left Logo -->
-            <div class="col-auto">
+            {{-- <div class="col-auto">
                 <a href="{{ url('/') }}">
                     <img src="{{ Vite::asset('resources/front/images/tatasteel-logo-blue.png') }}" alt="Tatasteel Logo">
                 </a>
-            </div>
+            </div> --}}
 
             <!-- Account Section (Now Before logo.png) -->
             <div class="col-auto">
@@ -36,11 +36,11 @@
             </div>
 
             <!-- Right Logo -->
-            <div class="col-auto">
+            {{-- <div class="col-auto">
                 <a href="{{ url('/') }}">
                     <img src="{{ Vite::asset('resources/front/images/logo.png') }}" alt="Logo">
                 </a>
-            </div>
+            </div> --}}
 
         </div>
     </div>

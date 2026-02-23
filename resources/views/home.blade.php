@@ -15,13 +15,13 @@
                                     </span>
                                 </a>
                         </div> -->
-                        <div class="logo-text">
+                        {{-- <div class="logo-text">
                             <h4>Login</h4>
-                        </div>
+                        </div> --}}
                         <div class="front-input">
                             <div class="position-relative add-icon-lft">
                                 <span class="icon-lft"><i class="fa-solid fa-envelope"></i></span>
-                                <input type="email" name="username" class="form-control front-input-style" placeholder="User ID:" value="{{@Session::get('remember_me')['username']}}" required>
+                                <input type="email" name="username" class="form-control front-input-style" placeholder="Email" value="{{@Session::get('remember_me')['username']}}" required>
                             </div>
                         </div>
                         <div class="front-input password-input" style="display: none;">
