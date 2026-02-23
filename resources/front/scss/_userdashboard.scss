@@ -1285,7 +1285,16 @@ $plGap: 450px;
         }
     }
 }
-
+.account-area-wrap{
+    display: flex;
+    align-items: center;
+    .account-rgt-logo{
+        padding-inline-start: 0.25rem;
+        a{
+            display: block;
+        }
+    }
+}
 
 
 // ================== Responsive here Start======================
@@ -1309,7 +1318,7 @@ $plGap: 450px;
         padding-right: 1rem;
     }
     .main-header {
-        padding: 0.5rem 0;
+        padding: 0 0 0.5rem 0;
     }
     .mobile-menu {
         display: block;
@@ -1440,6 +1449,30 @@ $plGap: 450px;
     .calculate-wrap-width{
         width: 50px;
     }
+     .site-logo{
+        img{
+            width: 90px;
+        }
+    }
+    .account-rgt-logo{
+        a{
+            img{
+                width: 100px;
+                display: block;
+            }
+        }
+    }
+    .account-details {
+        .account-name {
+            p {
+                font-size: 1rem;
+            }
+        }
+    }
+    .account-img {
+        height: 24px;
+        width: 24px;
+    }
 }
 @media only screen and (max-width: 767px) {
     .user-heading {
@@ -1509,6 +1542,11 @@ $plGap: 450px;
         width: 60px;
         .user-img-wrap-img{
             border: 2px solid $color5;
+        }
+    }
+    .site-logo{
+        img{
+            width: 80px;
         }
     }
 }
