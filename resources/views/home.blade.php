@@ -5,61 +5,45 @@
         <form action="" id="homeLoginForm">
             @csrf
             <div class="row justify-content-center">
-                <div class="col-lg-5 col-md-8 col-ms-12 col-12">
+                <div class="col-lg-7 col-md-8 col-ms-12 col-12">
                     <div class="new-login-page g-3">
-                        <!-- <div class="new-login-logo">
-                                <a href="{{url('/')}}" class="logoimg">
-                                    <span>
-                                        <img class="img-blog" src="{{Vite::asset('resources/front/images/tatasteel-logo-blue.png')}}" alt="Tatasteel Logo">
-                                        <img class="img-blog" src="{{Vite::asset('resources/front/images/logo.png')}}" alt="Logo">
-                                    </span>
-                                </a>
-                        </div> -->
-                        {{-- <div class="logo-text">
-                            <h4>Login</h4>
-                        </div> --}}
-                        <div class="front-input">
-                            <div class="position-relative add-icon-lft">
-                                <span class="icon-lft"><i class="fa-solid fa-envelope"></i></span>
-                                <input type="email" name="username" class="form-control front-input-style" placeholder="Email" value="{{@Session::get('remember_me')['username']}}" required>
-                            </div>
-                        </div>
-                        <div class="front-input password-input" style="display: none;">
-                            <div class="position-relative add-icon-lft add-icon-rgt add_eye">
-                                <span class="icon-lft"><i class="fa-solid fa-lock"></i></span>
-                                <input type="password" name="user_password" class="form-control front-input-style pass_input"
-                                    placeholder="Password" value="{{@Session::get('remember_me')['user_password']}}">
-                                <span class="icon-rgt pass_eye"><i class="eye_change fa-solid fa-eye-slash"></i></span>
-                            </div>
-                        </div>
-                        <div class="front-input otp-input" style="display: none;">
-                            <div class="position-relative add-icon-lft">
-                                <span class="icon-lft"><i class="fa-solid fa-key"></i></span>
-                                <input type="text" name="otp" class="form-control front-input-style" placeholder="Enter OTP">
-                            </div>
-                        </div>
-                        <div class="otp-controls" style="display: none; text-align: center; margin-top: .5rem;">
-                            <span class="otp-timer text-muted">OTP expires in <span class="timer-value">00:10</span></span>
-                            <button type="button" class="btn btn-link resend-otp" style="display:none;">Resend OTP</button>
-                        </div>
-                        <div class="remember-wrap row align-items-center justify-content-between g-2" style="display: none;">
-                            <div class="col-md-auto col-sm-12 col-12">
-                                <div class="checkbox ps-1">
-                                    <input type="checkbox" id="remember_password" name="remember" value="1" @if(Session::get('remember_me')) checked @endif>
-                                    <label for="remember_password">Remember me</label>
+
+                        <div class="row align-items-center g-3">
+                            <div class="col-md-8 col-12" id="email-input">
+                                <div class="front-input">
+                                    <div class="position-relative add-icon-lft">
+                                        <span class="icon-lft"><i class="fa-solid fa-envelope"></i></span>
+                                        <input type="email" name="username" class="form-control front-input-style" placeholder="Email" value="{{@Session::get('remember_me')['username']}}" required>
+                                    </div>
                                 </div>
                             </div>
+
+                            <div class="col-md-3 col-12 otp-input" style="display: none;">
+                                <div class="front-input">
+                                    <div class="position-relative add-icon-lft">
+                                        <span class="icon-lft"><i class="fa-solid fa-key"></i></span>
+                                        <input type="text" name="otp" class="form-control front-input-style" placeholder="Enter OTP">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 col-12">
+                                <div class="log-reg-submit-wrap" style="margin-top: -17px;">
+                                    <button type="submit" class="log-reg-submit-btn" id="login_btn">Login</button>
+                                </div>
+                            </div>
+
+                            <div class="otp-controls" style="display: none; text-align: center; margin-top: 0px;">
+                                <span class="otp-timer text-muted">OTP expires in <span class="timer-value">05:00</span></span>
+                                <button type="button" class="btn btn-link resend-otp" style="display:none;">Resend OTP</button>
+                            </div>
+
                             <input type="hidden" name="rfc" value="@php if(isset($_GET['rfc'])) { if($_GET['rfc']=='method'){ echo 'method'; } } @endphp">
-                            <div class="col-md-auto col-sm-12 col-12">
-                                <div class="forget-pass-wrap">
-                                    <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#forgotModal"
-                                    data-bs-dismiss="modal" aria-label="Close" class="forget-pass-btn">Forgot Password</a>
-                                </div>
-                            </div>
+                            
+                            
+
                         </div>
-                        <div class="log-reg-submit-wrap mt-3">
-                            <button type="submit" class="log-reg-submit-btn" id="login_btn">Login</button>
-                        </div>
+
                     </div>
                 </div>
             </div>
@@ -69,52 +53,6 @@
 </section>
 
 
-
-
-<!-- forgotpassword Modal -->
-<div class="modal fade only-modal-body only-modal-body" id="forgotModal" tabindex="-1"
-aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-body">
-                <button class="modal-close" data-bs-dismiss="modal" aria-label="Close"><i
-                        class="fa-regular fa-circle-xmark"></i></button>
-                <div class="log-reg-wrap">
-                    <div class="log-reg-head-wrap row align-items-center justify-content-between">
-                        <div class="col-auto">
-                            <div class="log-reg-head">
-                                <h4>Forgot Password</h4>
-                            </div>
-                        </div>
-                    </div>
-                    <form action="" id="forgotpasswordForm">
-                        @csrf
-                        <div class="front-input">
-                            <div class="position-relative add-icon-lft">
-                                <span class="icon-lft"><i class="fa-solid fa-envelope"></i></span>
-                                <input type="email" name="user_email" class="form-control front-input-style" placeholder="Email" required>
-                            </div>
-                        </div>
-                        {{-- <div class="row align-items-center justify-content-between">
-                            <div class="col-auto">
-                            </div>
-                            <div class="col-auto">
-                                <div class="forget-pass-wrap">
-                                    <a href="javascript:void(0)" data-bs-target="#loginModal"
-                                    data-bs-dismiss="modal" aria-label="Close" class="forget-pass-btn">Back to Login</a>
-                                </div>
-                            </div>
-                        </div> --}}
-                        <div class="log-reg-submit-wrap">
-                            <button type="submit" id="forgot_btn" class="log-reg-submit-btn">Submit</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- forgotpassword Modal End -->
 
 
 

@@ -58,12 +58,13 @@ $(function() {
                             });
                             // show otp input, hide password
                             $('.otp-input').show();
+                            $("#email-input").removeClass("col-md-8").addClass("col-md-5");
                             $('.pass_input').closest('.front-input').hide();
                             $('#login_btn').html('Verify OTP');
                             // re-enable button for next click
                             $("#login_btn").prop("disabled", false);
                             // start countdown & display resend controls
-                            startOtpTimer(10); // 5 minutes in seconds
+                            startOtpTimer(300); // 5 minutes in seconds
                         } else {
                             // final login success
                             Swal.fire({
