@@ -43,28 +43,29 @@ class InventoryImport implements ToModel, WithStartRow
             // 🔎 Condition (UNIQUE CHECK)
             [
                 'type'  => trim($row[0]),
-                'model' => trim($row[2]),
-                'width'      => (int) ($row[7] ?? 0),
-                'height'     => (int) ($row[8] ?? 0),
+                'model' => trim($row[1]),
+                'dimention'      => (int) ($row[4] ?? 0),
             ],
 
             // 📝 Data to insert or update
             [
-                'user_type'     => trim($row[1] ?? ''),
-                'description'     => trim($row[3] ?? ''),
-                'finish'     => trim($row[4] ?? ''),
-                'design'     => trim($row[5] ?? ''),
-                'shade'      => trim($row[6] ?? ''),
-                
-                'd_alhada'       => (int) ($row[9] ?? 0),
-                'd_tspl'  => (int) ($row[10] ?? 0),
-                'd_ultimate'   => (int) ($row[11] ?? 0),
-                'd_gmp'   => (int) ($row[12] ?? 0),
-                
-                'h_alhada'   => (int) ($row[13] ?? 0),
-                'h_tspl'   => (int) ($row[14] ?? 0),
-                'h_ultimate'   => (int) ($row[15] ?? 0),
-                'h_gmp'   => (int) ($row[16] ?? 0),
+                'description'     => trim($row[2] ?? ''),
+                'design'     => trim($row[3] ?? ''),
+                'colour'      => trim($row[5] ?? ''),
+                'orientation'      => trim($row[6] ?? ''),
+                'special_feature'      => trim($row[7] ?? ''),
+                'hyderabad'      => trim($row[8] ?? ''),
+                'ncr'      => trim($row[9] ?? ''),
+
+
+
+
+
+
+                'finish'      => 0,
+                'shade'      => 0,
+                'width'      => 0,
+                'height'      => 0,
             ]
         );
 

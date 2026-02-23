@@ -25,7 +25,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-6 col-md-6 col-ms-6">
+                            {{-- <div class="col-lg-6 col-md-6 col-ms-6">
                                 <div class="front-input">
                                     <label for="" class="mb-1">User Type</label>
                                     <div class="position-relative add-icon-lft">
@@ -35,7 +35,7 @@
                                         </select>
                                     </div>
                                 </div>
-                            </div>
+                            </div> --}}
                             <div class="col-lg-6 col-md-6 col-ms-6">
                                 <div class="front-input">
                                     <label for="" class="mb-1">Model</label>
@@ -48,7 +48,7 @@
                                 </div>
                                 <div id="modelDescription" class="model-description"></div>
                             </div>
-                            <div class="col-lg-6 col-md-6 col-ms-6">
+                            {{-- <div class="col-lg-6 col-md-6 col-ms-6">
                                 <div class="front-input">
                                     <label for="" class="mb-1">Finish</label>
                                     <div class="position-relative add-icon-lft">
@@ -58,7 +58,7 @@
                                         </select>
                                     </div>
                                 </div>
-                            </div>
+                            </div> --}}
                             <div class="col-lg-6 col-md-6 col-ms-6">
                                 <div class="front-input">
                                     <label for="" class="mb-1">Design</label>
@@ -72,27 +72,53 @@
                             </div>
                             <div class="col-lg-6 col-md-6 col-ms-6">
                                 <div class="front-input">
-                                    <label for="" class="mb-1">Shades</label>
+                                    <label for="" class="mb-1">Dimention</label>
                                     <div class="position-relative add-icon-lft">
                                         <span class="icon-lft"><i class="fa-solid fa-paintbrush"></i></span>
-                                        <select class="form-control front-input-style" name="" id="shade">
-                                            <option value="">Select Shades</option>
+                                        <select class="form-control front-input-style" name="" id="dimention">
+                                            <option value="">Select Dimention</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-lg-6 col-md-6 col-ms-6">
                                 <div class="front-input">
-                                    <label for="" class="mb-1">Size</label>
+                                    <label for="" class="mb-1">Colour</label>
                                     <div class="position-relative add-icon-lft">
                                         <span class="icon-lft"><i class="fa-solid fa-ruler-vertical"></i></span>
-                                        <select class="form-control front-input-style" name="" id="size">
-                                            <option value="">Select Size</option>
+                                        <select class="form-control front-input-style" name="" id="colour">
+                                            <option value="">Select Colour</option>
                                             
                                         </select>
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-lg-6 col-md-6 col-ms-6">
+                                <div class="front-input">
+                                    <label for="" class="mb-1">Orientation</label>
+                                    <div class="position-relative add-icon-lft">
+                                        <span class="icon-lft"><i class="fa-solid fa-ruler-vertical"></i></span>
+                                        <select class="form-control front-input-style" name="" id="orientation">
+                                            <option value="">Select Orientation</option>
+                                            
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 col-md-6 col-ms-6">
+                                <div class="front-input">
+                                    <label for="" class="mb-1">Special Feature</label>
+                                    <div class="position-relative add-icon-lft">
+                                        <span class="icon-lft"><i class="fa-solid fa-ruler-vertical"></i></span>
+                                        <select class="form-control front-input-style" name="" id="special_feature">
+                                            <option value="">Select Special Feature</option>
+                                            
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="col-lg-12 col-md-12 col-ms-12">
                                 <div class="log-reg-submit-wrap d-flex justify-content-end">
                                     <button type="submit" class="log-reg-submit-btn" id="stockCheckBtn">Next</button>

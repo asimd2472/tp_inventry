@@ -353,19 +353,21 @@ $(function() {
 
         $('.loader-wrap').show();
 
-        $.post('/user/inventory/finishes', {
+        $.post('/user/inventory/designs', {
             _token: $('meta[name="csrf-token"]').attr('content'),
             type: $('#type').val(),
             model: $(this).val()
         }, function (response) {
 
-            // Clear finish dropdown
-            $('#finish').empty().append('<option value="">Select Finish</option>');
+            // Clear design dropdown
+            $('#design').empty().append('<option value="">Select Design</option>');
 
-            // Add finishes
-            $.each(response.finishes, function (key, value) {
+            console.log(response)
+
+            // Add design
+            $.each(response.designs, function (key, value) {
                 if (value !== '') {
-                    $('#finish').append(
+                    $('#design').append(
                         '<option value="' + value + '">' + value + '</option>'
                     );
                 }
@@ -386,50 +388,50 @@ $(function() {
     });
 
 
-    $('#finish').change(function () {
-
-        resetBelow('finish');
-
-        $('.loader-wrap').show();
-
-        $.post('/user/inventory/designs', {
-            _token: $('meta[name="csrf-token"]').attr('content'),
-            type: $('#type').val(),
-            model: $('#model').val(),
-            finish: $(this).val()
-        }, function (data) {
-
-            $('#design').append('<option value="">Select Design</option>');
-
-            $.each(data, function (key, value) {
-                if(value != ''){
-                    $('#design').append('<option value="' + value + '">' + value + '</option>');
-                }
-            });
-        }).always(function () {
-           $('.loader-wrap').hide();
-        });
-    });
-
     $('#design').change(function () {
 
         resetBelow('design');
 
         $('.loader-wrap').show();
 
-        $.post('/user/inventory/shades', {
+        $.post('/user/inventory/dimention', {
             _token: $('meta[name="csrf-token"]').attr('content'),
             type: $('#type').val(),
             model: $('#model').val(),
-            finish: $('#finish').val(),
             design: $(this).val()
         }, function (data) {
 
-            $('#shade').append('<option value="">Select Shade</option>');
+            $('#dimention').append('<option value="">Select Dimention</option>');
 
             $.each(data, function (key, value) {
                 if(value != ''){
-                    $('#shade').append('<option value="' + value + '">' + value + '</option>');
+                    $('#dimention').append('<option value="' + value + '">' + value + '</option>');
+                }
+            });
+        }).always(function () {
+           $('.loader-wrap').hide();
+        });
+    });
+
+    $('#dimention').change(function () {
+
+        resetBelow('dimention');
+
+        $('.loader-wrap').show();
+
+        $.post('/user/inventory/colour', {
+            _token: $('meta[name="csrf-token"]').attr('content'),
+            type: $('#type').val(),
+            model: $('#model').val(),
+            design: $('#design').val(),
+            dimention: $(this).val()
+        }, function (data) {
+
+            $('#colour').append('<option value="">Select Colour</option>');
+
+            $.each(data, function (key, value) {
+                if(value != ''){
+                    $('#colour').append('<option value="' + value + '">' + value + '</option>');
                 }
             });
         }).always(function () {
@@ -438,25 +440,55 @@ $(function() {
     });
 
 
-    $('#shade').change(function () {
+    $('#colour').change(function () {
 
-        resetBelow('shade');
+        resetBelow('colour');
 
         $('.loader-wrap').show();
 
-        $.post('/user/inventory/sizes', {
+        $.post('/user/inventory/orientation', {
             _token: $('meta[name="csrf-token"]').attr('content'),
             type: $('#type').val(),
             model: $('#model').val(),
-            finish: $('#finish').val(),
             design: $('#design').val(),
-            shade: $(this).val()
+            dimention: $('#dimention').val(),
+            colour: $(this).val()
         }, function (data) {
 
-            $('#size').empty().append('<option value="">Select Size</option>');
+            $('#orientation').empty().append('<option value="">Select Orientation</option>');
 
             $.each(data, function (key, value) {
-                $('#size').append(
+                $('#orientation').append(
+                    '<option value="' + value + '">' +
+                    value +
+                    '</option>'
+                );
+            });
+        }).always(function () {
+           $('.loader-wrap').hide();
+        });
+    });
+
+    $('#orientation').change(function () {
+
+        resetBelow('orientation');
+
+        $('.loader-wrap').show();
+
+        $.post('/user/inventory/special_feature', {
+            _token: $('meta[name="csrf-token"]').attr('content'),
+            type: $('#type').val(),
+            model: $('#model').val(),
+            design: $('#design').val(),
+            dimention: $('#dimention').val(),
+            colour: $('#colour').val(),
+            orientation: $(this).val()
+        }, function (data) {
+
+            $('#orientation').empty().append('<option value="">Select Orientation</option>');
+
+            $.each(data, function (key, value) {
+                $('#orientation').append(
                     '<option value="' + value + '">' +
                     value +
                     '</option>'
@@ -533,16 +565,16 @@ $(function() {
             $('#finish, #design, #shade, #size').empty();
         }
 
-        if (level === 'finish') {
-            $('#design, #shade, #size').empty();
+        if (level === 'dimention') {
+            $('#colour').empty();
         }
 
         if (level === 'design') {
-            $('#shade, #size').empty();
+            $('#dimention').empty();
         }
 
-        if (level === 'shade') {
-            $('#size').empty();
+        if (level === 'colour') {
+            $('#orientation').empty();
         }
     }
 
