@@ -6,9 +6,9 @@
         
         <div class="row justify-content-center">
             <div class="col-lg-12 col-md-12 col-ms-12 col-12">
-                <div class="new-login-page g-3">
+                <div class="new-login-page inventory-bg g-3">
                     <div class="home-heading">Tata Pravesh Inventory</div>
-                    <form action="" id="loginForm" class="loginForm">
+                    <form action="" id="loginForm" class="loginForm inventory-form">
                         @csrf
                         <div class="row">
                             <div class="col-lg-6 col-md-6 col-ms-6">
@@ -25,7 +25,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-6 col-md-6 col-ms-6">
+                            {{-- <div class="col-lg-6 col-md-6 col-ms-6">
                                 <div class="front-input">
                                     <label for="" class="mb-1">User Type</label>
                                     <div class="position-relative add-icon-lft">
@@ -35,7 +35,7 @@
                                         </select>
                                     </div>
                                 </div>
-                            </div>
+                            </div> --}}
                             <div class="col-lg-6 col-md-6 col-ms-6">
                                 <div class="front-input">
                                     <label for="" class="mb-1">Model</label>
@@ -48,7 +48,7 @@
                                 </div>
                                 <div id="modelDescription" class="model-description"></div>
                             </div>
-                            <div class="col-lg-6 col-md-6 col-ms-6">
+                            {{-- <div class="col-lg-6 col-md-6 col-ms-6">
                                 <div class="front-input">
                                     <label for="" class="mb-1">Finish</label>
                                     <div class="position-relative add-icon-lft">
@@ -58,7 +58,7 @@
                                         </select>
                                     </div>
                                 </div>
-                            </div>
+                            </div> --}}
                             <div class="col-lg-6 col-md-6 col-ms-6">
                                 <div class="front-input">
                                     <label for="" class="mb-1">Design</label>
@@ -72,27 +72,53 @@
                             </div>
                             <div class="col-lg-6 col-md-6 col-ms-6">
                                 <div class="front-input">
-                                    <label for="" class="mb-1">Shades</label>
+                                    <label for="" class="mb-1">Dimention</label>
                                     <div class="position-relative add-icon-lft">
                                         <span class="icon-lft"><i class="fa-solid fa-paintbrush"></i></span>
-                                        <select class="form-control front-input-style" name="" id="shade">
-                                            <option value="">Select Shades</option>
+                                        <select class="form-control front-input-style" name="" id="dimention">
+                                            <option value="">Select Dimention</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-lg-6 col-md-6 col-ms-6">
                                 <div class="front-input">
-                                    <label for="" class="mb-1">Size</label>
+                                    <label for="" class="mb-1">Colour</label>
                                     <div class="position-relative add-icon-lft">
                                         <span class="icon-lft"><i class="fa-solid fa-ruler-vertical"></i></span>
-                                        <select class="form-control front-input-style" name="" id="size">
-                                            <option value="">Select Size</option>
+                                        <select class="form-control front-input-style" name="" id="colour">
+                                            <option value="">Select Colour</option>
                                             
                                         </select>
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-lg-6 col-md-6 col-ms-6">
+                                <div class="front-input">
+                                    <label for="" class="mb-1">Orientation</label>
+                                    <div class="position-relative add-icon-lft">
+                                        <span class="icon-lft"><i class="fa-solid fa-ruler-vertical"></i></span>
+                                        <select class="form-control front-input-style" name="" id="orientation">
+                                            <option value="">Select Orientation</option>
+                                            
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 col-md-6 col-ms-6">
+                                <div class="front-input">
+                                    <label for="" class="mb-1">Special Feature</label>
+                                    <div class="position-relative add-icon-lft">
+                                        <span class="icon-lft"><i class="fa-solid fa-ruler-vertical"></i></span>
+                                        <select class="form-control front-input-style" name="" id="special_feature">
+                                            <option value="">Select Special Feature</option>
+                                            
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="col-lg-12 col-md-12 col-ms-12">
                                 <div class="log-reg-submit-wrap d-flex justify-content-end">
                                     <button type="submit" class="log-reg-submit-btn" id="stockCheckBtn">Next</button>
@@ -101,22 +127,22 @@
                         </div>
                     </form>
 
-                    <div class="row result-section" style="display: none">
+                    <div class="row result-section" style="display: none;">
                         <div class="stock-card">
-                            <h3 class="stock-title">Available Stock in Delhi Warehouse</h3>
+                            <h3 class="stock-title">Available Stock</h3>
 
                             <div class="stock-grid">
-                                <div class="stock-item tspl">
-                                    <span class="label">Alhada</span>
-                                    <span class="value d_alhada"></span>
+                                <div class="stock-item ultimate">
+                                    <span class="label">Hyderabad</span>
+                                    <span class="value hyderabad"></span>
                                 </div>
 
                                 <div class="stock-item all">
-                                    <span class="label">TSPL</span>
-                                    <span class="value d_tspl"></span>
+                                    <span class="label">NCR</span>
+                                    <span class="value ncr"></span>
                                 </div>
 
-                                <div class="stock-item ultimate">
+                                {{-- <div class="stock-item ultimate">
                                     <span class="label">Ultimate</span>
                                     <span class="value d_ultimate"></span>
                                 </div>
@@ -124,10 +150,10 @@
                                 <div class="stock-item tspl">
                                     <span class="label">GMP</span>
                                     <span class="value d_gmp"></span>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
-                        <div class="stock-card">
+                        {{-- <div class="stock-card">
                             <h3 class="stock-title">Available Stock in Hyderabad Warehouse</h3>
 
                             <div class="stock-grid">
@@ -151,10 +177,10 @@
                                     <span class="value h_gmp"></span>
                                 </div>
                             </div>
-                        </div>
+                        </div> --}}
                         <div class="col-lg-12 col-md-12 col-ms-12">
                             <div class="log-reg-submit-wrap d-flex justify-content-start">
-                                <button type="submit" class="log-reg-submit-btn" id="previous_btn">Previous</button>
+                                <button type="submit" class="log-reg-submit-btn previous-btn" id="previous_btn">Previous</button>
                             </div>
                         </div>
                     </div>

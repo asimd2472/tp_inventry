@@ -55,6 +55,11 @@ Route::prefix('user')->name('user.')->group(function () {
         Route::post('/inventory/shades', [UserInventryController::class, 'getShades']);
         Route::post('/inventory/sizes', [UserInventryController::class, 'getSizes']);
         Route::post('/inventory/stock', [UserInventryController::class, 'getStock']);
+
+        Route::post('/inventory/dimention', [UserInventryController::class, 'getDimention']);
+        Route::post('/inventory/colour', [UserInventryController::class, 'getColour']);
+        Route::post('/inventory/orientation', [UserInventryController::class, 'getOrientation']);
+        Route::post('/inventory/special_feature', [UserInventryController::class, 'getSpecialFeature']);
     });
 });
 

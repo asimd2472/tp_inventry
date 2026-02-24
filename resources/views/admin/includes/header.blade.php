@@ -3,7 +3,7 @@
         <div class="row align-items-center justify-content-between">
 
             <!-- Left Logo -->
-            <div class="col-auto">
+            <div class="col-auto left-logo">
                 <a href="{{ url('/') }}" class="site-logo">
                     <img src="{{ Vite::asset('resources/front/images/tatasteel-logo-blue.png') }}" alt="Tatasteel Logo">
                 </a>

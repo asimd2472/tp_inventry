@@ -38,27 +38,38 @@ class UserInventryController extends Controller
         return response()->json($models);
     }
 
-    public function getFinishes(Request $request)
+    // public function getFinishes(Request $request)
+    // {
+
+    //     $finishes = Inventory::where([
+    //         'type'  => $request->type,
+    //         'model' => $request->model,
+    //     ])
+    //     ->select('finish')
+    //     ->distinct()
+    //     ->pluck('finish');
+
+    //     $description = Inventory::where([
+    //         'type'  => $request->type,
+    //         'model' => $request->model,
+    //     ])->value('description');
+
+    //     return response()->json([
+    //         'finishes'    => $finishes,
+    //         'description' => $description
+    //     ]);
+
+    // }
+
+    public function getDesigns(Request $request)
     {
-        // $finishes = Inventory::where([
-        //     'type'  => $request->type,
-        //     'model' => $request->model,
-        // ])
-        // ->select('finish')
-        // ->distinct()
-        // ->pluck('finish');
-
-        // return response()->json($finishes);
-
-        // dd($request->all());
-
-        $finishes = Inventory::where([
-            'type'  => $request->type,
-            'model' => $request->model,
+        $designs = Inventory::where([
+            'type'   => $request->type,
+            'model'  => $request->model,
         ])
-        ->select('finish')
+        ->select('design')
         ->distinct()
-        ->pluck('finish');
+        ->pluck('design');
 
         $description = Inventory::where([
             'type'  => $request->type,
@@ -66,42 +77,75 @@ class UserInventryController extends Controller
         ])->value('description');
 
         return response()->json([
-            'finishes'    => $finishes,
+            'designs'    => $designs,
             'description' => $description
         ]);
-
     }
 
-    public function getDesigns(Request $request)
-    {
-        $designs = Inventory::where([
+    
+    public function getDimention(Request $request){
+        $dimention = Inventory::where([
             'type'   => $request->type,
             'model'  => $request->model,
-            'finish' => $request->finish,
+            'design' => $request->design,
         ])
-        ->select('design')
+        ->select('dimention')
         ->distinct()
-        ->pluck('design');
+        ->pluck('dimention');
 
-        return response()->json($designs);
+        return response()->json($dimention);
     }
 
-    public function getShades(Request $request)
+    public function getColour(Request $request){
+        $colour = Inventory::where([
+            'type'   => $request->type,
+            'model'  => $request->model,
+            'design' => $request->design,
+            'dimention' => $request->dimention,
+        ])
+        ->select('colour')
+        ->distinct()
+        ->pluck('colour');
+
+        return response()->json($colour);
+    }
+
+    
+
+    public function getOrientation(Request $request)
     {
-        $shadeString = Inventory::where('type', $request->type)
-            ->where('model', $request->model)
-            ->where('finish', $request->finish)
-            ->where('design', $request->design)
-            ->value('shade');
+        $orientation = Inventory::where([
+            'type'   => $request->type,
+            'model'  => $request->model,
+            'design' => $request->design,
+            'dimention' => $request->dimention,
+            'colour' => $request->colour,
+        ])
+        ->select('orientation')
+        ->distinct()
+        ->pluck('orientation');
 
-        if (!$shadeString) {
-            return response()->json([]);
-        }
-
-        $shades = array_map('trim', explode(',', $shadeString));
-
-        return response()->json($shades);
+        return response()->json($orientation);
     }
+
+    public function getSpecialFeature(Request $request)
+    {
+        $getSpecialFeature = Inventory::where([
+            'type'   => $request->type,
+            'model'  => $request->model,
+            'design' => $request->design,
+            'dimention' => $request->dimention,
+            'colour' => $request->colour,
+            'orientation' => $request->orientation,
+        ])
+        ->select('special_feature')
+        ->distinct()
+        ->pluck('special_feature');
+
+        return response()->json($getSpecialFeature);
+    }
+
+    
 
     public function getSizes(Request $request)
     {
@@ -122,15 +166,24 @@ class UserInventryController extends Controller
 
     public function getStock(Request $request)
     {
-        [$width, $height] = explode(' x ', $request->size);
+        // [$width, $height] = explode(' x ', $request->size);
+
+        // $inventory = Inventory::where('type', $request->type)
+        //     ->where('model', $request->model)
+        //     ->where('finish', $request->finish)
+        //     ->where('design', $request->design)
+        //     ->where('shade', 'LIKE', '%' . $request->shade . '%')
+        //     ->where('width', trim($width))
+        //     ->where('height', trim($height))
+        //     ->first();
 
         $inventory = Inventory::where('type', $request->type)
             ->where('model', $request->model)
-            ->where('finish', $request->finish)
             ->where('design', $request->design)
-            ->where('shade', 'LIKE', '%' . $request->shade . '%')
-            ->where('width', trim($width))
-            ->where('height', trim($height))
+            ->where('dimention', $request->dimention)
+            ->where('colour', $request->colour)
+            ->where('orientation', $request->orientation)
+            ->where('special_feature', $request->special_feature)
             ->first();
 
         if (!$inventory) {
@@ -140,15 +193,8 @@ class UserInventryController extends Controller
         return response()->json([
             'status'    => 1,
             'id' => $inventory->id,
-            'd_alhada'      => $inventory->d_alhada,
-            'd_tspl' => $inventory->d_tspl,
-            'd_ultimate'  => $inventory->d_ultimate,
-            'd_gmp'  => $inventory->d_gmp,
-
-            'h_alhada'  => $inventory->h_alhada,
-            'h_tspl'  => $inventory->h_tspl,
-            'h_ultimate'  => $inventory->h_ultimate,
-            'h_gmp'  => $inventory->h_gmp,
+            'hyderabad'      => $inventory->hyderabad,
+            'ncr' => $inventory->ncr,
         ]);
     }
 
