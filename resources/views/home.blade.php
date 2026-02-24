@@ -61,20 +61,12 @@
 
 <style>
     .login-page-bg{
-        margin: 0;
-        min-height: 100dvh;
-
         background-image: url("{{ Vite::asset('resources/front/images/Embosseddoor.webp') }}");
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
     }
 
     @media (max-width: 768px) {
         .login-page-bg{
             background-image: url("{{ Vite::asset('resources/front/images/why-pravesh.jpeg') }}");
-            background-size: cover;
-            background-position: top center;
         }
     }
 </style>

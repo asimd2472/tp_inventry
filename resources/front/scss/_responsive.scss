@@ -103,7 +103,12 @@
 }
 @media only screen and (max-width: 800px) {
 }
-@media only screen and (max-width: 768px) {}
+@media only screen and (max-width: 768px) {
+    .login-page-bg{
+        background-size: cover;
+        background-position: top center;
+    }
+}
 @media only screen and (max-width: 767px) {
     .copyright-text{
         text-align: center;
@@ -134,6 +139,9 @@
         h4{
             font-size: 1rem;
         }
+    }
+    .new-login-page {
+        margin-block-end: 11rem;
     }
 
 }
