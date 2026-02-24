@@ -104,6 +104,16 @@ $wrapWidth: 300px;
     text-align: center;
 }
 
+.login-heading{
+    padding: 1.125rem;
+    color: $color3;
+    font-size: 2rem;
+    line-height: 1;
+    text-transform: capitalize;
+    font-weight: 600;
+    text-align: center;
+}
+
 .user-body{
     padding: 1.125rem;
 }
@@ -1473,7 +1483,7 @@ $plGap: 450px;
     }
      .site-logo{
         img{
-            width: 90px;
+            width: 75px;
         }
     }
     .account-rgt-logo{
@@ -1504,6 +1514,10 @@ $plGap: 450px;
     .home-heading{
         padding: 1rem;
         font-size: 1.5rem;
+    }
+    .login-heading{
+        // padding: 1rem;
+        font-size: 1.3rem;
     }
     .price-box-wrap {
         .price-box-btn {
@@ -1568,7 +1582,7 @@ $plGap: 450px;
     }
     .site-logo{
         img{
-            width: 80px;
+            width: 75px;
         }
     }
 }

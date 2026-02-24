@@ -24,53 +24,32 @@ class InventryController extends Controller
                 ->addColumn('type', function ($row) {
                     return $row->type;
                 })
-                ->addColumn('user_type', function ($row) {
-                    return $row->user_type;
-                })
                 ->addColumn('model', function ($row) {
                     return $row->model;
                 })
                 ->addColumn('description', function ($row) {
                     return $row->description;
                 })
-                ->addColumn('finish', function ($row) {
-                    return $row->finish;
-                })
                 ->addColumn('design', function ($row) {
                     return $row->design;
                 })
-                ->addColumn('shade', function ($row) {
-                    return $row->shade;
+                ->addColumn('dimention', function ($row) {
+                    return $row->dimention;
                 })
-                ->addColumn('width', function ($row) {
-                    return $row->width;
+                ->addColumn('colour', function ($row) {
+                    return $row->colour;
                 })
-                ->addColumn('height', function ($row) {
-                    return $row->height;
+                ->addColumn('orientation', function ($row) {
+                    return $row->orientation;
                 })
-                ->addColumn('d_alhada', function ($row) {
-                    return $row->d_alhada;
+                ->addColumn('special_feature', function ($row) {
+                    return $row->special_feature;
                 })
-                ->addColumn('d_tspl', function ($row) {
-                    return $row->d_tspl;
+                ->addColumn('hyderabad', function ($row) {
+                    return $row->hyderabad;
                 })
-                ->addColumn('d_ultimate', function ($row) {
-                    return $row->d_ultimate;
-                })
-                ->addColumn('d_gmp', function ($row) {
-                    return $row->d_ultimate;
-                })
-                ->addColumn('h_alhada', function ($row) {
-                    return $row->h_alhada;
-                })
-                ->addColumn('h_tspl', function ($row) {
-                    return $row->h_tspl;
-                })
-                ->addColumn('h_ultimate', function ($row) {
-                    return $row->h_ultimate;
-                })
-                ->addColumn('h_gmp', function ($row) {
-                    return $row->h_gmp;
+                ->addColumn('ncr', function ($row) {
+                    return $row->ncr;
                 })
                 ->rawColumns(['multipleCheckbox'])
                 ->make(true);

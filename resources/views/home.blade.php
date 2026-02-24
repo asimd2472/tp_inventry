@@ -7,7 +7,7 @@
             <div class="row justify-content-center">
                 <div class="col-lg-7 col-md-8 col-ms-12 col-12">
                     <div class="new-login-page g-3">
-
+                        <div class="login-heading mb-2">Tata Pravesh Inventory</div>
                         <div class="row align-items-center g-3">
                             <div class="col-md-9 col-12" id="email-input">
                                 <div class="front-input">

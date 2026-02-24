@@ -44,7 +44,7 @@ class InventoryImport implements ToModel, WithStartRow
             [
                 'type'  => trim($row[0]),
                 'model' => trim($row[1]),
-                'dimention'      => (int) ($row[4] ?? 0),
+                'dimention'      => trim($row[4] ?? ''),
             ],
 
             // 📝 Data to insert or update
