@@ -22,7 +22,7 @@
                                         <img src="{{ Vite::asset('resources/front/images/avatar.jpg')}}" alt="">
                                     @endif
                                 </span>
-                                <p>{{Session::get('user_session')->name}}</p>
+                                {{-- <p>{{Session::get('user_session')->name}}</p> --}}
                             </div>
 
                             <ul class="account-login" style="display: none;">
