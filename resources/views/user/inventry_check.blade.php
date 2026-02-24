@@ -13,11 +13,11 @@
                         <div class="row">
                             <div class="col-lg-6 col-md-6 col-ms-6">
                                 <div class="front-input">
-                                    <label for="" class="mb-1">Type</label>
+                                    <label for="" class="mb-1">Product Type</label>
                                     <div class="position-relative add-icon-lft">
                                         <span class="icon-lft"><i class="fa-solid fa-door-closed"></i></span>
                                         <select class="form-control front-input-style" name="" id="type">
-                                            <option value="">Select Type</option>
+                                            <option value="">Select Product Type</option>
                                             @foreach($types as $type)
                                                 <option value="{{ $type }}">{{ $type }}</option>
                                             @endforeach

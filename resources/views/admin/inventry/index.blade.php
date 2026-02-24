@@ -20,23 +20,15 @@
                                                     <input id="select_all" type="checkbox">
                                                 </td>
                                                 <th scope="col">Type</th>
-                                                <th scope="col">Use Type</th>
                                                 <th scope="col">Model</th>
                                                 <th scope="col">Description</th>
-                                                <th scope="col">Finish</th>
                                                 <th scope="col">Design</th>
-                                                <th scope="col">Shade</th>
-                                                <th scope="col">Width</th>
-                                                <th scope="col">Height</th>
-                                                <th scope="col">Delhi Alhada</th>
-                                                <th scope="col">Delhi TSPL</th>
-                                                <th scope="col">Delhi Ultimate</th>
-                                                <th scope="col">Delhi GMP</th>
-
-                                                <th scope="col">Hyderabad Alhada</th>
-                                                <th scope="col">Hyderabad TSPL</th>
-                                                <th scope="col">Hyderabad Ultimate</th>
-                                                <th scope="col">Hyderabad GMP</th>
+                                                <th scope="col">Dimention</th>
+                                                <th scope="col">Colour</th>
+                                                <th scope="col">Orientation</th>
+                                                <th scope="col">Special feature</th>
+                                                <th scope="col">Hyderabad</th>
+                                                <th scope="col">NCR</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -79,22 +71,16 @@
             columns: [
                 { data: 'multipleCheckbox', orderable: false, searchable: false },
                 { data: 'type' },
-                { data: 'user_type' },
                 { data: 'model' },
                 { data: 'description' },
-                { data: 'finish' },
                 { data: 'design' },
-                { data: 'shade' },
-                { data: 'width' },
-                { data: 'height' },
-                { data: 'd_alhada' },
-                { data: 'd_tspl' },
-                { data: 'd_ultimate' },
-                { data: 'd_gmp' },
-                { data: 'h_alhada' },
-                { data: 'h_tspl' },
-                { data: 'h_ultimate' },
-                { data: 'h_gmp' },
+                { data: 'dimention' },
+                { data: 'colour' },
+                { data: 'orientation' },
+                { data: 'special_feature' },
+                { data: 'hyderabad' },
+                { data: 'ncr' },
+                
             ]
         });
 
