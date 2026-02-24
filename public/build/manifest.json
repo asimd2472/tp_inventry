@@ -251,6 +251,10 @@
     "file": "assets/@tatasteel-logo-blue-e65220c6.png",
     "src": "resources/front/images/@tatasteel-logo-blue.png"
   },
+  "resources/front/images/Embosseddoor.webp": {
+    "file": "assets/Embosseddoor-30f8d826.webp",
+    "src": "resources/front/images/Embosseddoor.webp"
+  },
   "resources/front/images/Tata-Pravesh-Favicon.png": {
     "file": "assets/Tata-Pravesh-Favicon-6f1d8add.png",
     "src": "resources/front/images/Tata-Pravesh-Favicon.png"
@@ -351,6 +355,10 @@
     "file": "assets/tatasteel-logo-blue-e0bd3b89.png",
     "src": "resources/front/images/tatasteel-logo-blue.png"
   },
+  "resources/front/images/why-pravesh.jpeg": {
+    "file": "assets/why-pravesh-6d8e22db.jpeg",
+    "src": "resources/front/images/why-pravesh.jpeg"
+  },
   "resources/front/js/app.css": {
     "file": "assets/app-21fdfc57.css",
     "src": "resources/front/js/app.css"
@@ -359,7 +367,7 @@
     "css": [
       "assets/app-21fdfc57.css"
     ],
-    "file": "assets/app-5fd4e2c3.js",
+    "file": "assets/app-daeaafea.js",
     "imports": [
       "_additional-methods.min-6ba532ba.js"
     ],
@@ -367,7 +375,7 @@
     "src": "resources/front/js/app.js"
   },
   "resources/front/scss/style.scss": {
-    "file": "assets/style-2730becc.css",
+    "file": "assets/style-05e0baf5.css",
     "isEntry": true,
     "src": "resources/front/scss/style.scss"
   },

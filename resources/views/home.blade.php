@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('content')
-<section class="new-login-sec d-flex justify-content-center align-items-center">
+<section class="new-login-sec d-flex justify-content-center align-items-center login-page-bg">
     <div class="container">
         <form action="" id="homeLoginForm">
             @csrf
@@ -9,7 +9,7 @@
                     <div class="new-login-page g-3">
 
                         <div class="row align-items-center g-3">
-                            <div class="col-md-8 col-12" id="email-input">
+                            <div class="col-md-9 col-12" id="email-input">
                                 <div class="front-input">
                                     <div class="position-relative add-icon-lft">
                                         <span class="icon-lft"><i class="fa-solid fa-envelope"></i></span>
@@ -27,7 +27,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-4 col-12">
+                            <div class="col-md-3 col-12">
                                 <div class="log-reg-submit-wrap" style="margin-top: -17px;">
                                     <button type="submit" class="log-reg-submit-btn" id="login_btn">Login</button>
                                 </div>
@@ -58,6 +58,28 @@
 
 
 @push('scripts')
+
+<style>
+    .login-page-bg{
+        margin: 0;
+        min-height: 100dvh;
+
+        background-image: url("{{ Vite::asset('resources/front/images/Embosseddoor.webp') }}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    @media (max-width: 768px) {
+        .login-page-bg{
+            background-image: url("{{ Vite::asset('resources/front/images/why-pravesh.jpeg') }}");
+            background-size: cover;
+            background-position: top center;
+        }
+    }
+</style>
+
+
 
 <script type="module">
     document.addEventListener("DOMContentLoaded", function() {

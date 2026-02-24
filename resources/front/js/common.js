@@ -44,7 +44,7 @@ $(function() {
                 contentType: false,
                 data: formData,
                 beforeSend: function() {
-                    $('#login_btn').html('Please Wait...');
+                    $('#login_btn').html('Loading...');
                     $('#login_btn').attr('disabled', 'disabled');
                 },
                 success: function(data) {
@@ -58,7 +58,7 @@ $(function() {
                             });
                             // show otp input, hide password
                             $('.otp-input').show();
-                            $("#email-input").removeClass("col-md-8").addClass("col-md-5");
+                            $("#email-input").removeClass("col-md-9").addClass("col-md-6");
                             $('.pass_input').closest('.front-input').hide();
                             $('#login_btn').html('Verify OTP');
                             // re-enable button for next click
@@ -193,7 +193,7 @@ $(function() {
                 contentType: false,
                 data: formData,
                 beforeSend: function() {
-                    $('#forgot_btn').html('Please Wait...');
+                    $('#forgot_btn').html('Loading...');
                     $('#forgot_btn').attr('disabled', 'disabled');
                 },
                 success: function(data) {
@@ -250,7 +250,7 @@ $(function() {
                 contentType: false,
                 data: formData,
                 beforeSend: function() {
-                    $('#forgot_btn').html('Please Wait...');
+                    $('#forgot_btn').html('Loading...');
                     $('#forgot_btn').attr('disabled', 'disabled');
                 },
                 success: function(data) {
@@ -485,10 +485,10 @@ $(function() {
             orientation: $(this).val()
         }, function (data) {
 
-            $('#orientation').empty().append('<option value="">Select Orientation</option>');
+            $('#special_feature').empty().append('<option value="">Select Special Feature</option>');
 
             $.each(data, function (key, value) {
-                $('#orientation').append(
+                $('#special_feature').append(
                     '<option value="' + value + '">' +
                     value +
                     '</option>'
@@ -517,26 +517,31 @@ $(function() {
             _token: $('meta[name="csrf-token"]').attr('content'),
             type: $('#type').val(),
             model: $('#model').val(),
-            finish: $('#finish').val(),
             design: $('#design').val(),
-            shade: $('#shade').val(),
-            size: $('#size').val()
+            dimention: $('#dimention').val(),
+            colour: $('#colour').val(),
+            orientation: $('#orientation').val(),
+            special_feature: $('#special_feature').val(),
         }, function(data){
 
             if(data.status == 1){
                 $('.loginForm').hide();
                 $('.result-section').show();
+
+                $('.hyderabad').text(data.hyderabad);
+                $('.ncr').text(data.ncr);
+
                 // alert("TSPL: " + data.tspl +
                 //     "\nALL: " + data.all_stock +
                 //     "\nUltimate: " + data.ultimate);
-                    $('.d_alhada').text(data.d_alhada);
-                    $('.d_tspl').text(data.d_tspl);
-                    $('.d_ultimate').text(data.d_ultimate);
-                    $('.d_gmp').text(data.d_gmp);
-                    $('.h_alhada').text(data.h_alhada);
-                    $('.h_tspl').text(data.h_tspl);
-                    $('.h_ultimate').text(data.h_ultimate);
-                    $('.h_gmp').text(data.h_gmp);
+                    // $('.d_alhada').text(data.d_alhada);
+                    // $('.d_tspl').text(data.d_tspl);
+                    // $('.d_ultimate').text(data.d_ultimate);
+                    // $('.d_gmp').text(data.d_gmp);
+                    // $('.h_alhada').text(data.h_alhada);
+                    // $('.h_tspl').text(data.h_tspl);
+                    // $('.h_ultimate').text(data.h_ultimate);
+                    // $('.h_gmp').text(data.h_gmp);
             } else {
                 alert("No Stock Found");
             }

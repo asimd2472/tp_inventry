@@ -96,7 +96,7 @@ $wrapWidth: 300px;
 
 .home-heading{
     padding: 1.125rem;
-    color: $color3;
+    color: $color1;
     font-size: 2rem;
     line-height: 1;
     text-transform: capitalize;
@@ -1245,6 +1245,7 @@ $plGap: 450px;
         margin-bottom: 18px;
         font-size: 20px;
         font-weight: 600;
+        color: $color1;
     }
 
     .stock-grid {
@@ -1285,6 +1286,11 @@ $plGap: 450px;
         }
     }
 }
+.left-logo{
+    img{
+        width: 80%;
+    }
+}
 .account-area-wrap{
     display: flex;
     align-items: center;
@@ -1294,6 +1300,22 @@ $plGap: 450px;
             display: block;
         }
     }
+}
+
+.inventory-bg{
+    background-color: $color3;
+}
+.inventory-form{
+    label{
+        color: $color1;
+    }
+    button{
+        background-color: #132a37 !important;
+    }
+}
+
+.previous-btn{
+    background-color: #132a37 !important;
 }
 
 
@@ -1457,7 +1479,7 @@ $plGap: 450px;
     .account-rgt-logo{
         a{
             img{
-                width: 100px;
+                width: 140px;
                 display: block;
             }
         }

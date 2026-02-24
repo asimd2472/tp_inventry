@@ -138,9 +138,9 @@ class UserInventryController extends Controller
             'colour' => $request->colour,
             'orientation' => $request->orientation,
         ])
-        ->select('getSpecialFeature')
+        ->select('special_feature')
         ->distinct()
-        ->pluck('getSpecialFeature');
+        ->pluck('special_feature');
 
         return response()->json($getSpecialFeature);
     }
@@ -166,15 +166,24 @@ class UserInventryController extends Controller
 
     public function getStock(Request $request)
     {
-        [$width, $height] = explode(' x ', $request->size);
+        // [$width, $height] = explode(' x ', $request->size);
+
+        // $inventory = Inventory::where('type', $request->type)
+        //     ->where('model', $request->model)
+        //     ->where('finish', $request->finish)
+        //     ->where('design', $request->design)
+        //     ->where('shade', 'LIKE', '%' . $request->shade . '%')
+        //     ->where('width', trim($width))
+        //     ->where('height', trim($height))
+        //     ->first();
 
         $inventory = Inventory::where('type', $request->type)
             ->where('model', $request->model)
-            ->where('finish', $request->finish)
             ->where('design', $request->design)
-            ->where('shade', 'LIKE', '%' . $request->shade . '%')
-            ->where('width', trim($width))
-            ->where('height', trim($height))
+            ->where('dimention', $request->dimention)
+            ->where('colour', $request->colour)
+            ->where('orientation', $request->orientation)
+            ->where('special_feature', $request->special_feature)
             ->first();
 
         if (!$inventory) {
@@ -184,15 +193,8 @@ class UserInventryController extends Controller
         return response()->json([
             'status'    => 1,
             'id' => $inventory->id,
-            'd_alhada'      => $inventory->d_alhada,
-            'd_tspl' => $inventory->d_tspl,
-            'd_ultimate'  => $inventory->d_ultimate,
-            'd_gmp'  => $inventory->d_gmp,
-
-            'h_alhada'  => $inventory->h_alhada,
-            'h_tspl'  => $inventory->h_tspl,
-            'h_ultimate'  => $inventory->h_ultimate,
-            'h_gmp'  => $inventory->h_gmp,
+            'hyderabad'      => $inventory->hyderabad,
+            'ncr' => $inventory->ncr,
         ]);
     }
 
