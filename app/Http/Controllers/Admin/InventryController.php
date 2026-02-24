@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Excel;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\Inventory;
+use Illuminate\Support\Facades\DB;
 
 class InventryController extends Controller
 {
@@ -66,24 +67,33 @@ class InventryController extends Controller
     public function upload_inventry(Request $request, Excel $excel)
     {   
         $request->validate([
-        'file' => 'required|mimes:xlsx,xls'
-    ]);
-
-    try {
-
-        $excel->import(new InventoryImport, $request->file('file'));
-
-        return response()->json([
-            'status' => 1,
-            'msg' => 'Inventory Imported Successfully'
+            'file' => 'required|mimes:xlsx,xls'
         ]);
 
-    } catch (\Exception $e) {
+        DB::beginTransaction();
 
-        return response()->json([
-            'status' => 0,
-            'msg' => $e->getMessage()
-        ]);
-    }
+        try {
+
+            // Inventory::truncate();
+            Inventory::query()->delete();
+
+            $excel->import(new InventoryImport, $request->file('file'));
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 1,
+                'msg' => 'Inventory Imported Successfully'
+            ]);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 0,
+                'msg' => $e->getMessage()
+            ]);
+        }
     }
 }

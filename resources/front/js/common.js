@@ -401,7 +401,7 @@ $(function() {
             design: $(this).val()
         }, function (data) {
 
-            $('#dimention').append('<option value="">Select Dimention</option>');
+            $('#dimention').append('<option value="">Select Size</option>');
 
             $.each(data, function (key, value) {
                 if(value != ''){
