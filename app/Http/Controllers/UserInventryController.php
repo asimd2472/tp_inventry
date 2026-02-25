@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Inventory;
+use Illuminate\Support\Facades\Auth;
 
 class UserInventryController extends Controller
 {
@@ -177,14 +178,41 @@ class UserInventryController extends Controller
         //     ->where('height', trim($height))
         //     ->first();
 
-        $inventory = Inventory::where('type', $request->type)
-            ->where('model', $request->model)
-            ->where('design', $request->design)
-            ->where('dimention', $request->dimention)
-            ->where('colour', $request->colour)
-            ->where('orientation', $request->orientation)
-            ->where('special_feature', $request->special_feature)
-            ->first();
+        // $inventory = Inventory::where('type', $request->type)
+        //     ->where('model', $request->model)
+        //     ->where('design', $request->design)
+        //     ->where('dimention', $request->dimention)
+        //     ->where('colour', $request->colour)
+        //     ->where('orientation', $request->orientation)
+        //     ->where('special_feature', $request->special_feature)
+        //     ->first();
+
+        $query = Inventory::query();
+
+        if ($request->type) {
+            $query->where('type', $request->type);
+        }
+        if ($request->model) {
+            $query->where('model', $request->model);
+        }
+        if ($request->design) {
+            $query->where('design', $request->design);
+        }
+        if ($request->dimention) {
+            $query->where('dimention', $request->dimention);
+        }
+        if ($request->colour) {
+            $query->where('colour', $request->colour);
+        }
+        if ($request->orientation) {
+            $query->where('orientation', $request->orientation);
+        }
+        if ($request->special_feature) {
+            $query->where('special_feature', $request->special_feature);
+        }
+        $inventory = $query->first();
+
+        // dd($inventory);
 
         if (!$inventory) {
             return response()->json(['status' => 0]);
@@ -200,6 +228,34 @@ class UserInventryController extends Controller
 
 
 
+    public function inventorySend(Request $request)
+    {
+        $user_mail = Auth::user()->email;
+
+        // Export inventory data to Excel
+        $fileName = 'inventory_data_' . time() . '.xlsx';
+        $filePath = storage_path('app/' . $fileName);
+
+        // Use Laravel Excel to export
+        \Maatwebsite\Excel\Facades\Excel::store(new \App\Exports\InventoryExport, $fileName);
+
+        // Send email with attachment
+        \Mail::raw('Please find attached the inventory data.', function ($message) use ($user_mail, $filePath, $fileName) {
+            $message->to($user_mail)
+                ->subject('Inventory Data')
+                ->attach($filePath, [
+                    'as' => $fileName,
+                    'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                ]);
+        });
+
+        // Optionally, delete the file after sending
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+
+        return response()->json(['status' => 1, 'msg' => 'Inventory data sent successfully to your email.']);
+    }
 
 
 }

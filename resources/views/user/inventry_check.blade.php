@@ -72,11 +72,11 @@
                             </div>
                             <div class="col-lg-6 col-md-6 col-ms-6">
                                 <div class="front-input">
-                                    <label for="" class="mb-1">Dimention</label>
+                                    <label for="" class="mb-1">Size</label>
                                     <div class="position-relative add-icon-lft">
                                         <span class="icon-lft"><i class="fa-solid fa-paintbrush"></i></span>
                                         <select class="form-control front-input-style" name="" id="dimention">
-                                            <option value="">Select Dimention</option>
+                                            <option value="">Select Size</option>
                                         </select>
                                     </div>
                                 </div>

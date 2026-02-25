@@ -401,7 +401,7 @@ $(function() {
             design: $(this).val()
         }, function (data) {
 
-            $('#dimention').append('<option value="">Select Dimention</option>');
+            $('#dimention').append('<option value="">Select Size</option>');
 
             $.each(data, function (key, value) {
                 if(value != ''){
@@ -619,6 +619,36 @@ $.ajaxSetup({
 window.lang_select = function() {
     $(".account-login").slideToggle();
 }
+window.inventorySend = function(){
+    $.ajax({
+        url: base_url + '/user/inventory-send',
+        type: 'POST',
+        data: {
+            'id': "asd007",
+        },
+        beforeSend: function() {
+            $('.loader-wrap').show();
+        },
+        success: function(data) {
+            if(data.status == 1){
+                $('.loader-wrap').hide();
+                Swal.fire({
+                    title: 'Success',
+                    text: data.msg,
+                    icon: 'success',
+                });
+            }else if(data.status == 0) {
+                Swal.fire({
+                    title: 'Error',
+                    text: data.msg,
+                    icon: 'error',
+                });
+                $('.loader-wrap').hide();
+            }
+        }
+    });
+}
+
 
 
 

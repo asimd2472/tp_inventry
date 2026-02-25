@@ -24,6 +24,8 @@ class InventoryImport implements ToModel, WithStartRow
     public function model(array $row)
     {
 
+    // dd($row);
+
         // print_r($row);
         // return new Inventory([
         //     'type'       => trim($row[0] ?? ''),
@@ -38,36 +40,51 @@ class InventoryImport implements ToModel, WithStartRow
         //     'ultimate'   => (int) ($row[9] ?? 0),
         // ]);
 
-        return Inventory::updateOrCreate(
+        // return Inventory::updateOrCreate(
 
-            // 🔎 Condition (UNIQUE CHECK)
-            [
-                'type'  => trim($row[0]),
-                'model' => trim($row[1]),
-                'dimention'      => trim($row[4] ?? ''),
-            ],
+        //     [
+        //         'type'  => trim($row[0]),
+        //         'model' => trim($row[1]),
+        //         'dimention'      => trim($row[4] ?? ''),
+        //     ],
 
-            // 📝 Data to insert or update
-            [
-                'description'     => trim($row[2] ?? ''),
-                'design'     => trim($row[3] ?? ''),
-                'colour'      => trim($row[5] ?? ''),
-                'orientation'      => trim($row[6] ?? ''),
-                'special_feature'      => trim($row[7] ?? ''),
-                'hyderabad'      => trim($row[8] ?? ''),
-                'ncr'      => trim($row[9] ?? ''),
+        //     [
+        //         'description'     => trim($row[2] ?? ''),
+        //         'design'     => trim($row[3] ?? ''),
+        //         'colour'      => trim($row[5] ?? ''),
+        //         'orientation'      => trim($row[6] ?? ''),
+        //         'special_feature'      => trim($row[7] ?? ''),
+        //         'hyderabad'      => trim($row[8] ?? ''),
+        //         'ncr'      => trim($row[9] ?? ''),
 
 
 
 
 
 
-                'finish'      => 0,
-                'shade'      => 0,
-                'width'      => 0,
-                'height'      => 0,
-            ]
-        );
+        //         'finish'      => 0,
+        //         'shade'      => 0,
+        //         'width'      => 0,
+        //         'height'      => 0,
+        //     ]
+        // );
+
+        return Inventory::create([
+            'type' => trim($row[0]),
+            'model' => trim($row[1]),
+            'description' => trim($row[2] ?? ''),
+            'design' => trim($row[3] ?? ''),
+            'dimention' => trim($row[4] ?? ''),
+            'colour' => trim($row[5] ?? ''),
+            'orientation' => trim($row[6] ?? ''),
+            'special_feature' => trim($row[7] ?? ''),
+            'hyderabad' => trim($row[8] ?? ''),
+            'ncr' => trim($row[9] ?? ''),
+            'finish' => 0,
+            'shade' => 0,
+            'width' => 0,
+            'height' => 0,
+        ]);
 
     }
 
