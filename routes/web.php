@@ -60,6 +60,8 @@ Route::prefix('user')->name('user.')->group(function () {
         Route::post('/inventory/colour', [UserInventryController::class, 'getColour']);
         Route::post('/inventory/orientation', [UserInventryController::class, 'getOrientation']);
         Route::post('/inventory/special_feature', [UserInventryController::class, 'getSpecialFeature']);
+
+        Route::post('/inventory-send', [UserInventryController::class, 'inventorySend']);
     });
 });
 
