@@ -25,10 +25,28 @@
                                 {{-- <p>{{Session::get('user_session')->name}}</p> --}}
                             </div>
 
+
+
                             <ul class="account-login" style="display: none;">
                                 @if(Auth::user()->is_admin==1)
+                                    <li><a href="{{url('admin/inventry-upload')}}">Upload Inventory</a></li>
+                                    <li><a href="{{url('admin/inventry-details')}}">Inventory Details</a></li>
+                                    @if(Auth::user()->user_access==2)
+                                        <li><a href="{{url('user/inventry-check')}}">Frontend</a></li>
+                                        <li><a href="javascript:void(0)" onclick="inventorySend()">Inventory Send</a></li>
+                                    @endif
+                                    
+
                                     <li><a href="{{url('admin/user_logout')}}">Logout</a></li>
                                 @else
+
+                                    @if(Auth::user()->user_access==2)
+                                        <li><a href="{{url('admin/inventry-upload')}}">Upload Inventory</a></li>
+                                        <li><a href="{{url('admin/inventry-details')}}">Inventory Details</a></li>
+                                        <li><a href="{{url('user/inventry-check')}}">Frontend</a></li>
+                                        
+                                    @endif
+                                    <li><a href="javascript:void(0)" onclick="inventorySend()">Inventory Send</a></li>
                                     <li><a href="{{url('user/user_logout')}}">Logout</a></li>
                                 @endif
                             </ul>

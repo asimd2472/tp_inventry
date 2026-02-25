@@ -14,11 +14,25 @@ class IsUser
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
+    // public function handle(Request $request, Closure $next): Response
+    // {
+    //     if(Auth::user()->is_admin == 0){
+    //         return $next($request);
+    //     }
+    //     return redirect()->back()->with('error',"You don't have user access.");
+    // }
+
     public function handle(Request $request, Closure $next): Response
     {
-        if(Auth::user()->is_admin == 0){
+        $user = Auth::user();
+
+        if (
+            ($user->is_admin == 0 && $user->user_access == 1) ||
+            $user->user_access == 2
+        ) {
             return $next($request);
         }
-        return redirect()->back()->with('error',"You don't have user access.");
+
+        return redirect()->back()->with('error', "You don't have user access.");
     }
 }
