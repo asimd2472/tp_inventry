@@ -32,8 +32,8 @@
                                     <li><a href="{{url('admin/inventry-upload')}}">Upload Inventory</a></li>
                                     <li><a href="{{url('admin/inventry-details')}}">Inventory Details</a></li>
                                     @if(Auth::user()->user_access==2)
-                                        <li><a href="{{url('user/inventry-check')}}">Frontend</a></li>
-                                        <li><a href="javascript:void(0)" onclick="inventorySend()">Inventory Send</a></li>
+                                        <li><a href="{{url('user/inventry-check')}}">Explore Inventory</a></li>
+                                        <li><a href="javascript:void(0)" onclick="inventorySend()">Download Catalog</a></li>
                                     @endif
                                     
 
@@ -43,10 +43,10 @@
                                     @if(Auth::user()->user_access==2)
                                         <li><a href="{{url('admin/inventry-upload')}}">Upload Inventory</a></li>
                                         <li><a href="{{url('admin/inventry-details')}}">Inventory Details</a></li>
-                                        <li><a href="{{url('user/inventry-check')}}">Frontend</a></li>
+                                        <li><a href="{{url('user/inventry-check')}}">Explore Inventory</a></li>
                                         
                                     @endif
-                                    <li><a href="javascript:void(0)" onclick="inventorySend()">Inventory Send</a></li>
+                                    <li><a href="javascript:void(0)" onclick="inventorySend()">Download Catalog</a></li>
                                     <li><a href="{{url('user/user_logout')}}">Logout</a></li>
                                 @endif
                             </ul>

@@ -210,7 +210,8 @@ class UserInventryController extends Controller
         if ($request->special_feature) {
             $query->where('special_feature', $request->special_feature);
         }
-        $inventory = $query->first();
+        $inventory = $query->get();
+        
 
         // dd($inventory);
 
@@ -218,11 +219,15 @@ class UserInventryController extends Controller
             return response()->json(['status' => 0]);
         }
 
+        $totalHyderabad = $query->sum('hyderabad');
+        $totalNcr       = $query->sum('ncr');
+
         return response()->json([
             'status'    => 1,
-            'id' => $inventory->id,
-            'hyderabad'      => $inventory->hyderabad,
-            'ncr' => $inventory->ncr,
+            'id' => '' . $inventory->pluck('id')->implode(','),
+            'hyderabad'      => $totalHyderabad,
+            'ncr' => $totalNcr,
+            'count'=> $inventory->count(),
         ]);
     }
 
