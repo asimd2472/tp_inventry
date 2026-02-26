@@ -245,9 +245,32 @@ class UserInventryController extends Controller
         \Maatwebsite\Excel\Facades\Excel::store(new \App\Exports\InventoryExport, $fileName);
 
         // Send email with attachment
-        \Mail::raw('Please find attached the inventory data.', function ($message) use ($user_mail, $filePath, $fileName) {
+        // \Mail::raw('Please find attached the inventory data.', function ($message) use ($user_mail, $filePath, $fileName) {
+        //     $message->to($user_mail)
+        //         ->subject('Digital Catalogue')
+        //         ->attach($filePath, [
+        //             'as' => $fileName,
+        //             'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        //         ]);
+        // });
+
+        $body = "<p>Dear Team,</p>
+
+        <p>Please find attached the latest Digital Catalogue for Tata Pravesh.</p>
+
+        <p>Kindly use this updated version for all customer interactions and ensure older versions are no longer shared.</p>
+
+        <p>If you have any questions, please feel free to reach out.</p>
+
+        <br>
+
+        <p>Best regards,</p>
+
+        <p>Tata Pravesh</p>";
+
+        \Mail::html($body, function ($message) use ($user_mail, $filePath, $fileName) {
             $message->to($user_mail)
-                ->subject('Inventory Data')
+                ->subject('Digital Catalogue')
                 ->attach($filePath, [
                     'as' => $fileName,
                     'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
