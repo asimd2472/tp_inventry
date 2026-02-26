@@ -5,10 +5,10 @@
     <div class="user-dashboard">
         <ul>
             <li class="{{Route::currentRouteName() == 'user.course_list' ? 'active' : ''}}">
-                <a href="{{url('admin/inventry-details')}}"><i class="menu-icon fa-solid fa-chalkboard"></i> Inventry</a>
+                <a href="{{url('admin/inventry-details')}}"><i class="menu-icon fa-solid fa-chalkboard"></i> Inventory Details</a>
             </li>
             <li class="{{Route::currentRouteName() == 'user.course_list' ? 'active' : ''}}">
-                <a href="{{url('admin/inventry-upload')}}"><i class="menu-icon fa-solid fa-upload"></i> Upload Inventry</a>
+                <a href="{{url('admin/inventry-upload')}}"><i class="menu-icon fa-solid fa-upload"></i> Upload Inventory</a>
             </li>
             <li>
                 <a href="{{url('admin/user_logout')}}"><i class="menu-icon fa-solid fa-arrow-right-from-bracket"></i>Logout</a>

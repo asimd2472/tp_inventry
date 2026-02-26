@@ -43,7 +43,10 @@
                                     @if(Auth::user()->user_access==2)
                                         <li><a href="{{url('admin/inventry-upload')}}">Upload Inventory</a></li>
                                         <li><a href="{{url('admin/inventry-details')}}">Inventory Details</a></li>
-                                        <li><a href="{{url('user/inventry-check')}}">Explore Inventory</a></li>
+                                        
+                                        @if(!request()->is('user/*'))
+                                            <li><a href="{{url('user/inventry-check')}}">Explore Inventory</a></li>
+                                        @endif
                                         
                                     @endif
                                     <li><a href="javascript:void(0)" onclick="inventorySend()">Download Catalog</a></li>

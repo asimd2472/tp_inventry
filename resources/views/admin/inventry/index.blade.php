@@ -7,7 +7,7 @@
                 @include('admin.includes.leftmenu')
                 <div class="userwrap-rgt">
                     <div class="user-dashboard-dtls">
-                        <div class="user-heading">Inventry Details</div>
+                        <div class="user-heading">Inventory Details</div>
                         <div class="user-body">
 
                             <div class="row justify-content-center">
