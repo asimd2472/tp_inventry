@@ -62,6 +62,8 @@ Route::prefix('user')->name('user.')->group(function () {
         Route::post('/inventory/special_feature', [UserInventryController::class, 'getSpecialFeature']);
 
         Route::post('/inventory-send', [UserInventryController::class, 'inventorySend']);
+
+        Route::post('/inventory-item-check', [UserInventryController::class, 'inventoryItemCheck']);
     });
 });
 

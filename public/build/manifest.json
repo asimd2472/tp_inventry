@@ -367,7 +367,7 @@
     "css": [
       "assets/app-21fdfc57.css"
     ],
-    "file": "assets/app-3c06d239.js",
+    "file": "assets/app-3dee95b3.js",
     "imports": [
       "_additional-methods.min-6ba532ba.js"
     ],
@@ -375,7 +375,7 @@
     "src": "resources/front/js/app.js"
   },
   "resources/front/scss/style.scss": {
-    "file": "assets/style-675650ba.css",
+    "file": "assets/style-661472b7.css",
     "isEntry": true,
     "src": "resources/front/scss/style.scss"
   },
