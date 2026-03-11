@@ -286,4 +286,45 @@ class UserInventryController extends Controller
     }
 
 
+    public function inventoryItemCheck(Request $request){
+        $query = Inventory::query();
+
+        if ($request->type) {
+            $query->where('type', $request->type);
+        }
+        if ($request->model) {
+            $query->where('model', $request->model);
+        }
+        if ($request->design) {
+            $query->where('design', $request->design);
+        }
+        if ($request->dimention) {
+            $query->where('dimention', $request->dimention);
+        }
+        if ($request->colour) {
+            $query->where('colour', $request->colour);
+        }
+        if ($request->orientation) {
+            $query->where('orientation', $request->orientation);
+        }
+        if ($request->special_feature) {
+            $query->where('special_feature', $request->special_feature);
+        }
+        $inventory = $query->get();
+
+        if($inventory){
+            return response()->json([
+                'status'    => 1,
+                'itemCount'    => count($inventory),
+            ]);
+        }else{
+            return response()->json([
+                'status'    => 0,
+            ]);
+        }
+
+        
+    }
+
+
 }

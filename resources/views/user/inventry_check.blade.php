@@ -11,6 +11,7 @@
                     <form action="" id="loginForm" class="loginForm inventory-form">
                         @csrf
                         <div class="row">
+                            <p class="item-selected"></p>
                             <div class="col-lg-6 col-md-6 col-ms-6">
                                 <div class="front-input">
                                     <label for="" class="mb-1">Product Type</label>
