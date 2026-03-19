@@ -1,0 +1,204 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Inventory;
+
+class UserInventryController extends Controller
+{
+    public function getModels(Request $request)
+    {
+        $models = Inventory::where('type', $request->type)
+            ->select('model')
+            ->distinct()
+            ->pluck('model');
+        return response()->json($models);
+    }
+
+    public function getDesigns(Request $request)
+    {  
+        $designs = Inventory::where([
+            'type'   => $request->type,
+            'model'  => $request->model,
+        ])
+        ->select('design')
+        ->distinct()
+        ->pluck('design');
+
+        $description = Inventory::where([
+            'type'  => $request->type,
+            'model' => $request->model,
+        ])->value('description');
+
+        return response()->json([
+            'designs'    => $designs,
+            'description' => $description
+        ]);
+    }
+
+    public function getDimention(Request $request)
+    {
+        $dimention = Inventory::where([
+            'type'   => $request->type,
+            'model'  => $request->model,
+            'design' => $request->design,
+        ])
+        ->select('dimention')
+        ->distinct()
+        ->pluck('dimention');
+        return response()->json($dimention);
+    }
+
+    public function getColour(Request $request)
+    {
+        $colour = Inventory::where([
+            'type'   => $request->type,
+            'model'  => $request->model,
+            'design' => $request->design,
+            'dimention' => $request->dimention,
+        ])
+        ->select('colour')
+        ->distinct()
+        ->pluck('colour');
+        return response()->json($colour);
+    }
+
+    public function getOrientation(Request $request)
+    {
+        $orientation = Inventory::where([
+            'type'   => $request->type,
+            'model'  => $request->model,
+            'design' => $request->design,
+            'dimention' => $request->dimention,
+            'colour' => $request->colour,
+        ])
+        ->select('orientation')
+        ->distinct()
+        ->pluck('orientation');
+        return response()->json($orientation);
+    }
+
+    public function getSpecialFeature(Request $request)
+    {
+        $getSpecialFeature = Inventory::where([
+            'type'   => $request->type,
+            'model'  => $request->model,
+            'design' => $request->design,
+            'dimention' => $request->dimention,
+            'colour' => $request->colour,
+            'orientation' => $request->orientation,
+        ])
+        ->select('special_feature')
+        ->distinct()
+        ->pluck('special_feature');
+        return response()->json($getSpecialFeature);
+    }
+
+    public function getStock(Request $request)
+    {
+        // [$width, $height] = explode(' x ', $request->size);
+
+        // $inventory = Inventory::where('type', $request->type)
+        //     ->where('model', $request->model)
+        //     ->where('finish', $request->finish)
+        //     ->where('design', $request->design)
+        //     ->where('shade', 'LIKE', '%' . $request->shade . '%')
+        //     ->where('width', trim($width))
+        //     ->where('height', trim($height))
+        //     ->first();
+
+        // $inventory = Inventory::where('type', $request->type)
+        //     ->where('model', $request->model)
+        //     ->where('design', $request->design)
+        //     ->where('dimention', $request->dimention)
+        //     ->where('colour', $request->colour)
+        //     ->where('orientation', $request->orientation)
+        //     ->where('special_feature', $request->special_feature)
+        //     ->first();
+
+        $query = Inventory::query();
+
+        if ($request->type) {
+            $query->where('type', $request->type);
+        }
+        if ($request->model) {
+            $query->where('model', $request->model);
+        }
+        if ($request->design) {
+            $query->where('design', $request->design);
+        }
+        if ($request->dimention) {
+            $query->where('dimention', $request->dimention);
+        }
+        if ($request->colour) {
+            $query->where('colour', $request->colour);
+        }
+        if ($request->orientation) {
+            $query->where('orientation', $request->orientation);
+        }
+        if ($request->special_feature) {
+            $query->where('special_feature', $request->special_feature);
+        }
+        $inventory = $query->get();
+        
+
+        // dd($inventory);
+
+        if (!$inventory) {
+            return response()->json(['status' => 0]);
+        }
+
+        $totalHyderabad = $query->sum('hyderabad');
+        $totalNcr       = $query->sum('ncr');
+
+        return response()->json([
+            'status'    => 1,
+            'id' => '' . $inventory->pluck('id')->implode(','),
+            'hyderabad'      => $totalHyderabad,
+            'ncr' => $totalNcr,
+            'count'=> $inventory->count(),
+        ]);
+    }
+
+    public function inventoryItemCheck(Request $request){
+        $query = Inventory::query();
+
+        if ($request->type) {
+            $query->where('type', $request->type);
+        }
+        if ($request->model) {
+            $query->where('model', $request->model);
+        }
+        if ($request->design) {
+            $query->where('design', $request->design);
+        }
+        if ($request->dimention) {
+            $query->where('dimention', $request->dimention);
+        }
+        if ($request->colour) {
+            $query->where('colour', $request->colour);
+        }
+        if ($request->orientation) {
+            $query->where('orientation', $request->orientation);
+        }
+        if ($request->special_feature) {
+            $query->where('special_feature', $request->special_feature);
+        }
+        $inventory = $query->get();
+
+        if($inventory){
+            return response()->json([
+                'status'    => 1,
+                'itemCount'    => count($inventory),
+            ]);
+        }else{
+            return response()->json([
+                'status'    => 0,
+            ]);
+        }
+
+        
+    }
+}
