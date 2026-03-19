@@ -9,6 +9,7 @@ Route::post('/verify-otp', [OtpAuthController::class, 'verifyOtp']);
 use App\Http\Controllers\Api\UserInventryController;
 
 Route::middleware('auth:api')->group(function () {
+	Route::get('/inventory/types', [UserInventryController::class, 'getTypes']);
 	Route::post('/inventory/models', [UserInventryController::class, 'getModels']);
 	Route::post('/inventory/designs', [UserInventryController::class, 'getDesigns']);
 	Route::post('/inventory/dimention', [UserInventryController::class, 'getDimention']);
