@@ -7,7 +7,16 @@ use Illuminate\Http\Request;
 use App\Models\Inventory;
 
 class UserInventryController extends Controller
-{
+{   
+    public function getTypes(Request $request)
+    {
+        $types = Inventory::select('type')
+                ->whereNotNull('type')
+                ->distinct()
+                ->orderBy('type')
+                ->pluck('type');
+        return response()->json($types);
+    }
     public function getModels(Request $request)
     {
         $models = Inventory::where('type', $request->type)
