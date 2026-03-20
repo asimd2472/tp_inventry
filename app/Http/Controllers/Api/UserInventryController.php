@@ -8,6 +8,7 @@ use App\Models\Inventory;
 use Maatwebsite\Excel\Excel;
 use App\Imports\InventoryImport;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class UserInventryController extends Controller
 {   
@@ -249,5 +250,60 @@ class UserInventryController extends Controller
                 'msg' => $e->getMessage()
             ]);
         }
+    }
+
+
+    
+    public function download_excel(Request $request)
+    {   
+        
+        $user_mail = Auth::user()->email;
+
+        // Export inventory data to Excel
+        $fileName = 'inventory_data_' . time() . '.xlsx';
+        $filePath = storage_path('app/' . $fileName);
+
+        // Use Laravel Excel to export
+        \Maatwebsite\Excel\Facades\Excel::store(new \App\Exports\InventoryExport, $fileName);
+
+        // Send email with attachment
+        // \Mail::raw('Please find attached the inventory data.', function ($message) use ($user_mail, $filePath, $fileName) {
+        //     $message->to($user_mail)
+        //         ->subject('Digital Catalogue')
+        //         ->attach($filePath, [
+        //             'as' => $fileName,
+        //             'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        //         ]);
+        // });
+
+        $body = "<p>Dear Team,</p>
+
+        <p>Please find attached the latest Digital Catalogue for Tata Pravesh.</p>
+
+        <p>Kindly use this updated version for all customer interactions and ensure older versions are no longer shared.</p>
+
+        <p>If you have any questions, please feel free to reach out.</p>
+
+        <br>
+
+        <p>Best regards,</p>
+
+        <p>Tata Pravesh</p>";
+
+        \Mail::html($body, function ($message) use ($user_mail, $filePath, $fileName) {
+            $message->to($user_mail)
+                ->subject('Digital Catalogue')
+                ->attach($filePath, [
+                    'as' => $fileName,
+                    'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                ]);
+        });
+
+        // Optionally, delete the file after sending
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+
+        return response()->json(['status' => 1, 'msg' => 'Inventory data sent successfully to your email.']);
     }
 }
