@@ -18,5 +18,6 @@ Route::middleware('auth:api')->group(function () {
 	Route::post('/inventory/special_feature', [UserInventryController::class, 'getSpecialFeature']);
 	Route::post('/inventory/stock', [UserInventryController::class, 'getStock']);
     Route::post('/inventory/inventory-item-check', [UserInventryController::class, 'inventoryItemCheck']);
+    Route::post('/inventory/upload-excel', [UserInventryController::class, 'upload_excel']);
 });
 

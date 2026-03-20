@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Inventory;
+use Maatwebsite\Excel\Excel;
+use App\Imports\InventoryImport;
+use Illuminate\Support\Facades\DB;
 
 class UserInventryController extends Controller
 {   
@@ -209,5 +212,42 @@ class UserInventryController extends Controller
         }
 
         
+    }
+
+
+    
+    public function upload_excel(Request $request, Excel $excel)
+    {   
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls'
+        ]);
+
+        // echo "asd";exit;
+
+        DB::beginTransaction();
+
+        try {
+
+            // Inventory::truncate();
+            Inventory::query()->delete();
+
+            $excel->import(new InventoryImport, $request->file('file'));
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 1,
+                'msg' => 'Inventory Imported Successfully'
+            ]);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 0,
+                'msg' => $e->getMessage()
+            ]);
+        }
     }
 }
