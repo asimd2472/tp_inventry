@@ -19,5 +19,6 @@ Route::middleware('auth:api')->group(function () {
 	Route::post('/inventory/stock', [UserInventryController::class, 'getStock']);
     Route::post('/inventory/inventory-item-check', [UserInventryController::class, 'inventoryItemCheck']);
     Route::post('/inventory/upload-excel', [UserInventryController::class, 'upload_excel']);
+    Route::post('/inventory/download-excel', [UserInventryController::class, 'download_excel']);
 });
 
