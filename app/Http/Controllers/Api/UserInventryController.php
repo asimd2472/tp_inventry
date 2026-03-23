@@ -201,10 +201,13 @@ class UserInventryController extends Controller
         }
         $inventory = $query->get();
 
+        $totalHyderabad = $inventory->sum('hyderabad');
+        $totalNcr       = $inventory->sum('ncr');
+
         if($inventory){
             return response()->json([
                 'status'    => 1,
-                'itemCount'    => count($inventory),
+                'itemCount'    => ($totalHyderabad+$totalNcr),
             ]);
         }else{
             return response()->json([
