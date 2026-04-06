@@ -155,4 +155,36 @@ class MyaccountController extends Controller
             'user_type' => Auth::user()->is_admin == 1 ? 'admin' : 'user',
         ]);
     }
+
+    public function storeOrUpdateUser(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . ($request->id ?? 'NULL') . ',id',
+            'user_access' => 'required|in:1,2',
+        ]);
+
+        if ($request->id) {
+            $user = User::findOrFail($request->id);
+            $user->update($validated);
+            $msg = 'User updated successfully.';
+        } else {
+            $validated['password'] = bcrypt('password'); // default password
+            $validated['status'] = 1;
+            $validated['is_admin'] = 0;
+            $user = User::create($validated);
+            $msg = 'User created successfully.';
+        }
+
+        return response()->json([
+            'status' => 1,
+            'msg' => $msg,
+            'user' => $user,
+        ]);
+    }
+
+    public function users(){
+        $users = User::where('super_admin', '0')->get();
+        return view('admin.users.index', compact('users'));
+    }
 }

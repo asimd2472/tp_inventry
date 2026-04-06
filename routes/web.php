@@ -39,6 +39,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/inventry-details',[InventryController::class,'index'])->name('inventry_details');
         Route::get('/inventry-upload',[InventryController::class,'inventry_upload'])->name('inventry_upload');
         Route::post('/upload-inventry',[InventryController::class,'upload_inventry'])->name('upload_inventry');
+
+        Route::get('/users', [MyaccountController::class, 'users'])->name('users');
+        Route::post('/users/store-or-update', [MyaccountController::class, 'storeOrUpdateUser'])->name('users.storeOrUpdate');
     });
 
 });
