@@ -10,9 +10,11 @@
             <li class="{{Route::currentRouteName() == 'user.course_list' ? 'active' : ''}}">
                 <a href="{{url('admin/inventry-upload')}}"><i class="menu-icon fa-solid fa-upload"></i> Upload Inventory</a>
             </li>
-            <li class="{{Route::currentRouteName() == 'user.users' ? 'active' : ''}}">
-                <a href="{{url('admin/users')}}"><i class="menu-icon fa-solid fa-users"></i> Users</a>
-            </li>
+            @if(Auth::user()->super_admin==1)
+                <li class="{{Route::currentRouteName() == 'user.users' ? 'active' : ''}}">
+                    <a href="{{url('admin/users')}}"><i class="menu-icon fa-solid fa-users"></i> Users</a>
+                </li>
+            @endif
             <li>
                 <a href="{{url('admin/user_logout')}}"><i class="menu-icon fa-solid fa-arrow-right-from-bracket"></i>Logout</a>
             </li>
