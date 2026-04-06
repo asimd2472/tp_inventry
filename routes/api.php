@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\CvrController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OtpAuthController;
 
@@ -21,4 +22,6 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/inventory/upload-excel', [UserInventryController::class, 'upload_excel']);
     Route::post('/inventory/download-excel', [UserInventryController::class, 'download_excel']);
 });
+
+Route::post('/cvr-save', [CvrController::class, 'cvr_save']);
 
