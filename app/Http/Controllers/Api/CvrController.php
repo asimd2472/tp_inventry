@@ -16,6 +16,7 @@ class CvrController extends Controller
 
             if($check_cvr){
                 $check_cvr->update([
+                    'user_id' => $request->user_id,
                     'cvr_data' => $request->json()->all()
                 ]);
             }else{
