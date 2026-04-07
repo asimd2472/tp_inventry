@@ -14,9 +14,9 @@ class CvrController extends Controller
         // dd($request->id);
         try {
 
-            $dateTime = Carbon::parse($request->date);
-            $date = $dateTime->toDateString();
-            $time = $dateTime->toTimeString();
+            $dateTimeIST = Carbon::parse($request->date)->setTimezone('Asia/Kolkata');
+            $date = $dateTimeIST->toDateString();
+            $time = $dateTimeIST->toTimeString(); 
 
             $check_cvr = CvrDetails::where('cvr_id', $request->id)->first();
             
