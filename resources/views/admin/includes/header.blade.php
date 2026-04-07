@@ -31,6 +31,7 @@
 
                                 @if(Auth::user()->super_admin==1)
                                     <li><a href="{{url('admin/users')}}">Users</a></li>
+                                    <li><a href="{{url('admin/cvr-details')}}">CVR Details</a></li>
                                 @endif
 
                                 @if(Auth::user()->is_admin==1)
