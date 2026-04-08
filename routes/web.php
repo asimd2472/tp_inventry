@@ -4,6 +4,7 @@ use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\InventryController;
+use App\Http\Controllers\CvrController;
 use App\Http\Controllers\MyaccountController;
 use App\Http\Controllers\UserInventryController;
 
@@ -42,6 +43,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/users', [MyaccountController::class, 'users'])->name('users');
         Route::post('/users/store-or-update', [MyaccountController::class, 'storeOrUpdateUser'])->name('users.storeOrUpdate');
+        Route::get('/cvr-details', [CvrController::class, 'cvrDetails'])->name('cvrDetails');
+        Route::get('/cvr-export', [CvrController::class, 'export'])->name('export');
     });
 
 });
