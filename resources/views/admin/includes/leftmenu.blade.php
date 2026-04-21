@@ -17,6 +17,9 @@
                 <li class="{{Route::currentRouteName() == 'user.cvr_details' ? 'active' : ''}}">
                     <a href="{{url('admin/cvr-details')}}"><i class="menu-icon fa-solid fa-chalkboard"></i> CVR Details</a>
                 </li>
+                <li class="{{Route::currentRouteName() == 'admin.gallery' ? 'active' : ''}}">
+                    <a href="{{url('admin/gallery')}}"><i class="menu-icon fa-solid fa-chalkboard"></i> Gallery</a>
+                </li>
             @endif
             <li>
                 <a href="{{url('admin/user_logout')}}"><i class="menu-icon fa-solid fa-arrow-right-from-bracket"></i>Logout</a>

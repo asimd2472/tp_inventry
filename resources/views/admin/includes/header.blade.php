@@ -30,13 +30,14 @@
                             <ul class="account-login" style="display: none;">
 
                                 @if(Auth::user()->super_admin==1)
-                                    <li><a href="{{url('admin/users')}}">Users</a></li>
+                                    <li><a href="{{url('admin/users')}}">Create User</a></li>
                                     <li><a href="{{url('admin/cvr-details')}}">CVR Details</a></li>
                                 @endif
 
                                 @if(Auth::user()->is_admin==1)
                                     <li><a href="{{url('admin/inventry-upload')}}">Upload Inventory</a></li>
                                     <li><a href="{{url('admin/inventry-details')}}">Inventory Details</a></li>
+                                    <li><a href="{{url('admin/gallery')}}">Gallery</a></li>
                                     @if(Auth::user()->user_access==2)
                                         <li><a href="{{url('user/inventry-check')}}">Explore Inventory</a></li>
                                         <li><a href="javascript:void(0)" onclick="inventorySend()">Download Catalog</a></li>

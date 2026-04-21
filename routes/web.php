@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\InventryController;
 use App\Http\Controllers\CvrController;
+use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\MyaccountController;
 use App\Http\Controllers\UserInventryController;
 
@@ -45,6 +46,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/users/store-or-update', [MyaccountController::class, 'storeOrUpdateUser'])->name('users.storeOrUpdate');
         Route::get('/cvr-details', [CvrController::class, 'cvrDetails'])->name('cvrDetails');
         Route::get('/cvr-export', [CvrController::class, 'export'])->name('export');
+        Route::get('/gallery', [GalleryController::class, 'gallery'])->name('gallery');
+
+        Route::post('/brochure_upload',[GalleryController::class,'brochure_upload'])->name('brochure_upload');
+        Route::post('/dealers_upload',[GalleryController::class,'dealers_upload'])->name('dealers_upload');
+        Route::delete('/admin/brochure/{id}', [GalleryController::class, 'delete_brochure'])->name('brochure_delete');
+        Route::delete('/admin/dealers/{id}', [GalleryController::class, 'dealers_delete'])->name('dealers_delete');
     });
 
 });
