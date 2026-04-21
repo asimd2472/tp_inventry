@@ -283,6 +283,125 @@ $(function() {
         }
     });
 
+    $("#brochureUploadForm").validate({
+        ignore: [],
+        rules: {
+           
+        },
+        messages: {
+            
+        },
+        errorElement: 'span',
+        submitHandler: function(form) {
+
+            var form = $('#brochureUploadForm')[0];
+            var formData = new FormData(form);
+            event.preventDefault();
+
+            console.log(formData);
+
+            $.ajax({
+                url: base_url + "/admin/brochure_upload",
+                type: 'POST',
+                processData: false,
+                contentType: false,
+                data: formData,
+                beforeSend: function() {
+                    $('#forgot_btn').html('Loading...');
+                    $('#forgot_btn').attr('disabled', 'disabled');
+                },
+                success: function(data) {
+                    if (data.status == 1) {
+
+                        Swal.fire({
+                            title: 'Success',
+                            text: data.msg,
+                            icon: 'success',
+                        });
+
+                        location.reload();
+
+                        $('#forgot_btn').html('Reset');
+                        $("#forgot_btn").prop("disabled", false);
+                        form.reset();
+
+                    } else if (data.status == 0) {
+
+                        $('#forgot_btn').html('Reset');
+                        $("#forgot_btn").prop("disabled", false);
+
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.msg,
+                            icon: 'warning',
+                        });
+
+                    }
+                }
+            });
+        }
+    });
+
+    $("#dealersUploadForm").validate({
+        ignore: [],
+        rules: {
+           
+        },
+        messages: {
+            
+        },
+        errorElement: 'span',
+        submitHandler: function(form) {
+
+            var form = $('#dealersUploadForm')[0];
+            var formData = new FormData(form);
+            event.preventDefault();
+
+            console.log(formData);
+
+            $.ajax({
+                url: base_url + "/admin/dealers_upload",
+                type: 'POST',
+                processData: false,
+                contentType: false,
+                data: formData,
+                beforeSend: function() {
+                    $('#dealers_btn').html('Loading...');
+                    $('#dealers_btn').attr('disabled', 'disabled');
+                },
+                success: function(data) {
+                    if (data.status == 1) {
+
+                        Swal.fire({
+                            title: 'Success',
+                            text: data.msg,
+                            icon: 'success',
+                        });
+
+                        location.reload();
+
+                        $('#dealers_btn').html('Reset');
+                        $("#dealers_btn").prop("disabled", false);
+                        form.reset();
+
+
+                    } else if (data.status == 0) {
+
+                        $('#dealers_btn').html('Reset');
+                        $("#dealers_btn").prop("disabled", false);
+
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.msg,
+                            icon: 'warning',
+                        });
+
+                    }
+                }
+            });
+        }
+    });
+
 
     $('#type').change(function () {
 
