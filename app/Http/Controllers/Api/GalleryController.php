@@ -48,6 +48,42 @@ class GalleryController extends Controller
         ]);
     }
 
+    public function send_dealers(Request $request)
+    {
+        set_time_limit(600);
+
+        $user_mail = $request->email;
+
+        $dealers = Gallery::where('type', 'brochure')
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if ($dealers->count() > 0) {
+
+            $body = "<p>Dear Team,</p><p>Please find attached dealers.</p>";
+
+            \Mail::html($body, function ($message) use ($dealers, $user_mail) {
+
+                $message->to($user_mail)
+                    ->subject('Tata Pravesh Dealers List');
+
+                $filePath = public_path('gallery/' . $dealers->file_name);
+
+                if (file_exists($filePath)) {
+                    $message->attach($filePath, [
+                        'as' => $dealers->file_name,
+                        'mime' => mime_content_type($filePath),
+                    ]);
+                }
+            });
+        }
+
+        return response()->json([
+            'status' => 1,
+            'msg' => 'Email sent with selected brochures'
+        ]);
+    }
+
     public function get_brochures(){
         $brochures = Gallery::where('type', 'brochure')->get();
         return response()->json([
