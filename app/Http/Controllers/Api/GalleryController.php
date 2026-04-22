@@ -54,7 +54,7 @@ class GalleryController extends Controller
 
         $user_mail = $request->email;
 
-        $dealers = Gallery::where('type', 'brochure')
+        $dealers = Gallery::where('type', 'dealers')
             ->orderBy('id', 'desc')
             ->first();
 
