@@ -26,6 +26,6 @@ Route::middleware('auth:api')->group(function () {
 
 Route::post('/cvr-save', [CvrController::class, 'cvr_save']);
 Route::post('/send-brochures', [GalleryController::class, 'send_brochures']);
-Route::post('/get-brochures', [GalleryController::class, 'get_brochures']);
+Route::get('/get-brochures', [GalleryController::class, 'get_brochures']);
 
 
