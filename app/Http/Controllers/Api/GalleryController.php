@@ -10,9 +10,14 @@ class GalleryController extends Controller
 {
     public function send_brochures(Request $request)
     {
-        set_time_limit(600);    
+        set_time_limit(600);
+
         $user_mail = $request->email;
-        $brochures = Gallery::where('type', 'brochure')->get();
+        $fileIds = $request->get('files', []);
+
+        $brochures = Gallery::where('type', 'brochure')
+            ->whereIn('id', $fileIds) // <-- filter by IDs
+            ->get();
 
         if ($brochures->count() > 0) {
 
@@ -39,7 +44,7 @@ class GalleryController extends Controller
 
         return response()->json([
             'status' => 1,
-            'msg' => 'Email sent with brochures'
+            'msg' => 'Email sent with selected brochures'
         ]);
     }
 
