@@ -69,7 +69,9 @@
                                                                     <tr>
                                                                         <td>{{$item->file_name}}</td>
                                                                         <td>
-                                                                            <a href="{{asset('storage/gallery/'.$item->file_name)}}" target="_blank" class="btn btn-sm btn-info editUserBtn">View</a>
+                                                                            <a href="{{ asset('gallery/'.$item->file_name) }}" target="_blank" class="btn btn-sm btn-info editUserBtn">
+                                                                                View
+                                                                            </a>
                                                                             <form action="{{ route('admin.brochure_delete', $item->id) }}" method="POST" style="display:inline;">
                                                                                 @csrf
                                                                                 @method('DELETE')
@@ -109,7 +111,9 @@
                                                                     <tr>
                                                                         <td>{{$item->file_name}}</td>
                                                                         <td>
-                                                                            <a href="{{asset('storage/gallery/'.$item->file_name)}}" target="_blank" class="btn btn-sm btn-info editUserBtn">View</a>
+                                                                            <a href="{{ asset('gallery/'.$item->file_name) }}" target="_blank" class="btn btn-sm btn-info editUserBtn">
+                                                                                View
+                                                                            </a>
                                                                             <form action="{{ route('admin.dealers_delete', $item->id) }}" method="POST" style="display:inline;">
                                                                                 @csrf
                                                                                 @method('DELETE')

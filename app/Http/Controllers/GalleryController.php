@@ -24,8 +24,10 @@ class GalleryController extends Controller
 
         if ($request->hasFile('file_name')) {
             foreach ($request->file('file_name') as $file) {
+
                 $fileName = $file->getClientOriginalName();
-                $filePath = $file->storeAs('public/gallery', $fileName);
+                $file->move(public_path('gallery'), $fileName);
+
                 Gallery::create([
                     'type' => 'brochure',
                     'file_name' => $fileName
@@ -46,7 +48,7 @@ class GalleryController extends Controller
         if ($request->hasFile('file_name')) {
             foreach ($request->file('file_name') as $file) {
                 $fileName = $file->getClientOriginalName();
-                $filePath = $file->storeAs('public/gallery', $fileName);
+                $file->move(public_path('gallery'), $fileName);
                 Gallery::create([
                     'type' => 'dealers',
                     'file_name' => $fileName
@@ -63,8 +65,9 @@ class GalleryController extends Controller
     public function delete_brochure($id)
     {
         $brochure = Gallery::findOrFail($id);
-        if ($brochure->file_name && Storage::disk('public')->exists('gallery/'.$brochure->file_name)) {
-            Storage::disk('public')->delete('gallery/'.$brochure->file_name);
+        $filePath = public_path('gallery/' . $brochure->file_name);
+        if ($brochure->file_name && file_exists($filePath)) {
+            unlink($filePath);
         }
         $brochure->delete();
 
@@ -74,8 +77,9 @@ class GalleryController extends Controller
     public function dealers_delete($id)
     {
         $brochure = Gallery::findOrFail($id);
-        if ($brochure->file_name && Storage::disk('public')->exists('gallery/'.$brochure->file_name)) {
-            Storage::disk('public')->delete('gallery/'.$brochure->file_name);
+        $filePath = public_path('gallery/' . $brochure->file_name);
+        if ($brochure->file_name && file_exists($filePath)) {
+            unlink($filePath);
         }
         $brochure->delete();
 
