@@ -8,6 +8,46 @@ use Illuminate\Http\Request;
 
 class GalleryController extends Controller
 {
+    // public function send_brochures(Request $request)
+    // {
+    //     set_time_limit(600);
+
+    //     $user_mail = $request->email;
+    //     $fileIds = $request->get('files', []);
+
+    //     $brochures = Gallery::where('type', 'brochure')
+    //         ->whereIn('id', $fileIds) // <-- filter by IDs
+    //         ->get();
+
+    //     if ($brochures->count() > 0) {
+
+    //         $body = "<p>Dear Team,</p><p>Please find attached brochures.</p>";
+
+    //         \Mail::html($body, function ($message) use ($brochures, $user_mail) {
+
+    //             $message->to($user_mail)
+    //                 ->subject('Tata Pravesh Brochures');
+
+    //             foreach ($brochures as $file) {
+
+    //                 $filePath = public_path('gallery/' . $file->file_name);
+
+    //                 if (file_exists($filePath)) {
+    //                     $message->attach($filePath, [
+    //                         'as' => $file->file_name,
+    //                         'mime' => mime_content_type($filePath),
+    //                     ]);
+    //                 }
+    //             }
+    //         });
+    //     }
+
+    //     return response()->json([
+    //         'status' => 1,
+    //         'msg' => 'Email sent with selected brochures'
+    //     ]);
+    // }
+
     public function send_brochures(Request $request)
     {
         set_time_limit(600);
@@ -16,35 +56,36 @@ class GalleryController extends Controller
         $fileIds = $request->get('files', []);
 
         $brochures = Gallery::where('type', 'brochure')
-            ->whereIn('id', $fileIds) // <-- filter by IDs
+            ->whereIn('id', $fileIds)
             ->get();
+
+        // dd($brochures);
 
         if ($brochures->count() > 0) {
 
-            $body = "<p>Dear Team,</p><p>Please find attached brochures.</p>";
+            $body = "<p>Dear Team,</p>";
+            $body .= "<p>Please download brochures from below links:</p><ul>";
 
-            \Mail::html($body, function ($message) use ($brochures, $user_mail) {
+            foreach ($brochures as $file) {
+                $url = url('gallery/' . $file->file_name);
+                $body .= "<li style='margin-bottom: 5px;'>
+                            <a href='{$url}' target='_blank'>Download {$file->file_name}</a>
+                        </li>";
+            }
+
+            $body .= "</ul>";
+
+            // ✅ Send email WITHOUT attachments
+            \Mail::html($body, function ($message) use ($user_mail) {
 
                 $message->to($user_mail)
                     ->subject('Tata Pravesh Brochures');
-
-                foreach ($brochures as $file) {
-
-                    $filePath = public_path('gallery/' . $file->file_name);
-
-                    if (file_exists($filePath)) {
-                        $message->attach($filePath, [
-                            'as' => $file->file_name,
-                            'mime' => mime_content_type($filePath),
-                        ]);
-                    }
-                }
             });
         }
 
         return response()->json([
             'status' => 1,
-            'msg' => 'Email sent with selected brochures'
+            'msg' => 'Email sent with download links'
         ]);
     }
 
