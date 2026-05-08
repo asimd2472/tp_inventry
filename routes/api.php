@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\CvrController;
 use App\Http\Controllers\Api\GalleryController;
+use App\Http\Controllers\Api\OrderTrackingController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OtpAuthController;
 
@@ -22,6 +23,11 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/inventory/inventory-item-check', [UserInventryController::class, 'inventoryItemCheck']);
     Route::post('/inventory/upload-excel', [UserInventryController::class, 'upload_excel']);
     Route::post('/inventory/download-excel', [UserInventryController::class, 'download_excel']);
+
+
+    Route::post('/track-order', [OrderTrackingController::class, 'trackOrder']);
+
+
 });
 
 Route::post('/cvr-save', [CvrController::class, 'cvr_save']);
