@@ -12,7 +12,7 @@
                         <div class="user-body">
                            
                             <div class="row justify-content-center mb-4">
-                                <div class="col-xl-6 col-md-6 col-12">
+                                <div class="col-xl-4 col-md-4 col-12">
                                     <div class="card">
                                         <div class="card-body">
                                             <form action="{{route('admin.brochure_upload')}}" id="brochureUploadForm" method="POST" enctype="multipart/form-data">
@@ -26,7 +26,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-xl-6 col-md-6 col-12">
+                                <div class="col-xl-4 col-md-4 col-12">
                                     <div class="card">
                                         <div class="card-body">
                                             <form action="{{route('admin.dealers_upload')}}" id="dealersUploadForm" method="POST" enctype="multipart/form-data">
@@ -37,6 +37,42 @@
                                                 </div>
                                                 <button type="submit" id="dealers_btn" class="btn btn-primary">Upload Dealers</button>
                                             </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-4 col-md-4 col-12">
+                                    <div class="card">
+                                        <div class="card-body">
+
+                                            <form action="{{ route('admin.product_installation_images') }}" 
+                                                id="" 
+                                                method="POST" 
+                                                enctype="multipart/form-data">
+
+                                                @csrf
+
+                                                <div class="mb-3">
+                                                    <label for="file_name" class="form-label">
+                                                        Select Files
+                                                    </label>
+
+                                                    <input class="form-control"
+                                                        type="file"
+                                                        id="file_name"
+                                                        name="file_name[]"
+                                                        accept="image/*"
+                                                        multiple
+                                                        required>
+                                                </div>
+
+                                                <button type="submit"
+                                                        id="dealers_btn"
+                                                        class="btn btn-primary">
+                                                    Upload installation images
+                                                </button>
+
+                                            </form>
+
                                         </div>
                                     </div>
                                 </div>
@@ -115,6 +151,49 @@
                                                                                 View
                                                                             </a>
                                                                             <form action="{{ route('admin.dealers_delete', $item->id) }}" method="POST" style="display:inline;">
+                                                                                @csrf
+                                                                                @method('DELETE')
+                                                                                <button type="submit" class="btn btn-sm btn-danger"
+                                                                                    onclick="return confirm('Are you sure?')">
+                                                                                    Delete
+                                                                                </button>
+                                                                            </form>
+                                                                        </td>
+                                                                    </tr>
+                                                                @endforeach
+                                                                
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                                Post installation images
+                                            </button>
+                                            </h2>
+                                            <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                                                <div class="accordion-body">
+                                                    <div class="table-responsive mt-1">
+                                                        <table class="table table-bordered table-hover companyTable">
+                                                            <thead class="thead-dark">
+                                                                <tr>
+                                                                    <th scope="col">File</th>
+                                                                    <td>Action</td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach ($installationImages as $item)
+                                                                    <tr>
+                                                                        <td><img src="{{ asset('uploads/dealers/'.$item->file_name) }}" width="100" height="50"></td>
+                                                                        <td>
+                                                                            <a href="{{ asset('uploads/dealers/'.$item->file_name) }}" target="_blank" class="btn btn-sm btn-info editUserBtn">
+                                                                                View
+                                                                            </a>
+                                                                            <form action="{{ route('admin.installation_images_delete', $item->id) }}" method="POST" style="display:inline;">
                                                                                 @csrf
                                                                                 @method('DELETE')
                                                                                 <button type="submit" class="btn btn-sm btn-danger"

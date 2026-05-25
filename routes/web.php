@@ -50,8 +50,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::post('/brochure_upload',[GalleryController::class,'brochure_upload'])->name('brochure_upload');
         Route::post('/dealers_upload',[GalleryController::class,'dealers_upload'])->name('dealers_upload');
+        Route::post('/product_installation_images',[GalleryController::class,'product_installation_images'])->name('product_installation_images');
         Route::delete('/admin/brochure/{id}', [GalleryController::class, 'delete_brochure'])->name('brochure_delete');
         Route::delete('/admin/dealers/{id}', [GalleryController::class, 'dealers_delete'])->name('dealers_delete');
+        Route::delete('/admin/installation_images_delete/{id}', [GalleryController::class, 'installation_images_delete'])->name('installation_images_delete');
     });
 
 });

@@ -34,5 +34,6 @@ Route::post('/cvr-save', [CvrController::class, 'cvr_save']);
 Route::post('/send-brochures', [GalleryController::class, 'send_brochures']);
 Route::post('/send-dealers', [GalleryController::class, 'send_dealers']);
 Route::get('/get-brochures', [GalleryController::class, 'get_brochures']);
+Route::get('/post-installation-images', [GalleryController::class, 'post_installation_images']);
 
 
