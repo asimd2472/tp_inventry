@@ -132,4 +132,24 @@ class GalleryController extends Controller
             'brochures' => $brochures
         ]);
     }
+
+    public function post_installation_images(Request $request)
+    {
+        $perPage = $request->per_page ?? 10;
+
+        $installationImages = Gallery::where('type', 'installation_images')
+            ->orderBy('id', 'desc')
+            ->paginate($perPage);
+
+        return response()->json([
+            'status' => 1,
+            'data' => $installationImages->items(),
+            'pagination' => [
+                'current_page' => $installationImages->currentPage(),
+                'last_page' => $installationImages->lastPage(),
+                'per_page' => $installationImages->perPage(),
+                'total' => $installationImages->total(),
+            ]
+        ]);
+    }
 }

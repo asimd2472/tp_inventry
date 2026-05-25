@@ -12,7 +12,8 @@ class GalleryController extends Controller
     {   
         $dealers = Gallery::where('type', 'dealers')->get();
         $brochure = Gallery::where('type', 'brochure')->get();
-        return view('admin.gallery.index', compact('dealers', 'brochure'));
+        $installationImages = Gallery::where('type', 'installation_images')->get();
+        return view('admin.gallery.index', compact('dealers', 'brochure', 'installationImages'));
     } 
     
     public function brochure_upload(Request $request)
@@ -84,5 +85,41 @@ class GalleryController extends Controller
         $brochure->delete();
 
         return redirect()->back()->with('success', 'Dealer deleted successfully');
+    }
+
+    public function product_installation_images(Request $request){
+        $request->validate([
+            'file_name' => 'required|array',
+            'file_name.*' => 'mimes:jpg,jpeg,png,pdf|max:2048',
+        ]);
+
+        if ($request->hasFile('file_name')) {
+
+            foreach ($request->file('file_name') as $file) {
+
+                $filename = time() . '_' . rand(1000,9999) . '.' . $file->getClientOriginalExtension();
+
+                $file->move(public_path('uploads/dealers'), $filename);
+
+                
+                Gallery::create([
+                    'file_name' => $filename,
+                    'type' => 'installation_images',
+                ]);
+            }
+        }
+        return redirect()->back()->with('success', 'Files uploaded successfully');
+    }
+
+    public function installation_images_delete($id)
+    {
+        $brochure = Gallery::findOrFail($id);
+        $filePath = public_path('uploads/dealers/' . $brochure->file_name);
+        if ($brochure->file_name && file_exists($filePath)) {
+            unlink($filePath);
+        }
+        $brochure->delete();
+
+        return redirect()->back()->with('success', 'Image deleted successfully');
     }
 }
