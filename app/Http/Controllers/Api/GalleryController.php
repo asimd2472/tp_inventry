@@ -141,6 +141,18 @@ class GalleryController extends Controller
             ->orderBy('id', 'desc')
             ->paginate($perPage);
 
+        // Add full image path
+        $installationImages->getCollection()->transform(function ($item) {
+
+            // যদি storage/app/public এ image থাকে
+            $item->image_url = asset('uploads/dealers/' . $item->file_name);
+
+            // যদি public/uploads এ image থাকে তাহলে এটা ব্যবহার করুন
+            // $item->image_url = asset('uploads/' . $item->file_name);
+
+            return $item;
+        });
+
         return response()->json([
             'status' => 1,
             'data' => $installationImages->items(),
