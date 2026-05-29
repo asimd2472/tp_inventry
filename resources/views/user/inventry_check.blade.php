@@ -44,6 +44,9 @@
                                         <span class="icon-lft"><i class="fa-solid fa-barcode"></i></span>
                                         <select class="form-control front-input-style" name="" id="model">
                                             <option value="">Select Model</option>
+                                            @foreach($models as $model)
+                                                <option value="{{ $model }}">{{ $model }}</option>
+                                            @endforeach
                                         </select>
                                     </div>
                                 </div>
@@ -67,6 +70,9 @@
                                         <span class="icon-lft"><i class="fa-solid fa-brush"></i></span>
                                         <select class="form-control front-input-style" name="" id="design">
                                             <option value="">Select Design</option>
+                                            @foreach($designs as $design)
+                                                <option value="{{ $design }}">{{ $design }}</option>
+                                            @endforeach
                                         </select>
                                     </div>
                                 </div>
@@ -78,6 +84,9 @@
                                         <span class="icon-lft"><i class="fa-solid fa-paintbrush"></i></span>
                                         <select class="form-control front-input-style" name="" id="dimention">
                                             <option value="">Select Size</option>
+                                            @foreach($dimentions as $dimention)
+                                                <option value="{{ $dimention }}">{{ $dimention }}</option>
+                                            @endforeach
                                         </select>
                                     </div>
                                 </div>
@@ -89,7 +98,9 @@
                                         <span class="icon-lft"><i class="fa-solid fa-ruler-vertical"></i></span>
                                         <select class="form-control front-input-style" name="" id="colour">
                                             <option value="">Select Colour</option>
-                                            
+                                            @foreach($colours as $colour)
+                                                <option value="{{ $colour }}">{{ $colour }}</option>
+                                            @endforeach
                                         </select>
                                     </div>
                                 </div>
@@ -101,7 +112,9 @@
                                         <span class="icon-lft"><i class="fa-solid fa-ruler-vertical"></i></span>
                                         <select class="form-control front-input-style" name="" id="orientation">
                                             <option value="">Select Orientation</option>
-                                            
+                                            @foreach($orientations as $orientation)
+                                                <option value="{{ $orientation }}">{{ $orientation }}</option>
+                                            @endforeach
                                         </select>
                                     </div>
                                 </div>
@@ -114,7 +127,9 @@
                                         <span class="icon-lft"><i class="fa-solid fa-ruler-vertical"></i></span>
                                         <select class="form-control front-input-style" name="" id="special_feature">
                                             <option value="">Select Special Feature</option>
-                                            
+                                            @foreach($special_features as $special_feature)
+                                                <option value="{{ $special_feature }}">{{ $special_feature }}</option>
+                                            @endforeach
                                         </select>
                                     </div>
                                 </div>

@@ -20,6 +20,9 @@
                 <li class="{{Route::currentRouteName() == 'admin.gallery' ? 'active' : ''}}">
                     <a href="{{url('admin/gallery')}}"><i class="menu-icon fa-solid fa-chalkboard"></i> Gallery</a>
                 </li>
+                <li class="{{Route::currentRouteName() == 'admin.login_history' ? 'active' : ''}}">
+                    <a href="{{url('admin/login-history')}}"><i class="menu-icon fa-solid fa-chalkboard"></i> Login history</a>
+                </li>
             @endif
             <li>
                 <a href="{{url('admin/user_logout')}}"><i class="menu-icon fa-solid fa-arrow-right-from-bracket"></i>Logout</a>

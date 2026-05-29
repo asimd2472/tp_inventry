@@ -19,6 +19,52 @@ class UserInventryController extends Controller
                 ->distinct()
                 ->orderBy('type')
                 ->pluck('type');
+        $models = Inventory::select('model')
+                ->whereNotNull('model')
+                ->distinct()
+                ->orderBy('model')
+                ->pluck('model');
+
+        $designs = Inventory::select('design')
+                ->whereNotNull('design')
+                ->distinct()
+                ->orderBy('design')
+                ->pluck('design');
+
+        $dimentions = Inventory::select('dimention')
+                ->whereNotNull('dimention')
+                ->distinct()
+                ->orderBy('dimention')
+                ->pluck('dimention');
+        
+        $colours = Inventory::select('colour')
+                ->whereNotNull('colour')
+                ->distinct()
+                ->orderBy('colour')
+                ->pluck('colour');
+
+        $orientations = Inventory::select('orientation')
+                ->whereNotNull('orientation')
+                ->distinct()
+                ->orderBy('orientation')
+                ->pluck('orientation');
+
+        $special_features = Inventory::select('special_feature')
+                ->whereNotNull('special_feature')
+                ->distinct()
+                ->orderBy('special_feature')
+                ->pluck('special_feature');
+
+        return response()->json([
+            'types'    => $types,
+            'models' => $models,
+            'designs' => $designs,
+            'dimentions' => $dimentions,
+            'colours' => $colours,
+            'orientations' => $orientations,
+            'special_features' => $special_features,
+        ]);
+
         return response()->json($types);
     }
     public function getModels(Request $request)

@@ -26,6 +26,7 @@ Route::middleware('auth:api')->group(function () {
 
 
     Route::post('/track-order', [OrderTrackingController::class, 'trackOrder']);
+    Route::post('/logout', [OrderTrackingController::class, 'logout']);
 
 
 });

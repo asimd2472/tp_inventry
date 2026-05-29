@@ -54,6 +54,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/admin/brochure/{id}', [GalleryController::class, 'delete_brochure'])->name('brochure_delete');
         Route::delete('/admin/dealers/{id}', [GalleryController::class, 'dealers_delete'])->name('dealers_delete');
         Route::delete('/admin/installation_images_delete/{id}', [GalleryController::class, 'installation_images_delete'])->name('installation_images_delete');
+        Route::get('/login-history', [MyaccountController::class, 'login_history'])->name('login_history');
+        
     });
 
 });

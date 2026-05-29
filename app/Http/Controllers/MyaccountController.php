@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LoginHistory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Yajra\DataTables\DataTables;
 
 class MyaccountController extends Controller
 {
@@ -68,7 +71,10 @@ class MyaccountController extends Controller
         }
     }
 
-    public function user_logout(){
+    public function user_logout(Request $request){
+        LoginHistory::where('user_id', Auth::user()->id)
+            ->where('ip_address', $request->ip())
+            ->update(['logout_time' => now()]);
         Auth::logout();
         Session::forget('user_session');
         return redirect('/');
@@ -148,6 +154,13 @@ class MyaccountController extends Controller
         Session::put('user_session', Auth::user());
         $request->session()->forget('login_otp');
 
+        LoginHistory::create([
+            'user_id' => $user->id,
+            'login_time' => now(),
+            'ip_address' => $request->ip(),
+            'type' => 'web',
+        ]);
+
         return response()->json([
             'status' => 1,
             'msg' => 'login success',
@@ -186,5 +199,36 @@ class MyaccountController extends Controller
     public function users(){
         $users = User::where('super_admin', '0')->get();
         return view('admin.users.index', compact('users'));
+    }
+
+    public function login_history(Request $request){
+        if ($request->ajax()) {
+            $loginHistory = DB::table('login_histories')
+                ->join('users', 'login_histories.user_id', '=', 'users.id')
+                ->select('login_histories.*', 'users.name as user_name')
+                ->orderBy('login_histories.created_at', 'desc')
+                ->get();
+            return DataTables::of($loginHistory)
+                ->addColumn('user_name', function ($row) {
+                    return $row->user_name;
+                })
+                ->addColumn('type', function ($row) {
+                    return $row->type;
+                })
+                ->addColumn('ip_address', function ($row) {
+                    return $row->ip_address;
+                })
+                ->addColumn('login_time', function ($row) {
+                    return $row->login_time;
+                })
+                ->addColumn('logout_time', function ($row) {
+                    return $row->logout_time;
+                })
+                
+                ->rawColumns([''])
+                ->make(true);
+        }
+
+        return view('admin.login_history.index');
     }
 }

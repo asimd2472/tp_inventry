@@ -51,6 +51,7 @@
                                         <li><a href="{{url('admin/inventry-upload')}}">Upload Inventory</a></li>
                                         <li><a href="{{url('admin/inventry-details')}}">Inventory Details</a></li>
                                         <li><a href="{{url('admin/gallery')}}">Gallery</a></li>
+                                        <li><a href="{{url('admin/login-history')}}">Login history</a></li>
                                         @if(!request()->is('user/*'))
                                             <li><a href="{{url('user/inventry-check')}}">Explore Inventory</a></li>
                                         @endif

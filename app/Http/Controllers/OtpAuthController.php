@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LoginHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -130,6 +131,13 @@ class OtpAuthController extends Controller
 
         // ✅ Create Token
         $token = $user->createToken('auth_token')->plainTextToken;
+
+        LoginHistory::create([
+            'user_id' => $user->id,
+            'login_time' => now(),
+            'token' => $token,
+            'ip_address' => $request->ip(),
+        ]);
 
         return response()->json([
             'status' => 1,
