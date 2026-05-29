@@ -15,7 +15,43 @@ class UserInventryController extends Controller
                 ->orderBy('type')
                 ->pluck('type');
 
-        return view('user.inventry_check', compact('types'));
+        $models = Inventory::select('model')
+                ->whereNotNull('model')
+                ->distinct()
+                ->orderBy('model')
+                ->pluck('model');
+
+        $designs = Inventory::select('design')
+                ->whereNotNull('design')
+                ->distinct()
+                ->orderBy('design')
+                ->pluck('design');
+
+        $dimentions = Inventory::select('dimention')
+                ->whereNotNull('dimention')
+                ->distinct()
+                ->orderBy('dimention')
+                ->pluck('dimention');
+        
+        $colours = Inventory::select('colour')
+                ->whereNotNull('colour')
+                ->distinct()
+                ->orderBy('colour')
+                ->pluck('colour');
+
+        $orientations = Inventory::select('orientation')
+                ->whereNotNull('orientation')
+                ->distinct()
+                ->orderBy('orientation')
+                ->pluck('orientation');
+
+        $special_features = Inventory::select('special_feature')
+                ->whereNotNull('special_feature')
+                ->distinct()
+                ->orderBy('special_feature')
+                ->pluck('special_feature');
+
+        return view('user.inventry_check', compact('types', 'models', 'designs', 'dimentions', 'colours', 'orientations', 'special_features'));
     }
 
     public function getUserTypes(Request $request)

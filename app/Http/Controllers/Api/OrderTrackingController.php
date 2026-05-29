@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\LoginHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -115,4 +116,21 @@ class OrderTrackingController extends Controller
 
         return $body['access_token'] ?? null;
     }
-}
+
+    public function logout(Request $request)
+    {
+        // dd($request->bearerToken());
+        $user = $request->user();
+        $user->tokens()->delete();
+
+        LoginHistory::where('user_id', $user->id)
+            ->where('token', $request->bearerToken())
+            ->update(['logout_time' => now()]);
+
+        return response()->json([
+            'status' => 1,
+            'msg' => 'Logout successful',
+        ]);
+
+    }
+}   
