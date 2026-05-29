@@ -27,7 +27,7 @@
 
 
 
-                            <ul class="account-login" style="display: none;">
+                            {{-- <ul class="account-login" style="display: none;">
 
                                 @if(Auth::user()->super_admin==1)
                                     <li><a href="{{url('admin/users')}}">Create User</a></li>
@@ -37,6 +37,8 @@
                                 @if(Auth::user()->is_admin==1)
                                     <li><a href="{{url('admin/inventry-upload')}}">Upload Inventory</a></li>
                                     <li><a href="{{url('admin/inventry-details')}}">Inventory Details</a></li>
+                                    <li><a href="{{url('admin/gallery')}}">Manage Gallery</a></li>
+                                    <li><a href="{{url('admin/login-history')}}">Login history</a></li>
                                     
                                     @if(Auth::user()->user_access==2)
                                         <li><a href="{{url('user/inventry-check')}}">Explore Inventory</a></li>
@@ -50,8 +52,7 @@
                                     @if(Auth::user()->user_access==2)
                                         <li><a href="{{url('admin/inventry-upload')}}">Upload Inventory</a></li>
                                         <li><a href="{{url('admin/inventry-details')}}">Inventory Details</a></li>
-                                        <li><a href="{{url('admin/gallery')}}">Gallery</a></li>
-                                        <li><a href="{{url('admin/login-history')}}">Login history</a></li>
+                                        
                                         @if(!request()->is('user/*'))
                                             <li><a href="{{url('user/inventry-check')}}">Explore Inventory</a></li>
                                         @endif
@@ -60,7 +61,71 @@
                                     <li><a href="javascript:void(0)" onclick="inventorySend()">Download Catalog</a></li>
                                     <li><a href="{{url('user/user_logout')}}">Logout</a></li>
                                 @endif
+                            </ul> --}}
+
+                            @php
+                                $user = Auth::user();
+
+                                $isSuperAdmin = $user->super_admin == 1;
+                                $isAdmin = $user->is_admin == 1;
+                                $isUserAdmin = $user->user_access == 2;
+                            @endphp
+
+                            <ul class="account-login" style="display: none;">
+
+                                {{-- SUPER ADMIN --}}
+                                @if($isSuperAdmin)
+                                    <li><a href="{{ url('admin/users') }}">Create User</a></li>
+                                    <li><a href="{{ url('admin/cvr-details') }}">CVR Details</a></li>
+                                @endif
+
+
+                                {{-- SUPER ADMIN + USER ADMIN --}}
+                                @if($isSuperAdmin || $isUserAdmin)
+
+                                    <li><a href="{{ url('admin/inventry-upload') }}">Upload Inventory</a></li>
+
+                                    <li><a href="{{ url('admin/inventry-details') }}">Inventory Details</a></li>
+
+                                @endif
+
+
+                                {{-- ALL USERS --}}
+                                @if($isSuperAdmin || $isUserAdmin || $user->user_access == 1)
+
+                                    @if(!request()->is('user/*'))
+                                        <li>
+                                            <a href="{{ url('user/inventry-check') }}">
+                                                Explore Inventory
+                                            </a>
+                                        </li>
+                                    @endif
+
+                                    <li>
+                                        <a href="javascript:void(0)" onclick="inventorySend()">
+                                            Download Catalog
+                                        </a>
+                                    </li>
+
+                                @endif
+
+
+                                {{-- ONLY SUPER ADMIN --}}
+                                @if($isSuperAdmin)
+                                    <li><a href="{{ url('admin/gallery') }}">Manage Gallery</a></li>
+                                    <li><a href="{{ url('admin/login-history') }}">Login history</a></li>
+                                @endif
+
+
+                                {{-- LOGOUT --}}
+                                @if($isSuperAdmin || $isAdmin)
+                                    <li><a href="{{ url('admin/user_logout') }}">Logout</a></li>
+                                @else
+                                    <li><a href="{{ url('user/user_logout') }}">Logout</a></li>
+                                @endif
+
                             </ul>
+
                         </div>
                     @endif
                     <div class="account-rgt-logo">
