@@ -203,11 +203,30 @@ class MyaccountController extends Controller
 
     public function login_history(Request $request){
         if ($request->ajax()) {
-            $loginHistory = DB::table('login_histories')
-                ->join('users', 'login_histories.user_id', '=', 'users.id')
-                ->select('login_histories.*', 'users.name as user_name')
-                ->orderBy('login_histories.created_at', 'desc')
-                ->get();
+            // $loginHistory = DB::table('login_histories')
+            //     ->join('users', 'login_histories.user_id', '=', 'users.id')
+            //     ->select('login_histories.*', 'users.name as user_name')
+            //     ->orderBy('login_histories.created_at', 'desc')
+            //     ->get();
+
+            $loginHistory = DB::table('login_histories as lh')
+                ->join('users', 'lh.user_id', '=', 'users.id')
+                ->select(
+                    'lh.id',
+                    'lh.user_id',
+                    'users.name as user_name',
+                    'lh.type',
+                    'lh.ip_address',
+                    'lh.login_time',
+                    'lh.logout_time'
+                )
+                ->whereIn('lh.id', function ($query) {
+                    $query->select(DB::raw('MAX(id)'))
+                        ->from('login_histories')
+                        ->groupBy('user_id');
+                })
+                ->orderByDesc('lh.id');
+
             return DataTables::of($loginHistory)
                 ->addColumn('user_name', function ($row) {
                     return $row->user_name;
@@ -224,11 +243,32 @@ class MyaccountController extends Controller
                 ->addColumn('logout_time', function ($row) {
                     return $row->logout_time;
                 })
+                ->addColumn('action', function ($row) {
+
+                    return '
+                    <button class="btn btn-primary btn-sm view-history"
+                            data-user="'.$row->user_id.'">
+                        View More
+                    </button>';
+                })
                 
-                ->rawColumns([''])
+                ->rawColumns(['action'])
                 ->make(true);
         }
 
         return view('admin.login_history.index');
+    }
+
+    public function user_login_history($id)
+    {
+        $history = DB::table('login_histories')
+            ->where('user_id', $id)
+            ->orderByDesc('id')
+            ->get();
+
+        return response()->json([
+            'status' => 1,
+            'data' => $history
+        ]);
     }
 }
