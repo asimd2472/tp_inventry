@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Inventory;
 use Maatwebsite\Excel\Excel;
 use App\Imports\InventoryImport;
+use App\Models\LoginHistory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
@@ -54,6 +55,16 @@ class UserInventryController extends Controller
                 ->distinct()
                 ->orderBy('special_feature')
                 ->pluck('special_feature');
+        
+        
+        $user = Auth::user();
+        $token = $user->createToken('auth_token')->plainTextToken;
+        LoginHistory::create([
+            'user_id' => $user->id,
+            'login_time' => now(),
+            'token' => $token,
+            'ip_address' => $request->ip(),
+        ]);
 
         return response()->json([
             'types'    => $types,

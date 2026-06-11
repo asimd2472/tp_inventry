@@ -405,7 +405,7 @@ $(function() {
 
     $('#type').change(function () {
 
-        resetBelow('type');
+        // resetBelow('type');
 
         $('.loader-wrap').show();
 
@@ -430,13 +430,13 @@ $(function() {
             type: $(this).val()
         }, function (data) {
 
-            $('#model').append('<option value="">Select Model</option>');
+            // $('#model').append('<option value="">Select Model</option>');
 
-            $.each(data, function (key, value) {
-                if(value != ''){
-                    $('#model').append('<option value="' + value + '">' + value + '</option>');
-                }
-            });
+            // $.each(data, function (key, value) {
+            //     if(value != ''){
+            //         $('#model').append('<option value="' + value + '">' + value + '</option>');
+            //     }
+            // });
 
             inventoryItemCount();
 
@@ -471,7 +471,7 @@ $(function() {
 
     $('#model').change(function () {
 
-        resetBelow('model');
+        // resetBelow('model');
 
         $('.loader-wrap').show();
 
@@ -482,18 +482,18 @@ $(function() {
         }, function (response) {
 
             // Clear design dropdown
-            $('#design').empty().append('<option value="">Select Design</option>');
+            // $('#design').empty().append('<option value="">Select Design</option>');
 
             console.log(response)
 
             // Add design
-            $.each(response.designs, function (key, value) {
-                if (value !== '') {
-                    $('#design').append(
-                        '<option value="' + value + '">' + value + '</option>'
-                    );
-                }
-            });
+            // $.each(response.designs, function (key, value) {
+            //     if (value !== '') {
+            //         $('#design').append(
+            //             '<option value="' + value + '">' + value + '</option>'
+            //         );
+            //     }
+            // });
 
             // Show description
             if (response.description) {
@@ -514,7 +514,7 @@ $(function() {
 
     $('#design').change(function () {
 
-        resetBelow('design');
+        // resetBelow('design');
 
         $('.loader-wrap').show();
 
@@ -525,13 +525,13 @@ $(function() {
             design: $(this).val()
         }, function (data) {
 
-            $('#dimention').append('<option value="">Select Size</option>');
+            // $('#dimention').append('<option value="">Select Size</option>');
 
-            $.each(data, function (key, value) {
-                if(value != ''){
-                    $('#dimention').append('<option value="' + value + '">' + value + '</option>');
-                }
-            });
+            // $.each(data, function (key, value) {
+            //     if(value != ''){
+            //         $('#dimention').append('<option value="' + value + '">' + value + '</option>');
+            //     }
+            // });
 
             inventoryItemCount();
 
@@ -542,7 +542,7 @@ $(function() {
 
     $('#dimention').change(function () {
 
-        resetBelow('dimention');
+        // resetBelow('dimention');
 
         $('.loader-wrap').show();
 
@@ -554,13 +554,13 @@ $(function() {
             dimention: $(this).val()
         }, function (data) {
 
-            $('#colour').append('<option value="">Select Colour</option>');
+            // $('#colour').append('<option value="">Select Colour</option>');
 
-            $.each(data, function (key, value) {
-                if(value != ''){
-                    $('#colour').append('<option value="' + value + '">' + value + '</option>');
-                }
-            });
+            // $.each(data, function (key, value) {
+            //     if(value != ''){
+            //         $('#colour').append('<option value="' + value + '">' + value + '</option>');
+            //     }
+            // });
 
             inventoryItemCount();
 
@@ -572,7 +572,7 @@ $(function() {
 
     $('#colour').change(function () {
 
-        resetBelow('colour');
+        // resetBelow('colour');
 
         $('.loader-wrap').show();
 
@@ -585,15 +585,15 @@ $(function() {
             colour: $(this).val()
         }, function (data) {
 
-            $('#orientation').empty().append('<option value="">Select Orientation</option>');
+            // $('#orientation').empty().append('<option value="">Select Orientation</option>');
 
-            $.each(data, function (key, value) {
-                $('#orientation').append(
-                    '<option value="' + value + '">' +
-                    value +
-                    '</option>'
-                );
-            });
+            // $.each(data, function (key, value) {
+            //     $('#orientation').append(
+            //         '<option value="' + value + '">' +
+            //         value +
+            //         '</option>'
+            //     );
+            // });
 
             inventoryItemCount();
 
@@ -604,7 +604,7 @@ $(function() {
 
     $('#orientation').change(function () {
 
-        resetBelow('orientation');
+        // resetBelow('orientation');
 
         $('.loader-wrap').show();
 
@@ -618,15 +618,15 @@ $(function() {
             orientation: $(this).val()
         }, function (data) {
 
-            $('#special_feature').empty().append('<option value="">Select Special Feature</option>');
+            // $('#special_feature').empty().append('<option value="">Select Special Feature</option>');
 
-            $.each(data, function (key, value) {
-                $('#special_feature').append(
-                    '<option value="' + value + '">' +
-                    value +
-                    '</option>'
-                );
-            });
+            // $.each(data, function (key, value) {
+            //     $('#special_feature').append(
+            //         '<option value="' + value + '">' +
+            //         value +
+            //         '</option>'
+            //     );
+            // });
 
             inventoryItemCount();
             
@@ -636,6 +636,15 @@ $(function() {
     });
 
 
+
+    $('#special_feature').change(function () {
+
+        // resetBelow('orientation');
+
+        $('.loader-wrap').show();
+        inventoryItemCount();
+        $('.loader-wrap').hide();
+    });
 
 
 
