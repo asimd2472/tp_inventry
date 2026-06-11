@@ -21,6 +21,7 @@
                                                 <th scope="col">IP</th>
                                                 <th scope="col">Login</th>
                                                 <th scope="col">Logout</th>
+                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -36,6 +37,40 @@
             </div>
         </div>
     </section>
+
+
+    <div class="modal fade" id="historyModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5>User Login History</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>IP</th>
+                            <th>Login Time</th>
+                            <th>Logout Time</th>
+                        </tr>
+                        </thead>
+
+                        <tbody id="historyBody">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -63,8 +98,42 @@
                 { data: 'ip_address' },
                 { data: 'login_time' },
                 { data: 'logout_time' },
-                
+                {data:'action', orderable:false, searchable:false},
             ]
+        });
+
+    });
+
+    $(document).on('click','.view-history',function(){
+
+        let userId = $(this).data('user');
+
+        $.ajax({
+            url: '/admin/login-history-user/' + userId,
+            type:'GET',
+
+            success:function(response){
+
+                let html = '';
+
+                $.each(response.data,function(index,row){
+
+                    html += `
+                        <tr>
+                            <td>${row.type}</td>
+                            <td>${row.ip_address}</td>
+                            <td>${row.login_time}</td>
+                            <td>${row.logout_time ?? ''}</td>
+                        </tr>
+                    `;
+                });
+
+                $('#historyBody').html(html);
+
+                // $('#historyModal').modal('show');
+                const modal = new Modal(document.getElementById('historyModal'));
+                modal.show();
+            }
         });
 
     });
