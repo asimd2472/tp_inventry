@@ -120,7 +120,7 @@ class OrderTrackingController extends Controller
             $record['Expected_Std_Dispatch_Date__c'] = $record['Expected_Std_Dispatch_Date__c'];
 
 
-            $currentStatus = '';
+            $currentStatus = 'N/A';
 
             if (!empty($record['Expected_Std_Dispatch_Date__c'])) {
                 $currentStatus = 'Dispatched (Expected)';
