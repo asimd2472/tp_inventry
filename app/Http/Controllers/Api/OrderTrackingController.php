@@ -99,7 +99,7 @@ class OrderTrackingController extends Controller
 
             if(!empty($record['Order_Domain__c']) && $record['Order_Domain__c']=='B2B'){
                 $record['Booking_Date__c'] = $record['BM_Booking_Date__c'];
-                $record['Place_PO_Date__c'] = $record['B2B_SO_Creation_Date__c'];
+                $record['Place_PO_Date__c'] = $record['BM_Booking_Date__c'];
 
             }else{
                 $record['Booking_Date__c'] = $record['Booking_Date__c'];
