@@ -99,16 +99,18 @@ class OrderTrackingController extends Controller
 
             if(!empty($record['Order_Domain__c']) && $record['Order_Domain__c']=='B2B'){
                 $record['Booking_Date__c'] = $record['BM_Booking_Date__c'];
-                $record['Place_PO_Date__c'] = $record['BM_Booking_Date__c'];
+                $record['Place_PO_Date__c'] = $record['B2B_SO_Creation_Date__c'];
+                $record['Max_Accepted_by_plant_Date__c'] = $record['B2B_SO_Creation_Date__c'];
 
             }else{
                 $record['Booking_Date__c'] = $record['Booking_Date__c'];
                 $record['Place_PO_Date__c'] = $record['Place_PO_Date__c'];
+                $record['Max_Accepted_by_plant_Date__c'] = $record['Max_Accepted_by_plant_Date__c'];
             }
 
             
             $record['OrderNumber__c'] = $record['OrderNumber__c'];
-            $record['Max_Accepted_by_plant_Date__c'] = $record['Max_Accepted_by_plant_Date__c'];
+            
             $record['Max_Dispatch_Date__c'] = $record['Max_Dispatch_Date__c'];
             $record['Expected_Delivery_Date__c'] = $record['Expected_Delivery_Date__c'];
             $record['Revised_CPDD_Date__c'] = $record['Revised_CPDD_Date__c'];
