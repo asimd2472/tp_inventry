@@ -274,19 +274,41 @@ class CvrController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
+                // $complaints = [];
+                // if (!empty($row[8])) {
+
+                //     $items = preg_split('/\r\n|\r|\n/', $row[8]);
+
+                //     foreach ($items as $item) {
+
+                //         $item = trim($item);
+
+                //         if ($item != '') {
+                //             $complaints[] = $item;
+                //         }
+                //     }
+                // }
+
                 $complaints = [];
 
                 if (!empty($row[8])) {
 
                     $items = preg_split('/\r\n|\r|\n/', $row[8]);
 
-                    foreach ($items as $item) {
+                    foreach ($items as $index => $item) {
 
                         $item = trim($item);
 
-                        if ($item != '') {
-                            $complaints[] = $item;
+                        if ($item == '') {
+                            continue;
                         }
+
+                        $complaints[] = [
+                            "id" => "comp_{$meetingId}_{$index}",
+                            "category" => "Voucher Issues", // Default category
+                            "description" => $item,
+                            "severity" => "Critical" // Default severity
+                        ];
                     }
                 }
 
