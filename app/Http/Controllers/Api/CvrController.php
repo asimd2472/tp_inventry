@@ -9,6 +9,8 @@ use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class CvrController extends Controller
 {
@@ -168,7 +170,7 @@ class CvrController extends Controller
 
         DB::beginTransaction();
 
-        // try {
+        try {
 
             foreach ($rows as $row) {
 
@@ -243,72 +245,132 @@ class CvrController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                $actionPoints = [];
+                // $actionPoints = [];
 
-                if (!empty($row[7])) {
+                // if (!empty($row[7])) {
 
-                    $tasks = preg_split('/\r\n|\r|\n/', $row[7]);
+                //     $tasks = preg_split('/\r\n|\r|\n/', $row[7]);
 
-                    foreach ($tasks as $index => $task) {
+                //     foreach ($tasks as $index => $task) {
 
-                        $task = trim($task);
+                //         $task = trim($task);
 
-                        if ($task == '') {
-                            continue;
-                        }
+                //         if ($task == '') {
+                //             continue;
+                //         }
 
-                        $actionPoints[] = [
-                            "id" => "ap_{$meetingId}_{$index}",
-                            "task" => $task,
-                            "owner" => "Assigned Manually",
-                            "deadline" => $date,
-                            "priority" => "Medium",
-                            "status" => "Pending"
-                        ];
-                    }
-                }
-
-                /*
-                |--------------------------------------------------------------------------
-                | Complaints
-                |--------------------------------------------------------------------------
-                */
+                //         $actionPoints[] = [
+                //             "id" => "ap_{$meetingId}_{$index}",
+                //             "task" => $task,
+                //             "owner" => "Assigned Manually",
+                //             "deadline" => $date,
+                //             "priority" => "Medium",
+                //             "status" => "Pending"
+                //         ];
+                //     }
+                // }
 
                 // $complaints = [];
+
                 // if (!empty($row[8])) {
 
                 //     $items = preg_split('/\r\n|\r|\n/', $row[8]);
 
-                //     foreach ($items as $item) {
+                //     foreach ($items as $index => $item) {
 
                 //         $item = trim($item);
 
-                //         if ($item != '') {
-                //             $complaints[] = $item;
+                //         if ($item == '') {
+                //             continue;
                 //         }
+
+                //         $complaints[] = [
+                //             "id" => "comp_{$meetingId}_{$index}",
+                //             "category" => "Voucher Issues", // Default category
+                //             "description" => $item,
+                //             "severity" => "Critical" // Default severity
+                //         ];
                 //     }
                 // }
 
-                $complaints = [];
+                /*
+                |--------------------------------------------------------------------------
+                | Action Points & Complaints (Gemini-assisted)
+                |--------------------------------------------------------------------------
+                */
 
-                if (!empty($row[8])) {
+                $actionPoints = [];
+                $complaints   = [];
+                $geminiResult = null;
 
-                    $items = preg_split('/\r\n|\r|\n/', $row[8]);
+                $hasActionPoints = !empty(trim((string) ($row[7] ?? '')));
+                $hasComplaints   = !empty(trim((string) ($row[8] ?? '')));
 
-                    foreach ($items as $index => $item) {
+                if ($hasActionPoints || $hasComplaints) {
 
-                        $item = trim($item);
+                    $conversationText = "Executive Summary:\n" . ($row[6] ?? '') . "\n\n"
+                        . ($hasActionPoints ? "Action Points (raw):\n" . $row[7] . "\n\n" : '')
+                        . ($hasComplaints ? "Key Issues & Complaints (raw):\n" . $row[8] : '');
 
-                        if ($item == '') {
-                            continue;
-                        }
+                    $geminiResult = $this->analyzeWithGemini($conversationText);
 
-                        $complaints[] = [
-                            "id" => "comp_{$meetingId}_{$index}",
-                            "category" => "Voucher Issues", // Default category
-                            "description" => $item,
-                            "severity" => "Critical" // Default severity
+                    // dd($geminiResult);
+                }
+
+                if ($geminiResult) {
+
+                    foreach (($geminiResult['actionPoints'] ?? []) as $index => $ap) {
+                        $actionPoints[] = [
+                            "id"       => "ap_{$meetingId}_{$index}",
+                            "task"     => $ap['task'] ?? '',
+                            "owner"    => $ap['owner'] ?? 'Assigned Manually',
+                            "deadline" => $ap['deadline'] ?? $date,
+                            "priority" => $ap['priority'] ?? 'Medium',
+                            "status"   => "Pending"
                         ];
+                    }
+
+                    foreach (($geminiResult['complaints'] ?? []) as $index => $comp) {
+                        $complaints[] = [
+                            "id"          => "comp_{$meetingId}_{$index}",
+                            "category"    => $comp['category'] ?? 'Voucher Issues',
+                            "description" => $comp['description'] ?? '',
+                            "severity"    => $comp['severity'] ?? 'Critical'
+                        ];
+                    }
+
+                } else {
+
+                    // ---- Fallback: your original manual line-split parsing ----
+
+                    if ($hasActionPoints) {
+                        $tasks = preg_split('/\r\n|\r|\n/', $row[7]);
+                        foreach ($tasks as $index => $task) {
+                            $task = trim($task);
+                            if ($task === '') continue;
+                            $actionPoints[] = [
+                                "id" => "ap_{$meetingId}_{$index}",
+                                "task" => $task,
+                                "owner" => "Assigned Manually",
+                                "deadline" => $date,
+                                "priority" => "Medium",
+                                "status" => "Pending"
+                            ];
+                        }
+                    }
+
+                    if ($hasComplaints) {
+                        $items = preg_split('/\r\n|\r|\n/', $row[8]);
+                        foreach ($items as $index => $item) {
+                            $item = trim($item);
+                            if ($item === '') continue;
+                            $complaints[] = [
+                                "id" => "comp_{$meetingId}_{$index}",
+                                "category" => "Voucher Issues",
+                                "description" => $item,
+                                "severity" => "Critical"
+                            ];
+                        }
                     }
                 }
 
@@ -331,7 +393,7 @@ class CvrController extends Controller
                         "name" => $row[1],                  // Host
                         "distributorName" => $row[2],       // Distributor
                         "locationName" => $row[5],          // Location
-                        "customerName" => null,
+                        "customerName" => $row[3],
                         "customerPhone" => $row[4],         // Contact No of Host
                     ],
 
@@ -376,15 +438,101 @@ class CvrController extends Controller
                 'data' => $response
             ]);
 
-        // } catch (\Exception $e) {
+        } catch (\Exception $e) {
 
-        //     DB::rollBack();
+            DB::rollBack();
 
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => $e->getMessage()
-        //     ],500);
-        // }
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ],500);
+        }
     }
+
+
+
+
+    /**
+     * Call Gemini to structure action points & complaints from raw text.
+     */
+    private function analyzeWithGemini(string $text, int $retries = 2): ?array
+    {   
+
+        $prompt = <<<PROMPT
+    You are a sales visit assistant.
+
+    Return STRICT JSON only. No explanation.
+
+    {
+    "summary": "string",
+    "actionPoints": [
+        {
+        "task": "string",
+        "owner": "string",
+        "deadline": "string",
+        "priority": "High | Medium | Low"
+        }
+    ],
+    "complaints": [
+        {
+        "category": "string",
+        "description": "string",
+        "severity": "Critical | Major | Minor"
+        }
+    ]
+    }
+
+    IMPORTANT:
+    - Always return objects (NOT strings)
+    - Fill all fields
+
+    Conversation:
+    {$text}
+    PROMPT;
+
+    // dd($prompt);
+
+    try {
+        $response = Http::withHeaders([
+            'Content-Type'  => 'application/json',
+            'X-goog-api-key' => env('GEMINI_API_KEY'),
+        ])->post(
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent',
+            [
+                'contents' => [
+                    ['parts' => [['text' => $prompt]]]
+                ],
+            ]
+        );
+
+        $data = $response->json();
+        // dd($data);
+
+        // Retry on 503 (model overloaded)
+        if (($data['error']['code'] ?? null) == 503 && $retries > 0) {
+            sleep(2);
+            return $this->analyzeWithGemini($text, $retries - 1);
+        }
+
+        if (!empty($data['error'])) {
+            Log::warning('Gemini error: '.json_encode($data['error']));
+            return null;
+        }
+
+        $resultText = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+
+        // dd($resultText);
+
+        $resultText = trim(preg_replace('/```json|```/', '', $resultText));
+
+        $parsed = json_decode($resultText, true);
+
+        return json_last_error() === JSON_ERROR_NONE ? $parsed : null;
+
+    } catch (\Exception $e) {
+        Log::warning('Gemini call failed: '.$e->getMessage());
+        return null;
+    }
+}
 
 }
