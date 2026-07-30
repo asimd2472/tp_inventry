@@ -40,4 +40,8 @@ class CvrController extends Controller
     {
         return Excel::download(new CvrExport($request), 'cvr_details.xlsx');
     }
+
+    public function cvr(){
+        return view('admin.cvr.index');
+    }
 }
