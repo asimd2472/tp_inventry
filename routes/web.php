@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\InventryController;
 use App\Http\Controllers\CvrController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\MyaccountController;
+use App\Http\Controllers\UserCVRController;
 use App\Http\Controllers\UserInventryController;
 
 // Route::get('/', function () {
@@ -84,6 +85,9 @@ Route::prefix('user')->name('user.')->group(function () {
         Route::post('/inventory-send', [UserInventryController::class, 'inventorySend']);
 
         Route::post('/inventory-item-check', [UserInventryController::class, 'inventoryItemCheck']);
+        Route::get('/cvr', [UserCVRController::class, 'cvr']);
+        Route::post('/upload-cvr', [UserCVRController::class, 'uploadCvr']);
+        Route::get('/cvr/repository', [UserCVRController::class, 'repository'])->name('repository');
     });
 });
 
