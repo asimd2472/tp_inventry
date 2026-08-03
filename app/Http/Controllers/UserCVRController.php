@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\CvrActionPoints;
+use App\Models\CvrComplaints;
 use App\Models\CvrDetails;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
@@ -97,6 +99,8 @@ class UserCVRController extends Controller
 
                 $actionPoints = [];
                 $complaints   = [];
+                $actionPointRecords = [];
+                $complaintRecords = [];
                 $geminiResult = null;
 
                 $hasActionPoints = !empty(trim((string) ($row[7] ?? '')));
@@ -116,7 +120,7 @@ class UserCVRController extends Controller
                 if ($geminiResult) {
 
                     foreach (($geminiResult['actionPoints'] ?? []) as $index => $ap) {
-                        $actionPoints[] = [
+                        $actionPoint = [
                             "id"       => "ap_{$meetingId}_{$index}",
                             "task"     => $ap['task'] ?? '',
                             "owner"    => $ap['owner'] ?? 'Assigned Manually',
@@ -124,14 +128,32 @@ class UserCVRController extends Controller
                             "priority" => $ap['priority'] ?? 'Medium',
                             "status"   => "Pending"
                         ];
+
+                        $actionPoints[] = $actionPoint;
+                        $actionPointRecords[] = [
+                            'action_id' => $actionPoint['id'],
+                            'task' => $actionPoint['task'],
+                            'owner' => $actionPoint['owner'],
+                            'deadline' => $actionPoint['deadline'],
+                            'priority' => $actionPoint['priority'],
+                            'status' => $actionPoint['status'],
+                        ];
                     }
 
                     foreach (($geminiResult['complaints'] ?? []) as $index => $comp) {
-                        $complaints[] = [
+                        $complaint = [
                             "id"          => "comp_{$meetingId}_{$index}",
                             "category"    => $comp['category'] ?? 'Voucher Issues',
                             "description" => $comp['description'] ?? '',
                             "severity"    => $comp['severity'] ?? 'Critical'
+                        ];
+
+                        $complaints[] = $complaint;
+                        $complaintRecords[] = [
+                            'complaint_id' => $complaint['id'],
+                            'category' => $complaint['category'],
+                            'description' => $complaint['description'],
+                            'severity' => $complaint['severity'],
                         ];
                     }
 
@@ -144,13 +166,22 @@ class UserCVRController extends Controller
                         foreach ($tasks as $index => $task) {
                             $task = trim($task);
                             if ($task === '') continue;
-                            $actionPoints[] = [
+                            $actionPoint = [
                                 "id" => "ap_{$meetingId}_{$index}",
                                 "task" => $task,
                                 "owner" => "Assigned Manually",
                                 "deadline" => $date,
                                 "priority" => "Medium",
                                 "status" => "Pending"
+                            ];
+                            $actionPoints[] = $actionPoint;
+                            $actionPointRecords[] = [
+                                'action_id' => $actionPoint['id'],
+                                'task' => $actionPoint['task'],
+                                'owner' => $actionPoint['owner'],
+                                'deadline' => $actionPoint['deadline'],
+                                'priority' => $actionPoint['priority'],
+                                'status' => $actionPoint['status'],
                             ];
                         }
                     }
@@ -160,11 +191,18 @@ class UserCVRController extends Controller
                         foreach ($items as $index => $item) {
                             $item = trim($item);
                             if ($item === '') continue;
-                            $complaints[] = [
+                            $complaint = [
                                 "id" => "comp_{$meetingId}_{$index}",
                                 "category" => "Voucher Issues",
                                 "description" => $item,
                                 "severity" => "Critical"
+                            ];
+                            $complaints[] = $complaint;
+                            $complaintRecords[] = [
+                                'complaint_id' => $complaint['id'],
+                                'category' => $complaint['category'],
+                                'description' => $complaint['description'],
+                                'severity' => $complaint['severity'],
                             ];
                         }
                     }
@@ -224,6 +262,22 @@ class UserCVRController extends Controller
                     'cvr_data' => $cvrData
                 ]);
 
+                if (!empty($actionPointRecords)) {
+                    $actionPointRecords = array_map(function ($record) use ($cvr) {
+                        return array_merge($record, ['cvr_id' => $cvr->id]);
+                    }, $actionPointRecords);
+
+                    CvrActionPoints::insert($actionPointRecords);
+                }
+
+                if (!empty($complaintRecords)) {
+                    $complaintRecords = array_map(function ($record) use ($cvr) {
+                        return array_merge($record, ['cvr_id' => $cvr->id]);
+                    }, $complaintRecords);
+
+                    CvrComplaints::insert($complaintRecords);
+                }
+
                 $response[] = [
                     'db_id' => $cvr->id,
                     'data' => $cvrData
@@ -251,46 +305,85 @@ class UserCVRController extends Controller
 
     }
 
-    public function repository()
+    public function repository(Request $request)
+    {
+        $payload = $this->buildRepositoryPayload($request);
+
+        return view('user.cvr.repository', $payload);
+    }
+
+    public function repositoryData(Request $request)
+    {
+        return response()->json($this->buildRepositoryPayload($request));
+    }
+
+    private function buildRepositoryPayload(Request $request): array
     {
         $userId = Auth::id();
+        $search = trim((string) $request->get('search', ''));
+        $page = max(1, (int) $request->get('page', 1));
+        $perPage = 20;
 
-        $cvrs = CvrDetails::where('user_id', $userId)
+        $query = CvrDetails::with(['actionPoints', 'complaints'])
+            ->where('user_id', $userId)
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($subQuery) use ($search) {
+                    $subQuery->where('host', 'like', "%{$search}%")
+                        ->orWhere('distributor', 'like', "%{$search}%")
+                        ->orWhere('location', 'like', "%{$search}%")
+                        ->orWhere('visitor', 'like', "%{$search}%")
+                        ->orWhere('visitor_name', 'like', "%{$search}%")
+                        ->orWhere('contact_no', 'like', "%{$search}%")
+                        ->orWhere('cvr_id', 'like', "%{$search}%")
+                        ->orWhere('id', 'like', "%{$search}%");
+                });
+            })
             ->orderByDesc('visitor_date')
-            ->orderByDesc('id')
-            ->get();
+            ->orderByDesc('id');
 
-        $totalVisits = $cvrs->count();
+        $allResults = (clone $query)->get();
+        $cvrs = (clone $query)->paginate($perPage, ['*'], 'page', $page);
+
+        $totalVisits = $allResults->count();
         $openActions = 0;
         $criticalIssues = 0;
         $items = [];
 
+        foreach ($allResults as $cvr) {
+            foreach ($cvr->actionPoints as $ap) {
+                $status = strtolower(trim($ap->status ?? 'pending'));
+
+                if (!in_array($status, ['completed', 'done', 'closed'])) {
+                    $openActions++;
+                }
+            }
+
+            foreach ($cvr->complaints as $comp) {
+                if (strtolower(trim($comp->severity ?? '')) === 'critical') {
+                    $criticalIssues++;
+                }
+            }
+        }
+
         foreach ($cvrs as $cvr) {
             $data = $cvr->cvr_data ?? [];
-            $actionPoints = $data['actionPoints'] ?? [];
-            $complaints = $data['complaints'] ?? [];
+            $actionPoints = $cvr->actionPoints;
+            $complaints = $cvr->complaints;
 
             $pending = 0;
             $completed = 0;
 
             foreach ($actionPoints as $ap) {
-                $status = strtolower(trim($ap['status'] ?? 'pending'));
+                $status = strtolower(trim($ap->status ?? 'pending'));
 
                 if (in_array($status, ['completed', 'done', 'closed'])) {
                     $completed++;
                 } else {
                     $pending++;
-                    $openActions++;
                 }
             }
 
-            $issuesCount = count($complaints);
-
-            foreach ($complaints as $comp) {
-                if (strtolower(trim($comp['severity'] ?? '')) === 'critical') {
-                    $criticalIssues++;
-                }
-            }
+            $issuesCount = $complaints->count();
 
             if ($cvr->visitor_date) {
                 $date = Carbon::parse($cvr->visitor_date)->format('d/m/y');
@@ -316,13 +409,13 @@ class UserCVRController extends Controller
             ];
 
             foreach ($actionPoints as $ap) {
-                $searchParts[] = $ap['task'] ?? '';
-                $searchParts[] = $ap['owner'] ?? '';
+                $searchParts[] = $ap->task ?? '';
+                $searchParts[] = $ap->owner ?? '';
             }
 
             foreach ($complaints as $comp) {
-                $searchParts[] = $comp['description'] ?? '';
-                $searchParts[] = $comp['category'] ?? '';
+                $searchParts[] = $comp->description ?? '';
+                $searchParts[] = $comp->category ?? '';
             }
 
             $items[] = [
@@ -340,12 +433,24 @@ class UserCVRController extends Controller
             ];
         }
 
-        return view('user.cvr.repository', compact(
-            'items',
-            'totalVisits',
-            'openActions',
-            'criticalIssues'
-        ));
+        return [
+            'items' => $items,
+            'totalVisits' => $totalVisits,
+            'openActions' => $openActions,
+            'criticalIssues' => $criticalIssues,
+            'search' => $search,
+            'pagination' => [
+                'current_page' => $cvrs->currentPage(),
+                'last_page' => $cvrs->lastPage(),
+                'total' => $cvrs->total(),
+                'from' => $cvrs->firstItem(),
+                'to' => $cvrs->lastItem(),
+                'has_more_pages' => $cvrs->hasMorePages(),
+                'prev_page' => $cvrs->currentPage() > 1 ? $cvrs->currentPage() - 1 : null,
+                'next_page' => $cvrs->hasMorePages() ? $cvrs->currentPage() + 1 : null,
+            ],
+            'itemsHtml' => view('user.cvr.partials.repository-items', ['items' => $items])->render(),
+        ];
     }
 
     private function analyzeWithGemini(string $text, int $retries = 2): ?array
@@ -427,4 +532,96 @@ class UserCVRController extends Controller
         return null;
     }
 }
+
+    public function viewCvrDetails($id)
+    {
+        $userId = Auth::id();
+
+        $cvr = CvrDetails::with(['actionPoints', 'complaints'])
+            ->where('id', $id)
+            ->where('user_id', $userId)
+            ->firstOrFail();
+
+        $data = $cvr->cvr_data ?? [];
+        $actionPoints = $cvr->actionPoints;
+        $complaints = $cvr->complaints;
+
+        $dealerName = $cvr->host ?: ($data['dealer']['name'] ?? 'Unknown Dealer');
+        $distributor = $cvr->distributor ?: ($data['dealer']['distributorName'] ?? '');
+        $visitor = $cvr->visitor ?: ($data['visitorName'] ?? ($data['dealer']['customerName'] ?? ''));
+        $contact = $cvr->contact_no ?: ($data['dealer']['customerPhone'] ?? '');
+        $location = $cvr->location ?: ($data['dealer']['locationName'] ?? '');
+        $date = $cvr->visitor_date ? Carbon::parse($cvr->visitor_date)->format('d/m/Y') : 'N/A';
+        $time = $cvr->visitor_time ?? 'N/A';
+        $summary = $data['summary'] ?? '';
+        $sentiment = ucfirst(strtolower($data['sentiment'] ?? 'Neutral'));
+
+        return view('user.cvr.details', compact(
+            'cvr',
+            'dealerName',
+            'distributor',
+            'visitor',
+            'contact',
+            'location',
+            'date',
+            'time',
+            'summary',
+            'sentiment',
+            'actionPoints',
+            'complaints'
+        ));
+    }
+
+    public function addActionPoint(Request $request, $id)
+    {
+        $userId = Auth::id();
+
+        $cvr = CvrDetails::where('id', $id)->where('user_id', $userId)->firstOrFail();
+
+        $data = $request->validate([
+            'task' => 'required|string|max:2000',
+            'owner' => 'nullable|string|max:255',
+            'deadline' => 'nullable|date',
+            'priority' => 'nullable|string|max:50',
+        ]);
+
+        $ap = CvrActionPoints::create([
+            'cvr_id' => $cvr->id,
+            'action_id' => 'ap_'.uniqid(),
+            'task' => $data['task'],
+            'owner' => $data['owner'] ?? null,
+            'deadline' => $data['deadline'] ?? null,
+            'priority' => $data['priority'] ?? 'Medium',
+            'status' => 'Pending',
+        ]);
+
+        $html = view('user.cvr.partials.action-point-item', ['ap' => $ap])->render();
+
+        return response()->json(['success' => true, 'html' => $html]);
+    }
+
+    public function addComplaint(Request $request, $id)
+    {
+        $userId = Auth::id();
+
+        $cvr = CvrDetails::where('id', $id)->where('user_id', $userId)->firstOrFail();
+
+        $data = $request->validate([
+            'category' => 'nullable|string|max:255',
+            'description' => 'required|string|max:5000',
+            'severity' => 'nullable|string|max:50',
+        ]);
+
+        $comp = CvrComplaints::create([
+            'cvr_id' => $cvr->id,
+            'complaint_id' => 'comp_'.uniqid(),
+            'category' => $data['category'] ?? null,
+            'description' => $data['description'],
+            'severity' => $data['severity'] ?? 'Minor',
+        ]);
+
+        $html = view('user.cvr.partials.complaint-item', ['comp' => $comp])->render();
+
+        return response()->json(['success' => true, 'html' => $html]);
+    }
 }

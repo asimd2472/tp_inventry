@@ -88,6 +88,10 @@ Route::prefix('user')->name('user.')->group(function () {
         Route::get('/cvr', [UserCVRController::class, 'cvr']);
         Route::post('/upload-cvr', [UserCVRController::class, 'uploadCvr']);
         Route::get('/cvr/repository', [UserCVRController::class, 'repository'])->name('repository');
+        Route::get('/cvr/repository-data', [UserCVRController::class, 'repositoryData'])->name('repository.data');
+        Route::get('/cvr/view/{id}', [UserCVRController::class, 'viewCvrDetails'])->name('cvr.details');
+        Route::post('/cvr/{id}/action-points', [UserCVRController::class, 'addActionPoint'])->name('cvr.addActionPoint');
+        Route::post('/cvr/{id}/complaints', [UserCVRController::class, 'addComplaint'])->name('cvr.addComplaint');
     });
 });
 
