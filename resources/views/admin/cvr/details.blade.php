@@ -96,12 +96,12 @@
                                             <div class="section">
                                                 <div class="section-head">
                                                     <h3>Executive Summary</h3>
-                                                    <button class="edit-btn" title="Edit">
+                                                    <button class="edit-btn" id="editSummaryBtn" title="Edit">
                                                         <i class="fas fa-edit"></i>
                                                         Edit
                                                     </button>
                                                 </div>
-                                                <div class="section-body">
+                                                <div class="section-body" id="executiveSummaryText">
                                                     @if($summary)
                                                         <p>{{ $summary }}</p>
                                                     @else
@@ -177,11 +177,11 @@
                                 </div>
                         
                                 {{-- Action Button --}}
-                                <div class="details-footer">
+                                {{-- <div class="details-footer">
                                     <button class="btn-close-report">
                                         Close Report
                                     </button>
-                                </div>
+                                </div> --}}
                         
                             </div>
                         
@@ -213,17 +213,10 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById(tabId).classList.add('active');
         });
     });
-});
-</script>
-@endpush
 
-@push('scripts')
-<script>
-// Add Item modal logic and AJAX submissions
-document.addEventListener('DOMContentLoaded', function () {
     const csrf = document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || '';
-
-    // Action Point modal elements (create simple prompt-style modal)
+    const summaryBtn = document.getElementById('editSummaryBtn');
+    const summaryText = document.getElementById('executiveSummaryText');
     const openAddAp = document.getElementById('openAddAp');
     const openAddComp = document.getElementById('openAddComp');
 
@@ -237,6 +230,53 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function closeModal(modal) {
         if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
+    }
+
+    if (summaryBtn) {
+        summaryBtn.addEventListener('click', function () {
+            const currentSummary = (summaryText ? summaryText.innerText : '').trim();
+            const html = `
+                <div class="simple-modal-backdrop"></div>
+                <div class="simple-modal-inner">
+                    <h3>Update Executive Summary</h3>
+                    <textarea id="summaryEditor" rows="8" style="width:100%; resize: vertical;">${currentSummary.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+                    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:12px;">
+                        <button id="summaryCancel" class="btn btn-light">Cancel</button>
+                        <button id="summarySubmit" class="btn btn-primary">Save Summary</button>
+                    </div>
+                </div>
+            `;
+
+            const modal = createModal(html);
+            modal.querySelector('#summaryCancel').addEventListener('click', function () {
+                closeModal(modal);
+            });
+
+            modal.querySelector('#summarySubmit').addEventListener('click', function () {
+                const value = modal.querySelector('#summaryEditor').value.trim();
+                fetch('{{ route('admin.cvr.updateSummary', $cvr->id) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrf,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ summary: value })
+                }).then(r => r.json()).then(data => {
+                    if (data.success) {
+                        if (summaryText) {
+                            summaryText.innerHTML = data.summary ? '<p>' + data.summary.replace(/\n/g, '<br>') + '</p>' : '<p class="text-muted">No summary available.</p>';
+                        }
+                        closeModal(modal);
+                    } else {
+                        alert('Could not update summary');
+                    }
+                }).catch(err => {
+                    console.error(err);
+                    alert('Network error');
+                });
+            });
+        });
     }
 
     if (openAddAp) {
@@ -351,7 +391,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     severity: modal.querySelector('#comp_severity').value || 'Minor'
                 };
 
-                fetch('{{ route('user.cvr.addComplaint', $cvr->id) }}', {
+                fetch('{{ route('admin.cvr.addComplaint', $cvr->id) }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -383,6 +423,62 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
+
+    document.querySelectorAll('.ap-status-select').forEach(function (select) {
+        select.addEventListener('change', function () {
+            const url = this.dataset.url;
+            const status = this.value;
+            fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrf,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ status: status })
+            }).then(r => r.json()).then(data => {
+                if (!data.success) {
+                    alert('Could not update status');
+                }
+            }).catch(function () {
+                alert('Network error');
+            });
+        });
+    });
+
+    document.querySelectorAll('.delete-btn').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const url = this.dataset.deleteUrl;
+            if (!url) return;
+
+            if (!confirm('Are you sure you want to delete this item?')) {
+                return;
+            }
+
+            fetch(url, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': csrf,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    const item = this.closest('.action-point-item, .complaint-item');
+                    if (item) item.remove();
+                    const list = item && item.classList.contains('action-point-item') ? document.getElementById('actionPointsList') : document.getElementById('complaintsList');
+                    if (list && list.querySelectorAll('.action-point-item, .complaint-item').length === 0) {
+                        list.style.display = 'none';
+                        const noMessage = list.id === 'actionPointsList' ? document.getElementById('noApMessage') : document.getElementById('noCompMessage');
+                        if (noMessage) noMessage.style.display = 'block';
+                    }
+                } else {
+                    alert('Could not delete item');
+                }
+            }).catch(function () {
+                alert('Network error');
+            });
+        });
+    });
 });
 </script>
 @endpush

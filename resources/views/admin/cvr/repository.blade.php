@@ -40,6 +40,18 @@
                                     </div>
                                 </div>
                         
+                                @php
+                                    $canViewAll = Auth::user() && (int) Auth::user()->super_admin === 1;
+                                @endphp
+
+                                {{-- Tabs --}}
+                                @if($canViewAll)
+                                    <div class="repo-tabs" style="margin-bottom: 20px; display:flex; gap:10px; flex-wrap:wrap;">
+                                        <button type="button" class="repo-tab btn btn-sm {{ ($tab ?? 'my') === 'my' ? 'btn-primary' : 'btn-outline-secondary' }}" data-tab="my">My CVR</button>
+                                        <button type="button" class="repo-tab btn btn-sm {{ ($tab ?? 'my') === 'all' ? 'btn-primary' : 'btn-outline-secondary' }}" data-tab="all">All CVR</button>
+                                    </div>
+                                @endif
+
                                 {{-- Search --}}
                                 <div class="repo-search-wrap">
                                     <div class="repo-search">
@@ -100,8 +112,10 @@
     var $statTotal = $('#statTotalVisits');
     var $statOpen = $('#statOpenActions');
     var $statCritical = $('#statCriticalIssues');
+    var $tabs = $('.repo-tab');
     var debounceTimer = null;
     var baseUrl = '{{ route('admin.repository.data') }}';
+    var currentTab = '{{ $tab ?? 'my' }}';
 
     if (!$input.length) {
         return;
@@ -170,7 +184,8 @@
         var query = search === undefined ? $input.val().trim() : search;
         var params = new URLSearchParams({
             page: page || 1,
-            search: query
+            search: query,
+            tab: currentTab
         });
 
         fetch(baseUrl + '?' + params.toString(), {
@@ -202,6 +217,13 @@
         debounceTimer = setTimeout(function () {
             loadPage(1, $input.val().trim());
         }, 250);
+    });
+
+    $tabs.on('click', function () {
+        currentTab = $(this).data('tab');
+        $tabs.removeClass('btn-primary').addClass('btn-outline-secondary');
+        $(this).removeClass('btn-outline-secondary').addClass('btn-primary');
+        loadPage(1, $input.val().trim());
     });
 
     loadPage(1, '');

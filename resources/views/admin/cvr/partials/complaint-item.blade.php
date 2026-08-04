@@ -4,7 +4,7 @@
             <h4>{{ $comp->category ?? 'Issue' }}</h4>
         </div>
         <div class="comp-actions">
-            <button class="icon-btn delete-btn" title="Delete">
+            <button class="icon-btn delete-btn" data-delete-url="{{ route('admin.cvr.deleteComplaint', $comp->id) }}" title="Delete">
                 <i class="fas fa-trash"></i>
             </button>
         </div>

@@ -116,13 +116,14 @@
 }
 
 .tabs-header {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     border-bottom: 1px solid #e9ecef;
     background: #f8f9fa;
 }
 
 .tab-btn {
-    flex: 1;
+    width: 100%;
     padding: 1rem;
     border: none;
     background: transparent;
@@ -260,9 +261,10 @@
 .action-point-item,
 .complaint-item {
     border: 1px solid #e9ecef;
-    border-radius: 6px;
+    border-radius: 12px;
     padding: 1rem;
-    background: #fafbfc;
+    background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
 }
 
 .ap-header,
@@ -271,86 +273,159 @@
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 1rem;
+    gap: 0.75rem;
 }
 
 .ap-title h4,
 .comp-title h4 {
     margin: 0;
     font-size: 1rem;
-    color: #333;
-    font-weight: 600;
+    color: #1f2937;
+    font-weight: 700;
+    line-height: 1.5;
 }
 
 .ap-actions,
 .comp-actions {
     display: flex;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+}
+
+.ap-status-select-wrap {
+    position: relative;
+    min-width: 170px;
+}
+
+.ap-status-select {
+    width: 100%;
+    border: 1px solid #d7dce3;
+    border-radius: 10px;
+    background: #fff;
+    color: #1f2937;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.7rem 2.6rem 0.7rem 0.9rem;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ap-status-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.ap-status-select-wrap::after {
+    content: '\25BE';
+    position: absolute;
+    right: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #475569;
+    font-size: 0.9rem;
+    pointer-events: none;
 }
 
 .icon-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    border: none;
-    background: transparent;
-    color: #999;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: #f1f5f9;
+    color: #64748b;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
 
     &:hover {
-        background: #e9ecef;
-        color: #666;
+        background: #e2e8f0;
+        color: #334155;
     }
 
     &.delete-btn:hover {
-        background: #ffebee;
-        color: #d32f2f;
+        background: #fef2f2;
+        border-color: #fecaca;
+        color: #dc2626;
     }
 }
 
 .ap-meta,
 .comp-footer {
     display: flex;
-    gap: 1rem;
+    gap: 0.85rem 1rem;
     font-size: 0.9rem;
     flex-wrap: wrap;
 }
 
 .ap-meta-item {
-    color: #666;
+    color: #475569;
+    line-height: 1.5;
 
     strong {
-        color: #333;
+        color: #1f2937;
+    }
+}
+
+.status-badge,
+.priority-badge,
+.severity-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.32rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.status-badge {
+    &.pending {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    &.in-progress {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    &.completed {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    &.closed {
+        background: #e2e8f0;
+        color: #334155;
     }
 }
 
 .priority-badge,
 .severity-badge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-
     &.high,
     &.critical {
-        background: #ffebee;
-        color: #d32f2f;
+        background: #fee2e2;
+        color: #b91c1c;
     }
 
     &.medium,
     &.major {
-        background: #fff3e0;
-        color: #f57c00;
+        background: #ffedd5;
+        color: #c2410c;
     }
 
     &.low,
     &.minor {
-        background: #e8f5e9;
-        color: #388e3c;
+        background: #dcfce7;
+        color: #166534;
     }
 }
 
@@ -412,28 +487,97 @@
 }
 
 @media (max-width: 768px) {
+    .cvr-details-body {
+        padding: 1rem;
+    }
+
+    .cvr-details-header {
+        padding: 0.85rem 1rem;
+    }
+
+    .cvr-details-title h1 {
+        font-size: 1.2rem;
+    }
+
     .info-row {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
     }
 
     .tabs-header {
-        flex-direction: column;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .tab-btn {
-        border-bottom: none;
-        border-right: 3px solid transparent;
-        margin-right: -1px;
-        margin-bottom: 0;
+        padding: 0.8rem 0.5rem;
+        font-size: 0.85rem;
+        border-bottom: 3px solid transparent;
+        margin-bottom: -1px;
 
         &.active {
-            border-right-color: #0066cc;
-            border-bottom: none;
+            border-right-color: transparent;
+            border-bottom-color: #0066cc;
         }
     }
 
-    .ap-meta {
+    .section-head {
         flex-direction: column;
-        gap: 0.5rem;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .ap-header,
+    .comp-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ap-actions,
+    .comp-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .ap-status-select-wrap {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .ap-meta,
+    .comp-footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 0.75rem;
+    }
+
+    .simple-modal-inner {
+        margin: 1rem;
+        max-width: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .info-row,
+    .tabs-header {
+        grid-template-columns: 1fr;
+    }
+
+    .cvr-details-body {
+        padding: 0.75rem;
+    }
+
+    .info-card,
+    .section-tabs {
+        border-radius: 10px;
+    }
+
+    .action-point-item,
+    .complaint-item {
+        padding: 0.85rem;
+    }
+
+    .ap-actions,
+    .comp-actions {
+        justify-content: flex-end;
     }
 }

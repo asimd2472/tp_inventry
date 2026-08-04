@@ -320,13 +320,20 @@ class AdminCvrController extends Controller
 
     private function buildRepositoryPayload(Request $request): array
     {
+        $currentUser = Auth::user();
         $userId = Auth::id();
         $search = trim((string) $request->get('search', ''));
+        $tab = in_array($request->get('tab'), ['all', 'my'], true) ? $request->get('tab') : 'my';
         $page = max(1, (int) $request->get('page', 1));
         $perPage = 20;
+        $canViewAll = $currentUser && (int) $currentUser->is_admin === 1;
 
-        $query = CvrDetails::with(['actionPoints', 'complaints'])
-            ->where('user_id', $userId)
+        $query = CvrDetails::with(['actionPoints', 'complaints', 'user'])
+            ->when($canViewAll && $tab === 'all', function ($query) {
+                // admin can view all CVRs
+            }, function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($subQuery) use ($search) {
                     $subQuery->where('host', 'like', "%{$search}%")
@@ -336,7 +343,10 @@ class AdminCvrController extends Controller
                         ->orWhere('visitor_name', 'like', "%{$search}%")
                         ->orWhere('contact_no', 'like', "%{$search}%")
                         ->orWhere('cvr_id', 'like', "%{$search}%")
-                        ->orWhere('id', 'like', "%{$search}%");
+                        ->orWhere('id', 'like', "%{$search}%")
+                        ->orWhereHas('user', function ($userQuery) use ($search) {
+                            $userQuery->where('name', 'like', "%{$search}%");
+                        });
                 });
             })
             ->orderByDesc('visitor_date')
@@ -399,6 +409,7 @@ class AdminCvrController extends Controller
             $location = $cvr->location ?: ($data['dealer']['locationName'] ?? '');
             $summary = $data['summary'] ?? '';
             $sentiment = ucfirst(strtolower($data['sentiment'] ?? 'Neutral'));
+            $uploadedBy = $cvr->user->name ?? 'Unknown User';
 
             $searchParts = [
                 $dealerName,
@@ -407,6 +418,7 @@ class AdminCvrController extends Controller
                 $cvr->distributor ?? '',
                 $summary,
                 $sentiment,
+                $uploadedBy,
             ];
 
             foreach ($actionPoints as $ap) {
@@ -427,6 +439,7 @@ class AdminCvrController extends Controller
                 'contact' => $contact,
                 'summary' => $summary,
                 'sentiment' => $sentiment,
+                'uploaded_by' => $uploadedBy,
                 'pending' => $pending,
                 'completed' => $completed,
                 'issues' => $issuesCount,
@@ -440,6 +453,8 @@ class AdminCvrController extends Controller
             'openActions' => $openActions,
             'criticalIssues' => $criticalIssues,
             'search' => $search,
+            'tab' => $tab,
+            'canViewAll' => $canViewAll,
             'pagination' => [
                 'current_page' => $cvrs->currentPage(),
                 'last_page' => $cvrs->lastPage(),
@@ -534,14 +549,21 @@ class AdminCvrController extends Controller
     }
 }
 
+    private function getAuthorizedCvr(int $id): CvrDetails
+    {
+        $user = Auth::user();
+        $query = CvrDetails::with(['actionPoints', 'complaints', 'user'])->where('id', $id);
+
+        if (!( $user && (int) $user->is_admin === 1 )) {
+            $query->where('user_id', Auth::id());
+        }
+
+        return $query->firstOrFail();
+    }
+
     public function viewCvrDetails($id)
     {
-        $userId = Auth::id();
-
-        $cvr = CvrDetails::with(['actionPoints', 'complaints'])
-            ->where('id', $id)
-            ->where('user_id', $userId)
-            ->firstOrFail();
+        $cvr = $this->getAuthorizedCvr((int) $id);
 
         $data = $cvr->cvr_data ?? [];
         $actionPoints = $cvr->actionPoints;
@@ -556,6 +578,7 @@ class AdminCvrController extends Controller
         $time = $cvr->visitor_time ?? 'N/A';
         $summary = $data['summary'] ?? '';
         $sentiment = ucfirst(strtolower($data['sentiment'] ?? 'Neutral'));
+        $uploadedBy = $cvr->user->name ?? 'Unknown User';
 
         return view('admin.cvr.details', compact(
             'cvr',
@@ -568,16 +591,34 @@ class AdminCvrController extends Controller
             'time',
             'summary',
             'sentiment',
+            'uploadedBy',
             'actionPoints',
             'complaints'
         ));
     }
 
+    public function updateSummary(Request $request, $id)
+    {
+        $cvr = $this->getAuthorizedCvr((int) $id);
+
+        $data = $request->validate([
+            'summary' => 'nullable|string',
+        ]);
+
+        $cvrData = is_array($cvr->cvr_data) ? $cvr->cvr_data : [];
+        $cvrData['summary'] = $data['summary'] ?? '';
+        $cvr->cvr_data = $cvrData;
+        $cvr->save();
+
+        return response()->json([
+            'success' => true,
+            'summary' => $data['summary'] ?? '',
+        ]);
+    }
+
     public function addActionPoint(Request $request, $id)
     {
-        $userId = Auth::id();
-
-        $cvr = CvrDetails::where('id', $id)->where('user_id', $userId)->firstOrFail();
+        $cvr = $this->getAuthorizedCvr((int) $id);
 
         $data = $request->validate([
             'task' => 'required|string|max:2000',
@@ -594,18 +635,17 @@ class AdminCvrController extends Controller
             'deadline' => $data['deadline'] ?? null,
             'priority' => $data['priority'] ?? 'Medium',
             'status' => 'Pending',
+            'status_change_by' => null,
         ]);
 
-        $html = view('user.cvr.partials.action-point-item', ['ap' => $ap])->render();
+        $html = view('admin.cvr.partials.action-point-item', ['ap' => $ap])->render();
 
         return response()->json(['success' => true, 'html' => $html]);
     }
 
     public function addComplaint(Request $request, $id)
     {
-        $userId = Auth::id();
-
-        $cvr = CvrDetails::where('id', $id)->where('user_id', $userId)->firstOrFail();
+        $cvr = $this->getAuthorizedCvr((int) $id);
 
         $data = $request->validate([
             'category' => 'nullable|string|max:255',
@@ -621,8 +661,49 @@ class AdminCvrController extends Controller
             'severity' => $data['severity'] ?? 'Minor',
         ]);
 
-        $html = view('user.cvr.partials.complaint-item', ['comp' => $comp])->render();
+        $html = view('admin.cvr.partials.complaint-item', ['comp' => $comp])->render();
 
         return response()->json(['success' => true, 'html' => $html]);
+    }
+
+    public function deleteActionPoint($id)
+    {
+        $ap = CvrActionPoints::findOrFail($id);
+        $this->getAuthorizedCvr((int) $ap->cvr_id);
+
+        $ap->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function deleteComplaint($id)
+    {
+        $comp = CvrComplaints::findOrFail($id);
+        $this->getAuthorizedCvr((int) $comp->cvr_id);
+
+        $comp->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function updateActionPointStatus(Request $request, $id)
+    {
+        $ap = CvrActionPoints::findOrFail($id);
+        $this->getAuthorizedCvr((int) $ap->cvr_id);
+
+        $data = $request->validate([
+            'status' => 'required|string|in:Pending,In Progress,Completed,Closed',
+        ]);
+
+        $ap->status = $data['status'];
+        $ap->status_change_by = (string) Auth::id();
+        $ap->save();
+
+        return response()->json([
+            'success' => true,
+            'status' => $ap->status,
+            'status_change_by' => $ap->status_change_by,
+            'updated_at' => $ap->updated_at ? $ap->updated_at->format('d M, Y H:i') : null,
+        ]);
     }
 }

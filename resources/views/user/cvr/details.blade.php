@@ -90,10 +90,10 @@
                     <div class="section">
                         <div class="section-head">
                             <h3>Executive Summary</h3>
-                            <button class="edit-btn" title="Edit">
+                            {{-- <button class="edit-btn" title="Edit">
                                 <i class="fas fa-edit"></i>
                                 Edit
-                            </button>
+                            </button> --}}
                         </div>
                         <div class="section-body">
                             @if($summary)

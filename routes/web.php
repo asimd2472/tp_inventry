@@ -63,8 +63,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/cvr/repository', [AdminCvrController::class, 'repository'])->name('repository');
         Route::get('/cvr/repository-data', [AdminCvrController::class, 'repositoryData'])->name('repository.data');
         Route::get('/cvr/view/{id}', [AdminCvrController::class, 'viewCvrDetails'])->name('cvr.details');
+        Route::post('/cvr/{id}/summary', [AdminCvrController::class, 'updateSummary'])->name('cvr.updateSummary');
         Route::post('/cvr/{id}/action-points', [AdminCvrController::class, 'addActionPoint'])->name('cvr.addActionPoint');
         Route::post('/cvr/{id}/complaints', [AdminCvrController::class, 'addComplaint'])->name('cvr.addComplaint');
+        Route::delete('/cvr/action-point/{id}', [AdminCvrController::class, 'deleteActionPoint'])->name('cvr.deleteActionPoint');
+        Route::delete('/cvr/complaint/{id}', [AdminCvrController::class, 'deleteComplaint'])->name('cvr.deleteComplaint');
+        Route::put('/cvr/action-point/{id}/status', [AdminCvrController::class, 'updateActionPointStatus'])->name('cvr.updateActionPointStatus');
         
     });
 

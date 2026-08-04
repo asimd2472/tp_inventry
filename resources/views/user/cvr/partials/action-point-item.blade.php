@@ -3,19 +3,19 @@
         <div class="ap-title">
             <h4>{{ $ap->task ?? 'Untitled' }}</h4>
         </div>
-        <div class="ap-actions">
-            <button class="icon-btn delete-btn" title="Delete">
-                <i class="fas fa-trash"></i>
-            </button>
-        </div>
     </div>
     <div class="ap-meta">
+        <div class="ap-meta-item">
+            <strong>Status:</strong>
+            <span class="status-badge {{ strtolower(str_replace(' ', '-', ($ap->status ?? 'pending'))) }}">
+                {{ $ap->status ?? 'Pending' }}
+            </span>
+        </div>
         <div class="ap-meta-item">
             <strong>Owner:</strong> {{ $ap->owner ?? 'Unassigned' }}
         </div>
         <div class="ap-meta-item">
-            {{-- <strong>Follow-up Date:</strong> {{ $ap->deadline ? \Carbon\Carbon::parse($ap->deadline)->format('d M, Y') : '—' }} --}}
-            <strong>Follow-up Date:</strong> {{ $ap->deadline }}
+            <strong>Follow-up Date:</strong> {{ $ap->deadline ?: '—' }}
         </div>
         <div class="ap-meta-item">
             <strong>Priority:</strong>
@@ -23,5 +23,13 @@
                 {{ $ap->priority ?? 'Medium' }}
             </span>
         </div>
+        @if(!empty($ap->status_change_by))
+            @php
+                $updater = \App\Models\User::find($ap->status_change_by);
+            @endphp
+            <div class="ap-meta-item">
+                <strong>Updated By:</strong> {{ $updater?->name ?? 'Admin' }}
+            </div>
+        @endif
     </div>
 </div>
