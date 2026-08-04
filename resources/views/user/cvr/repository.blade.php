@@ -49,7 +49,6 @@
         </div>
 
         @if(count($items) === 0)
-
             <div class="repo-empty">
                 <i class="fas fa-folder-open"></i>
                 <h4>No CVR Records Yet</h4>
@@ -59,82 +58,18 @@
                     Upload CVR
                 </a>
             </div>
-
         @else
-
             <div class="repo-list has-items" id="cvrList">
-
-                @foreach($items as $item)
-                    @php
-                        $sentimentClass = match(strtolower($item['sentiment'])) {
-                            'positive' => 'positive',
-                            'negative' => 'negative',
-                            default => 'neutral',
-                        };
-                        $sentimentIcon = match(strtolower($item['sentiment'])) {
-                            'positive' => 'fa-smile',
-                            'negative' => 'fa-frown',
-                            default => 'fa-chart-line',
-                        };
-                    @endphp
-
-                    <article class="cvr-card"
-                             data-search="{{ $item['search_text'] }}"
-                             data-pending="{{ $item['pending'] }}"
-                             data-issues="{{ $item['issues'] }}">
-
-                        <div class="cvr-card-head">
-                            <div>
-                                <h3 class="cvr-card-title">{{ $item['dealer'] }}</h3>
-                                @if($item['location'])
-                                    <p class="cvr-card-location">{{ $item['location'] }}</p>
-                                @endif
-                            </div>
-                            <span class="sentiment-badge {{ $sentimentClass }}">
-                                <i class="fas {{ $sentimentIcon }}"></i>
-                                {{ $item['sentiment'] }}
-                            </span>
-                        </div>
-
-                        <div class="cvr-card-meta">
-                            <div class="cvr-meta-item">
-                                DATE: <span>{{ $item['date'] }}</span>
-                            </div>
-                            <div class="cvr-meta-item">
-                                CONTACT: <span>{{ $item['contact'] }}</span>
-                            </div>
-                        </div>
-
-                        @if($item['summary'])
-                            <p class="cvr-card-summary">{{ $item['summary'] }}</p>
-                        @endif
-
-                        <div class="cvr-card-footer">
-                            <span class="cvr-stat pending">
-                                <i class="fas fa-clock"></i>
-                                {{ $item['pending'] }} Action{{ $item['pending'] !== 1 ? 's' : '' }} Pending
-                            </span>
-                            <span class="cvr-stat completed">
-                                <i class="fas fa-check-circle"></i>
-                                {{ $item['completed'] }} Completed
-                            </span>
-                            <span class="cvr-stat issues">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                {{ $item['issues'] }} Issue{{ $item['issues'] !== 1 ? 's' : '' }}
-                            </span>
-                        </div>
-
-                    </article>
-                @endforeach
-
+                @include('user.cvr.partials.repository-items', ['items' => $items])
             </div>
 
-            <div class="repo-no-results" id="noResults">
+            <div class="repo-no-results" id="noResults" style="display:none;">
                 <i class="fas fa-search"></i>
                 <p>No matches found for your search.</p>
             </div>
-
         @endif
+
+        <div class="repo-pagination" id="paginationContainer"></div>
 
     </div>
 
@@ -143,50 +78,121 @@
 @endsection
 
 @push('scripts')
-<script>
-$(function () {
+<script type="module">
+(function () {
     var $input = $('#cvrSearchInput');
-    var $cards = $('.cvr-card');
     var $matchCount = $('#matchCount');
     var $noResults = $('#noResults');
     var $list = $('#cvrList');
+    var $pagination = $('#paginationContainer');
+    var $statTotal = $('#statTotalVisits');
+    var $statOpen = $('#statOpenActions');
+    var $statCritical = $('#statCriticalIssues');
+    var debounceTimer = null;
+    var baseUrl = '{{ route('user.repository.data') }}';
 
-    if (!$input.length || !$cards.length) {
+    if (!$input.length) {
         return;
     }
 
-    function filterCards() {
-        var query = $input.val().toLowerCase().trim();
-        var visible = 0;
-        var visiblePending = 0;
-        var visibleIssues = 0;
-
-        $cards.each(function () {
-            var $card = $(this);
-            var searchText = $card.data('search') || '';
-            var matches = query === '' || searchText.indexOf(query) !== -1;
-
-            $card.toggle(matches);
-
-            if (matches) {
-                visible++;
-                visiblePending += parseInt($card.data('pending'), 10) || 0;
-                visibleIssues += parseInt($card.data('issues'), 10) || 0;
-            }
-        });
-
-        $matchCount.text(visible);
-
-        if (visible === 0) {
-            $list.hide();
-            $noResults.show();
-        } else {
-            $list.show();
-            $noResults.hide();
+    function updateStats(data) {
+        if (data.totalVisits !== undefined) {
+            $statTotal.text(data.totalVisits);
+        }
+        if (data.openActions !== undefined) {
+            $statOpen.text(data.openActions);
+        }
+        if (data.criticalIssues !== undefined) {
+            $statCritical.text(data.criticalIssues);
+        }
+        if (data.pagination && data.pagination.total !== undefined) {
+            $matchCount.text(data.pagination.total);
         }
     }
 
-    $input.on('input', filterCards);
-});
+    function renderPagination(data) {
+        if (!$pagination.length) {
+            return;
+        }
+
+        $pagination.empty();
+
+        if (!data.pagination || data.pagination.last_page <= 1) {
+            return;
+        }
+
+        var currentPage = data.pagination.current_page || 1;
+        var lastPage = data.pagination.last_page || 1;
+        var prevPage = data.pagination.prev_page;
+        var nextPage = data.pagination.next_page;
+
+        var buildButton = function (page, label, disabled, active) {
+            var btn = $('<button>', {
+                type: 'button',
+                class: 'btn btn-sm me-2 ' + (active ? 'btn-primary' : 'btn-outline-secondary'),
+                text: label,
+                disabled: disabled
+            });
+
+            btn.on('click', function () {
+                loadPage(page);
+            });
+
+            return btn;
+        };
+
+        if (prevPage) {
+            $pagination.append(buildButton(prevPage, 'Previous', false, false));
+        }
+
+        for (var page = 1; page <= lastPage; page++) {
+            $pagination.append(buildButton(page, page, false, page === currentPage));
+        }
+
+        if (nextPage) {
+            $pagination.append(buildButton(nextPage, 'Next', false, false));
+        }
+    }
+
+    function loadPage(page, search) {
+        var query = search === undefined ? $input.val().trim() : search;
+        var params = new URLSearchParams({
+            page: page || 1,
+            search: query
+        });
+
+        fetch(baseUrl + '?' + params.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (data) {
+                updateStats(data);
+
+                if (data.items && data.items.length > 0) {
+                    $list.html(data.itemsHtml);
+                    $list.show();
+                    $noResults.hide();
+                } else {
+                    $list.hide();
+                    $noResults.show();
+                }
+
+                renderPagination(data);
+            });
+    }
+
+    $input.on('input', function () {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function () {
+            loadPage(1, $input.val().trim());
+        }, 250);
+    });
+
+    loadPage(1, '');
+})();
 </script>
 @endpush

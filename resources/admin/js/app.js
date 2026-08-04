@@ -27,8 +27,8 @@ import 'jquery-validation/dist/additional-methods.min.js';
 
 import 'datatables.net-bs5';
 
-import 'summernote/dist/summernote-lite.css';
-import 'summernote/dist/summernote-lite.js';
+// import 'summernote/dist/summernote-lite.css';
+// import 'summernote/dist/summernote-lite.js';
 
 import.meta.glob([
     '../images/**',

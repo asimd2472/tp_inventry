@@ -68,10 +68,24 @@
                     </a>
                 </li>
 
-                <li class="{{ Route::currentRouteName() == 'admin.cvr_details' ? 'active' : '' }}">
+                {{-- <li class="{{ Route::currentRouteName() == 'admin.cvr_details' ? 'active' : '' }}">
                     <a href="{{ url('admin/cvr-details') }}">
                         <i class="menu-icon fa-solid fa-chalkboard"></i>
                         CVR Details
+                    </a>
+                </li> --}}
+
+                <li class="{{ Route::currentRouteName() == 'admin.cvr' ? 'active' : '' }}">
+                    <a href="{{ url('admin/cvr') }}">
+                        <i class="menu-icon fa-solid fa-chalkboard"></i>
+                        CVR
+                    </a>
+                </li>
+
+                <li class="{{ Route::currentRouteName() == 'admin.repository' ? 'active' : '' }}">
+                    <a href="{{ url('admin/cvr/repository') }}">
+                        <i class="menu-icon fa-solid fa-chalkboard"></i>
+                        CVR Repository
                     </a>
                 </li>
 

@@ -9,7 +9,7 @@ use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\MyaccountController;
 use App\Http\Controllers\UserCVRController;
 use App\Http\Controllers\UserInventryController;
-
+use App\Http\Controllers\Admin\AdminCvrController;
 // Route::get('/', function () {
 //     return view('welcome');
 // });
@@ -58,7 +58,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/login-history', [MyaccountController::class, 'login_history'])->name('login_history');
         Route::get('/login-history-user/{id}', [MyaccountController::class,'user_login_history'])->name('admin.user_login_history');
 
-        Route::get('/cvr', [CvrController::class, 'cvr'])->name('cvr');
+        Route::get('/cvr', [AdminCvrController::class, 'cvr']);
+        Route::post('/upload-cvr', [AdminCvrController::class, 'uploadCvr']);
+        Route::get('/cvr/repository', [AdminCvrController::class, 'repository'])->name('repository');
+        Route::get('/cvr/repository-data', [AdminCvrController::class, 'repositoryData'])->name('repository.data');
+        Route::get('/cvr/view/{id}', [AdminCvrController::class, 'viewCvrDetails'])->name('cvr.details');
+        Route::post('/cvr/{id}/summary', [AdminCvrController::class, 'updateSummary'])->name('cvr.updateSummary');
+        Route::post('/cvr/{id}/action-points', [AdminCvrController::class, 'addActionPoint'])->name('cvr.addActionPoint');
+        Route::post('/cvr/{id}/complaints', [AdminCvrController::class, 'addComplaint'])->name('cvr.addComplaint');
+        Route::delete('/cvr/action-point/{id}', [AdminCvrController::class, 'deleteActionPoint'])->name('cvr.deleteActionPoint');
+        Route::delete('/cvr/complaint/{id}', [AdminCvrController::class, 'deleteComplaint'])->name('cvr.deleteComplaint');
+        Route::put('/cvr/action-point/{id}/status', [AdminCvrController::class, 'updateActionPointStatus'])->name('cvr.updateActionPointStatus');
         
     });
 
@@ -88,6 +98,10 @@ Route::prefix('user')->name('user.')->group(function () {
         Route::get('/cvr', [UserCVRController::class, 'cvr']);
         Route::post('/upload-cvr', [UserCVRController::class, 'uploadCvr']);
         Route::get('/cvr/repository', [UserCVRController::class, 'repository'])->name('repository');
+        Route::get('/cvr/repository-data', [UserCVRController::class, 'repositoryData'])->name('repository.data');
+        Route::get('/cvr/view/{id}', [UserCVRController::class, 'viewCvrDetails'])->name('cvr.details');
+        Route::post('/cvr/{id}/action-points', [UserCVRController::class, 'addActionPoint'])->name('cvr.addActionPoint');
+        Route::post('/cvr/{id}/complaints', [UserCVRController::class, 'addComplaint'])->name('cvr.addComplaint');
     });
 });
 

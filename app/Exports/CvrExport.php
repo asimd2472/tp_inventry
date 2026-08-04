@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\CvrDetails;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -19,7 +20,36 @@ class CvrExport implements FromCollection, WithHeadings
 
     public function collection()
     {
-        $query = CvrDetails::query();
+        $query = CvrDetails::with(['actionPoints', 'complaints', 'user']);
+
+        $tab = in_array($this->request->get('tab'), ['all', 'my'], true) ? $this->request->get('tab') : 'my';
+        $user = auth()->user();
+
+        if ($user && (int) $user->is_admin === 1 && $tab === 'my') {
+            $query->where('user_id', $user->id);
+        }
+
+        if ($user && (int) $user->is_admin === 1 && $tab === 'all') {
+            // export all CVR records for the super admin
+        } elseif ($user) {
+            $query->where('user_id', $user->id);
+        }
+
+        $search = trim((string) $this->request->get('search', ''));
+        if ($search !== '') {
+            $query->where(function ($subQuery) use ($search) {
+                $subQuery->where('host', 'like', "%{$search}%")
+                    ->orWhere('distributor', 'like', "%{$search}%")
+                    ->orWhere('location', 'like', "%{$search}%")
+                    ->orWhere('visitor', 'like', "%{$search}%")
+                    ->orWhere('visitor_name', 'like', "%{$search}%")
+                    ->orWhere('contact_no', 'like', "%{$search}%")
+                    ->orWhere('cvr_id', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
 
         // Filters
         if (!empty($this->request->visitor_name)) {
@@ -35,10 +65,8 @@ class CvrExport implements FromCollection, WithHeadings
         }
 
         return $query->orderBy('id', 'DESC')->get()->map(function ($item) {
+            $data = $item->cvr_data ?? [];
 
-            $data = $item->cvr_data;
-
-            // Date + Time (same like Blade)
             $date = '';
             $time = '';
 
@@ -46,32 +74,52 @@ class CvrExport implements FromCollection, WithHeadings
                 $dt = Carbon::parse($data['date'])->setTimezone('Asia/Kolkata');
                 $date = $dt->format('d-m-Y');
                 $time = $dt->format('h:i A');
+            } elseif ($item->visitor_date) {
+                $dt = Carbon::parse($item->visitor_date)->setTimezone('Asia/Kolkata');
+                $date = $dt->format('d-m-Y');
+                $time = $item->visitor_time ?: $dt->format('h:i A');
             }
 
-            // Complaints (convert array → string)
             $complaints = '';
-            if (!empty($data['complaints'])) {
-                foreach ($data['complaints'] as $c) {
-                    $complaints .= $c['category'] . ' - ' . $c['description'] . ' (' . $c['severity'] . ")\n";
-                }
+            foreach ($item->complaints as $c) {
+                $complaints .= ($c->category ?? 'Issue') . ' - ' . ($c->description ?? '') . ' (' . ($c->severity ?? 'Minor') . ")\n";
             }
 
-            // Action Points
             $actions = '';
-            if (!empty($data['actionPoints'])) {
-                foreach ($data['actionPoints'] as $a) {
-                    $actions .= $a['task'] . ' | ' . $a['priority'] . ' | ' . $a['status'] . "\n";
+            foreach ($item->actionPoints as $a) {
+                $statusUpdatedBy = '';
+                if (!empty($a->status_change_by)) {
+                    $statusUpdatedBy = ' | Updated By: ' . ($a->status_change_by ? User::find($a->status_change_by)->name : 'Admin');
                 }
+
+                $actions .= ($a->task ?? 'Untitled')
+                    . ' | Owner: ' . ($a->owner ?? 'Unassigned')
+                    . ' | Deadline: ' . ($a->deadline ?? '—')
+                    . ' | Priority: ' . ($a->priority ?? 'Medium')
+                    . ' | Status: ' . ($a->status ?? 'Pending')
+                    . $statusUpdatedBy
+                    . "\n";
+            }
+
+            if ($actions === '') {
+                $actions = $data['actionPoints'] ?? '';
+            }
+
+            if ($complaints === '') {
+                $complaints = collect($data['complaints'] ?? [])->map(function ($c) {
+                    return ($c['category'] ?? 'Issue') . ' - ' . ($c['description'] ?? '') . ' (' . ($c['severity'] ?? 'Minor') . ')';
+                })->implode("\n");
             }
 
             return [
                 'Visit Date' => $date . ' ' . $time,
-                'Visitor Name' => $data['visitorName'] ?? '',
-                'Customer Name' => $data['dealer']['customerName'] ?? '',
-                'Phone' => $data['dealer']['customerPhone'] ?? '',
-                'Dealer' => $data['dealer']['name'] ?? '',
-                'Distributor' => $data['dealer']['distributorName'] ?? '',
-                'Location' => $data['dealer']['locationName'] ?? '',
+                'Visitor Name' => $data['visitorName'] ?? $item->visitor ?? '',
+                'Customer Name' => $data['dealer']['customerName'] ?? $item->visitor ?? '',
+                'Phone' => $data['dealer']['customerPhone'] ?? $item->contact_no ?? '',
+                'Dealer' => $data['dealer']['name'] ?? $item->host ?? '',
+                'Distributor' => $data['dealer']['distributorName'] ?? $item->distributor ?? '',
+                'Location' => $data['dealer']['locationName'] ?? $item->location ?? '',
+                'Uploaded By' => $item->user->name ?? 'Unknown User',
                 'Summary' => $data['summary'] ?? '',
                 'Sentiment' => $data['sentiment'] ?? '',
                 'Complaints' => $complaints,
@@ -90,6 +138,7 @@ class CvrExport implements FromCollection, WithHeadings
             'Dealer',
             'Distributor',
             'Location',
+            'Uploaded By',
             'Summary',
             'Sentiment',
             'Complaints',
