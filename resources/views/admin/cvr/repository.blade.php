@@ -16,10 +16,19 @@
                                         <i class="fas fa-chevron-left"></i>
                                     </a>
                                     <h1 class="repo-title">CVR Repository</h1>
-                                    <a href="{{ url('/admin/cvr') }}" class="repo-header-action" title="Upload CVR">
-                                        <i class="fas fa-upload"></i>
-                                    </a>
+                                    <div style="display:flex; align-items:center; gap:10px;">
+                                        <a type="button" id="downloadCvrBtn" class="repo-header-action" title="Download Excel">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                        <a href="{{ url('/admin/cvr') }}" class="repo-header-action" title="Upload CVR">
+                                            <i class="fas fa-upload"></i>
+                                        </a>
+                                    </div>
                                 </div>
+                            </div>
+
+                            <div id="downloadLoader" style="display:none; margin: 0 0 12px; text-align:right; color:#0d6efd; font-size:0.9rem; font-weight:600;">
+                                <i class="fas fa-spinner fa-spin"></i> Downloading Excel...
                             </div>
                         
                             <div class="repo-body">
@@ -41,7 +50,7 @@
                                 </div>
                         
                                 @php
-                                    $canViewAll = Auth::user() && (int) Auth::user()->super_admin === 1;
+                                    $canViewAll = Auth::user() && (int) Auth::user()->is_admin === 1;
                                 @endphp
 
                                 {{-- Tabs --}}
@@ -113,6 +122,8 @@
     var $statOpen = $('#statOpenActions');
     var $statCritical = $('#statCriticalIssues');
     var $tabs = $('.repo-tab');
+    var $downloadBtn = $('#downloadCvrBtn');
+    var $downloadLoader = $('#downloadLoader');
     var debounceTimer = null;
     var baseUrl = '{{ route('admin.repository.data') }}';
     var currentTab = '{{ $tab ?? 'my' }}';
@@ -180,6 +191,16 @@
         }
     }
 
+    function buildExportUrl() {
+        var query = $input.val().trim();
+        var params = new URLSearchParams({
+            tab: 'all',
+            search: query
+        });
+
+        return '{{ route('admin.export') }}?' + params.toString();
+    }
+
     function loadPage(page, search) {
         var query = search === undefined ? $input.val().trim() : search;
         var params = new URLSearchParams({
@@ -224,6 +245,45 @@
         $tabs.removeClass('btn-primary').addClass('btn-outline-secondary');
         $(this).removeClass('btn-outline-secondary').addClass('btn-primary');
         loadPage(1, $input.val().trim());
+    });
+
+    $downloadBtn.on('click', function () {
+        var exportUrl = buildExportUrl();
+        var $icon = $downloadBtn.find('i');
+
+        $downloadLoader.show();
+        $downloadBtn.prop('disabled', true);
+        $icon.removeClass('fa-download').addClass('fa-spinner fa-spin');
+
+        fetch(exportUrl, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error('Download failed');
+                }
+                return response.blob();
+            })
+            .then(function (blob) {
+                var url = window.URL.createObjectURL(blob);
+                var link = document.createElement('a');
+                link.href = url;
+                link.download = 'cvr_repository_' + currentTab + '.xlsx';
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(function () {
+                alert('Unable to download CVR Excel file.');
+            })
+            .finally(function () {
+                $downloadLoader.hide();
+                $downloadBtn.prop('disabled', false);
+                $icon.removeClass('fa-spinner fa-spin').addClass('fa-download');
+            });
     });
 
     loadPage(1, '');

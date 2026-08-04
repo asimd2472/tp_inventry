@@ -171,11 +171,11 @@
         </div>
 
         {{-- Action Button --}}
-        <div class="details-footer">
+        {{-- <div class="details-footer">
             <button class="btn-close-report">
                 Close Report
             </button>
-        </div>
+        </div> --}}
 
     </div>
 
