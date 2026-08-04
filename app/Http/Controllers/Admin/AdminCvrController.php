@@ -326,7 +326,7 @@ class AdminCvrController extends Controller
         $tab = in_array($request->get('tab'), ['all', 'my'], true) ? $request->get('tab') : 'my';
         $page = max(1, (int) $request->get('page', 1));
         $perPage = 20;
-        $canViewAll = $currentUser && (int) $currentUser->is_admin === 1;
+        $canViewAll = $currentUser && (int) $currentUser->super_admin === 1;
 
         $query = CvrDetails::with(['actionPoints', 'complaints', 'user'])
             ->when($canViewAll && $tab === 'all', function ($query) {
@@ -554,7 +554,7 @@ class AdminCvrController extends Controller
         $user = Auth::user();
         $query = CvrDetails::with(['actionPoints', 'complaints', 'user'])->where('id', $id);
 
-        if (!( $user && (int) $user->is_admin === 1 )) {
+        if (!( $user && (int) $user->super_admin === 1 )) {
             $query->where('user_id', Auth::id());
         }
 
