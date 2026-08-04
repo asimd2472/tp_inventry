@@ -76,7 +76,19 @@
                                 {{-- SUPER ADMIN --}}
                                 @if($isSuperAdmin)
                                     <li><a href="{{ url('admin/users') }}">Create User</a></li>
-                                    <li><a href="{{ url('admin/cvr-details') }}">CVR Details</a></li>
+                                    {{-- <li><a href="{{ url('admin/cvr-details') }}">CVR Details</a></li> --}}
+
+                                    <li>
+                                        <a href="{{ url('admin/cvr') }}">
+                                            CVR
+                                        </a>
+                                    </li>
+                                    
+                                    <li>
+                                        <a href="{{ url('admin/cvr/repository') }}">
+                                            CVR Repository
+                                        </a>
+                                    </li>
                                 @endif
 
 
@@ -100,12 +112,25 @@
                                             </a>
                                         </li>
                                     @endif
-
+                                    
                                     <li>
                                         <a href="javascript:void(0)" onclick="inventorySend()">
                                             Download Catalog
                                         </a>
                                     </li>
+                                    @if($user->user_access == 1)
+                                    <li>
+                                        <a href="{{ url('user/cvr') }}">
+                                            CVR
+                                        </a>
+                                    </li>
+                                    
+                                    <li>
+                                        <a href="{{ url('user/cvr/repository') }}">
+                                            CVR Repository
+                                        </a>
+                                    </li>
+                                    @endif
 
                                 @endif
 
