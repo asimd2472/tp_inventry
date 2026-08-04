@@ -50,7 +50,7 @@
                                 </div>
                         
                                 @php
-                                    $canViewAll = Auth::user() && (int) Auth::user()->is_admin === 1;
+                                    $canViewAll = Auth::user() && (int) Auth::user()->super_admin === 1;
                                 @endphp
 
                                 {{-- Tabs --}}
