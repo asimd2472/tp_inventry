@@ -69,7 +69,7 @@
             </div>
         @endif
 
-        <div class="repo-pagination" id="paginationContainer"></div>
+        <div class="repo-pagination" style="margin-top: 15px;" id="paginationContainer"></div>
 
     </div>
 

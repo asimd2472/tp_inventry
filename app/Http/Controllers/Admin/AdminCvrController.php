@@ -325,7 +325,7 @@ class AdminCvrController extends Controller
         $search = trim((string) $request->get('search', ''));
         $tab = in_array($request->get('tab'), ['all', 'my'], true) ? $request->get('tab') : 'my';
         $page = max(1, (int) $request->get('page', 1));
-        $perPage = 20;
+        $perPage = 30;
         $canViewAll = $currentUser && (int) $currentUser->super_admin === 1;
 
         $query = CvrDetails::with(['actionPoints', 'complaints', 'user'])
