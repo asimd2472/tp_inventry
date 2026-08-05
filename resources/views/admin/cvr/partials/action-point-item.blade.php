@@ -6,8 +6,8 @@
         <div class="ap-actions">
             <div class="ap-status-select-wrap">
                 <select class="ap-status-select" data-id="{{ $ap->id }}" data-url="{{ route('admin.cvr.updateActionPointStatus', $ap->id) }}">
-                    @foreach(['Pending','In Progress','Completed','Closed'] as $statusOption)
-                        <option value="{{ $statusOption }}" {{ ($ap->status ?? 'Pending') === $statusOption ? 'selected' : '' }}>{{ $statusOption }}</option>
+                    @foreach(['Open','In Progress','Closed'] as $statusOption)
+                        <option value="{{ $statusOption }}" {{ ($ap->status ?? 'Open') === $statusOption ? 'selected' : '' }}>{{ $statusOption }}</option>
                     @endforeach
                 </select>
             </div>

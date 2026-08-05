@@ -321,11 +321,26 @@ class UserCVRController extends Controller
     {
         $userId = Auth::id();
         $search = trim((string) $request->get('search', ''));
+        $dealer = trim((string) $request->get('dealer', ''));
         $page = max(1, (int) $request->get('page', 1));
         $perPage = 20;
+        $dealerOptions = CvrDetails::query()
+            ->where('user_id', $userId)
+            ->whereNotNull('host')
+            ->where('host', '!=', '')
+            ->select('host')
+            ->distinct()
+            ->orderBy('host')
+            ->pluck('host')
+            ->filter()
+            ->values()
+            ->all();
 
         $query = CvrDetails::with(['actionPoints', 'complaints'])
             ->where('user_id', $userId)
+            ->when($dealer !== '', function ($query) use ($dealer) {
+                $query->where('host', $dealer);
+            })
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($subQuery) use ($search) {
                     $subQuery->where('host', 'like', "%{$search}%")
@@ -439,6 +454,8 @@ class UserCVRController extends Controller
             'openActions' => $openActions,
             'criticalIssues' => $criticalIssues,
             'search' => $search,
+            'dealer' => $dealer,
+            'dealerOptions' => $dealerOptions,
             'pagination' => [
                 'current_page' => $cvrs->currentPage(),
                 'last_page' => $cvrs->lastPage(),

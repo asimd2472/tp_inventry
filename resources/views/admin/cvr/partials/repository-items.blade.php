@@ -38,8 +38,9 @@
                     @endif
                 </div>
                 <span class="sentiment-badge {{ $sentimentClass }}">
-                    <i class="fas {{ $sentimentIcon }}"></i>
-                    {{ $item['sentiment'] }}
+                    <i class="fas fa-user"></i>
+                    {{-- {{ $item['sentiment'] }} --}}
+                    {{ $item['uploaded_by'] ?? 'Unknown User' }}
                 </span>
             </div>
 
@@ -50,9 +51,9 @@
                 <div class="cvr-meta-item">
                     CONTACT: <span>{{ $item['contact'] }}</span>
                 </div>
-                <div class="cvr-meta-item">
+                {{-- <div class="cvr-meta-item">
                     UPLOADED BY: <span>{{ $item['uploaded_by'] ?? 'Unknown User' }}</span>
-                </div>
+                </div> --}}
             </div>
 
             @if($item['summary'])

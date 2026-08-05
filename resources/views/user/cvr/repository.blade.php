@@ -36,12 +36,29 @@
 
         {{-- Search --}}
         <div class="repo-search-wrap">
-            <div class="repo-search">
-                <i class="fas fa-search"></i>
-                <input type="text"
-                       id="cvrSearchInput"
-                       placeholder="Search dealers, people, actions..."
-                       autocomplete="off">
+            <div class="repo-search-row">
+                <div class="repo-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text"
+                           id="cvrSearchInput"
+                           placeholder="Search dealers, people, actions..."
+                           autocomplete="off"
+                           value="{{ old('search', $search ?? '') }}">
+                </div>
+                <div class="repo-filter" style="position: relative;">
+                    <button type="button" id="dealerFilterToggle" class="repo-filter-button" aria-label="Filter by dealer" aria-expanded="false" title="Filter by dealer">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                    <div class="repo-filter-dropdown" id="dealerFilterDropdown" style="display:none;">
+                        <label for="dealerFilterSelect">Dealer</label>
+                        <select id="dealerFilterSelect">
+                            <option value="">All Dealers</option>
+                            @foreach(($dealerOptions ?? []) as $dealerOption)
+                                <option value="{{ $dealerOption }}" {{ ($dealer ?? '') === $dealerOption ? 'selected' : '' }}>{{ $dealerOption }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
             </div>
             <div class="repo-match-count">
                 <span id="matchCount">{{ $totalVisits }}</span> Matches Found
@@ -88,8 +105,12 @@
     var $statTotal = $('#statTotalVisits');
     var $statOpen = $('#statOpenActions');
     var $statCritical = $('#statCriticalIssues');
+    var $dealerToggle = $('#dealerFilterToggle');
+    var $dealerDropdown = $('#dealerFilterDropdown');
+    var $dealerSelect = $('#dealerFilterSelect');
     var debounceTimer = null;
     var baseUrl = '{{ route('user.repository.data') }}';
+    var selectedDealer = @json($dealer ?? '');
 
     if (!$input.length) {
         return;
@@ -154,11 +175,23 @@
         }
     }
 
-    function loadPage(page, search) {
+    function toggleDealerDropdown(forceOpen) {
+        var shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : $dealerDropdown.is(':hidden');
+        $dealerDropdown.toggle(shouldOpen);
+        $dealerToggle.attr('aria-expanded', shouldOpen ? 'true' : 'false');
+    }
+
+    function loadPage(page, search, dealer) {
         var query = search === undefined ? $input.val().trim() : search;
+        var activeDealer = dealer === undefined ? selectedDealer : dealer;
+        selectedDealer = activeDealer;
+        if ($dealerSelect.length) {
+            $dealerSelect.val(selectedDealer || '');
+        }
         var params = new URLSearchParams({
             page: page || 1,
-            search: query
+            search: query,
+            dealer: activeDealer || ''
         });
 
         fetch(baseUrl + '?' + params.toString(), {
@@ -188,11 +221,32 @@
     $input.on('input', function () {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(function () {
-            loadPage(1, $input.val().trim());
+            loadPage(1, $input.val().trim(), selectedDealer);
         }, 250);
     });
 
-    loadPage(1, '');
+    $dealerToggle.on('click', function (event) {
+        event.stopPropagation();
+        toggleDealerDropdown();
+    });
+
+    $dealerSelect.on('change', function () {
+        selectedDealer = $(this).val() || '';
+        toggleDealerDropdown(false);
+        loadPage(1, $input.val().trim(), selectedDealer);
+    });
+
+    $(document).on('click', function (event) {
+        if (!$dealerDropdown.is(event.target) && !$dealerToggle.is(event.target) && !$dealerDropdown.has(event.target).length) {
+            toggleDealerDropdown(false);
+        }
+    });
+
+    if ($dealerSelect.length && selectedDealer) {
+        $dealerSelect.val(selectedDealer);
+    }
+
+    loadPage(1, '', selectedDealer);
 })();
 </script>
 @endpush

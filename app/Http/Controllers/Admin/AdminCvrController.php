@@ -127,7 +127,7 @@ class AdminCvrController extends Controller
                             "owner"    => $ap['owner'] ?? 'Assigned Manually',
                             "deadline" => $ap['deadline'] ?? $date,
                             "priority" => $ap['priority'] ?? 'Medium',
-                            "status"   => "Pending"
+                            "status"   => "Open"
                         ];
 
                         $actionPoints[] = $actionPoint;
@@ -173,7 +173,7 @@ class AdminCvrController extends Controller
                                 "owner" => "Assigned Manually",
                                 "deadline" => $date,
                                 "priority" => "Medium",
-                                "status" => "Pending"
+                                "status" => "Open"
                             ];
                             $actionPoints[] = $actionPoint;
                             $actionPointRecords[] = [
@@ -323,16 +323,30 @@ class AdminCvrController extends Controller
         $currentUser = Auth::user();
         $userId = Auth::id();
         $search = trim((string) $request->get('search', ''));
+        $dealer = trim((string) $request->get('dealer', ''));
         $tab = in_array($request->get('tab'), ['all', 'my'], true) ? $request->get('tab') : 'my';
         $page = max(1, (int) $request->get('page', 1));
         $perPage = 30;
         $canViewAll = $currentUser && (int) $currentUser->super_admin === 1;
+        $dealerOptions = CvrDetails::query()
+            ->whereNotNull('host')
+            ->where('host', '!=', '')
+            ->select('host')
+            ->distinct()
+            ->orderBy('host')
+            ->pluck('host')
+            ->filter()
+            ->values()
+            ->all();
 
         $query = CvrDetails::with(['actionPoints', 'complaints', 'user'])
             ->when($canViewAll && $tab === 'all', function ($query) {
                 // admin can view all CVRs
             }, function ($query) use ($userId) {
                 $query->where('user_id', $userId);
+            })
+            ->when($dealer !== '', function ($query) use ($dealer) {
+                $query->where('host', $dealer);
             })
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($subQuery) use ($search) {
@@ -453,6 +467,8 @@ class AdminCvrController extends Controller
             'openActions' => $openActions,
             'criticalIssues' => $criticalIssues,
             'search' => $search,
+            'dealer' => $dealer,
+            'dealerOptions' => $dealerOptions,
             'tab' => $tab,
             'canViewAll' => $canViewAll,
             'pagination' => [
