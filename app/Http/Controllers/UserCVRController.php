@@ -126,7 +126,7 @@ class UserCVRController extends Controller
                             "owner"    => $ap['owner'] ?? 'Assigned Manually',
                             "deadline" => $ap['deadline'] ?? $date,
                             "priority" => $ap['priority'] ?? 'Medium',
-                            "status"   => "Pending"
+                            "status"   => "Open"
                         ];
 
                         $actionPoints[] = $actionPoint;
@@ -143,7 +143,7 @@ class UserCVRController extends Controller
                     foreach (($geminiResult['complaints'] ?? []) as $index => $comp) {
                         $complaint = [
                             "id"          => "comp_{$meetingId}_{$index}",
-                            "category"    => $comp['category'] ?? 'Voucher Issues',
+                            "category"    => $comp['category'] ?? 'Other Issues',
                             "description" => $comp['description'] ?? '',
                             "severity"    => $comp['severity'] ?? 'Critical'
                         ];
@@ -172,7 +172,7 @@ class UserCVRController extends Controller
                                 "owner" => "Assigned Manually",
                                 "deadline" => $date,
                                 "priority" => "Medium",
-                                "status" => "Pending"
+                                "status" => "Open"
                             ];
                             $actionPoints[] = $actionPoint;
                             $actionPointRecords[] = [
@@ -193,7 +193,7 @@ class UserCVRController extends Controller
                             if ($item === '') continue;
                             $complaint = [
                                 "id" => "comp_{$meetingId}_{$index}",
-                                "category" => "Voucher Issues",
+                                "category" => "Other Issues",
                                 "description" => $item,
                                 "severity" => "Critical"
                             ];
@@ -609,7 +609,7 @@ class UserCVRController extends Controller
             'owner' => $data['owner'] ?? null,
             'deadline' => $data['deadline'] ?? null,
             'priority' => $data['priority'] ?? 'Medium',
-            'status' => 'Pending',
+            'status' => 'Open',
         ]);
 
         $html = view('user.cvr.partials.action-point-item', ['ap' => $ap])->render();

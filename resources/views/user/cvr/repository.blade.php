@@ -45,7 +45,7 @@
                            autocomplete="off"
                            value="{{ old('search', $search ?? '') }}">
                 </div>
-                <div class="repo-filter" style="position: relative;">
+                {{-- <div class="repo-filter" style="position: relative;">
                     <button type="button" id="dealerFilterToggle" class="repo-filter-button" aria-label="Filter by dealer" aria-expanded="false" title="Filter by dealer">
                         <i class="fas fa-filter"></i>
                     </button>
@@ -58,7 +58,7 @@
                             @endforeach
                         </select>
                     </div>
-                </div>
+                </div> --}}
             </div>
             <div class="repo-match-count">
                 <span id="matchCount">{{ $totalVisits }}</span> Matches Found

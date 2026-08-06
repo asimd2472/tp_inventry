@@ -92,7 +92,7 @@
                                     </div>
                                 </div>
                         
-                                @if(count($items) === 0)
+                                {{-- @if(count($items) === 0)
                                     <div class="repo-empty">
                                         <i class="fas fa-folder-open"></i>
                                         <h4>No CVR Records Yet</h4>
@@ -102,7 +102,7 @@
                                             Upload CVR
                                         </a>
                                     </div>
-                                @else
+                                @else --}}
                                     <div class="repo-list has-items" id="cvrList">
                                         @include('admin.cvr.partials.repository-items', ['items' => $items])
                                     </div>
@@ -111,7 +111,7 @@
                                         <i class="fas fa-search"></i>
                                         <p>No matches found for your search.</p>
                                     </div>
-                                @endif
+                                {{-- @endif --}}
                         
                                 <div class="repo-pagination" style="margin-top: 15px;" id="paginationContainer"></div>
                         

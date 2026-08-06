@@ -144,7 +144,7 @@ class AdminCvrController extends Controller
                     foreach (($geminiResult['complaints'] ?? []) as $index => $comp) {
                         $complaint = [
                             "id"          => "comp_{$meetingId}_{$index}",
-                            "category"    => $comp['category'] ?? 'Voucher Issues',
+                            "category"    => $comp['category'] ?? 'Other Issues',
                             "description" => $comp['description'] ?? '',
                             "severity"    => $comp['severity'] ?? 'Critical'
                         ];
@@ -194,7 +194,7 @@ class AdminCvrController extends Controller
                             if ($item === '') continue;
                             $complaint = [
                                 "id" => "comp_{$meetingId}_{$index}",
-                                "category" => "Voucher Issues",
+                                "category" => "Other Issues",
                                 "description" => $item,
                                 "severity" => "Critical"
                             ];
@@ -374,6 +374,8 @@ class AdminCvrController extends Controller
         $criticalIssues = 0;
         $items = [];
 
+        // dd($totalVisits);
+
         foreach ($allResults as $cvr) {
             foreach ($cvr->actionPoints as $ap) {
                 $status = strtolower(trim($ap->status ?? 'pending'));
@@ -384,7 +386,9 @@ class AdminCvrController extends Controller
             }
 
             foreach ($cvr->complaints as $comp) {
-                if (strtolower(trim($comp->severity ?? '')) === 'critical') {
+                // dd(trim($comp->severity));
+                // echo $comp->id . ' - ' . $comp->severity . "\n";
+                if (strtolower(trim($comp->severity ?? '')) == 'critical') {
                     $criticalIssues++;
                 }
             }
@@ -650,7 +654,7 @@ class AdminCvrController extends Controller
             'owner' => $data['owner'] ?? null,
             'deadline' => $data['deadline'] ?? null,
             'priority' => $data['priority'] ?? 'Medium',
-            'status' => 'Pending',
+            'status' => 'Open',
             'status_change_by' => null,
         ]);
 
@@ -708,7 +712,7 @@ class AdminCvrController extends Controller
         $this->getAuthorizedCvr((int) $ap->cvr_id);
 
         $data = $request->validate([
-            'status' => 'required|string|in:Pending,In Progress,Completed,Closed',
+            'status' => 'required|string|in:Open,In Progress,Closed',
         ]);
 
         $ap->status = $data['status'];

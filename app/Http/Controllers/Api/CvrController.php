@@ -312,6 +312,8 @@ class CvrController extends Controller
                         . ($hasActionPoints ? "Action Points (raw):\n" . $row[7] . "\n\n" : '')
                         . ($hasComplaints ? "Key Issues & Complaints (raw):\n" . $row[8] : '');
 
+                    // dd($conversationText);
+
                     $geminiResult = $this->analyzeWithGemini($conversationText);
 
                     // dd($geminiResult);
@@ -366,7 +368,7 @@ class CvrController extends Controller
                             if ($item === '') continue;
                             $complaints[] = [
                                 "id" => "comp_{$meetingId}_{$index}",
-                                "category" => "Voucher Issues",
+                                "category" => "Other Issues",
                                 "description" => $item,
                                 "severity" => "Critical"
                             ];
@@ -458,37 +460,162 @@ class CvrController extends Controller
     private function analyzeWithGemini(string $text, int $retries = 2): ?array
     {   
 
-        $prompt = <<<PROMPT
-    You are a sales visit assistant.
+    //     $prompt = <<<PROMPT
+    // You are a sales visit assistant.
 
-    Return STRICT JSON only. No explanation.
+    // Return STRICT JSON only. No explanation.
 
-    {
+    // {
+    // "summary": "string",
+    // "actionPoints": [
+    //     {
+    //     "task": "string",
+    //     "owner": "string",
+    //     "deadline": "string",
+    //     "priority": "High | Medium | Low"
+    //     }
+    // ],
+    // "complaints": [
+    //     {
+    //     "category": "string",
+    //     "description": "string",
+    //     "severity": "Critical | Major | Minor"
+    //     }
+    // ]
+    // }
+
+    // IMPORTANT:
+    // - Always return objects (NOT strings)
+    // - Fill all fields
+
+    // Conversation:
+    // {$text}
+    // PROMPT;
+
+    $prompt = <<<PROMPT
+You are an expert business analyst specializing in customer visits, sales meetings, dealer interactions, service visits, market surveys, and complaint analysis.
+
+Your task is to analyze the provided text and transform it into structured data.
+
+IMPORTANT RULES
+
+1. Return ONLY valid JSON.
+2. Do not return markdown.
+3. Do not wrap the output inside triple backticks.
+4. Do not include explanations.
+5. Do not leave any field empty.
+6. Never return plain strings where objects are expected.
+7. Extract information only from the provided text.
+8. If information is not explicitly available, infer it from the context.
+9. If nothing is found, return an empty array ([]).
+
+------------------------------------------------------------------
+ACTION POINT RULES
+------------------------------------------------------------------
+
+For every action point:
+
+- Extract the task.
+- Identify the most likely owner.
+- Estimate the priority level.
+- Estimate the deadline if possible.
+
+Allowed owners:
+
+- Sales Team
+- Marketing Team
+- Operations Team
+- Service Team
+- Dealer
+- Distributor
+- Management
+- Customer
+- Unknown
+
+Priority rules:
+
+- High
+- Medium
+- Low
+
+------------------------------------------------------------------
+COMPLAINT RULES
+------------------------------------------------------------------
+
+For every issue, complaint, risk, obstacle, challenge, or concern:
+
+- Create a category name.
+- Categorize the issue according to its meaning.
+- Use a short, standardized category name.
+- Do not create duplicate categories.
+
+Examples of categories:
+
+- Product Quality
+- Pricing
+- Delivery Delay
+- Product Availability
+- Inventory
+- Marketing
+- Promotion
+- Product Awareness
+- Customer Service
+- Lead Generation
+- Communication
+- Training
+- Competitor Activity
+- Payment
+- Technical Issue
+- Display Visibility
+- Dealer Support
+- Logistics
+- Warranty
+- Service Delay
+- Operations
+- Other
+
+Severity rules:
+
+- Critical
+- Major
+- Minor
+
+------------------------------------------------------------------
+SUMMARY RULES
+------------------------------------------------------------------
+
+Create a concise executive summary in fewer than 100 words.
+
+------------------------------------------------------------------
+RETURN FORMAT
+------------------------------------------------------------------
+
+{
     "summary": "string",
     "actionPoints": [
         {
-        "task": "string",
-        "owner": "string",
-        "deadline": "string",
-        "priority": "High | Medium | Low"
+            "task": "string",
+            "owner": "string",
+            "deadline": "string",
+            "priority": "High | Medium | Low"
         }
     ],
     "complaints": [
         {
-        "category": "string",
-        "description": "string",
-        "severity": "Critical | Major | Minor"
+            "category": "string",
+            "description": "string",
+            "severity": "Critical | Major | Minor"
         }
     ]
-    }
+}
 
-    IMPORTANT:
-    - Always return objects (NOT strings)
-    - Fill all fields
+------------------------------------------------------------------
+TEXT
+------------------------------------------------------------------
 
-    Conversation:
-    {$text}
-    PROMPT;
+{$text}
+
+PROMPT;
 
     // dd($prompt);
 
@@ -506,7 +633,7 @@ class CvrController extends Controller
         );
 
         $data = $response->json();
-        // dd($data);
+        // dd($response->json());
 
         // Retry on 503 (model overloaded)
         if (($data['error']['code'] ?? null) == 503 && $retries > 0) {

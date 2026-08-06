@@ -63,11 +63,11 @@
             <div class="cvr-card-footer">
                 <span class="cvr-stat pending">
                     <i class="fas fa-clock"></i>
-                    {{ $item['pending'] }} Action{{ $item['pending'] !== 1 ? 's' : '' }} Pending
+                    {{ $item['pending'] }} Action{{ $item['pending'] !== 1 ? 's' : '' }} Open
                 </span>
                 <span class="cvr-stat completed">
                     <i class="fas fa-check-circle"></i>
-                    {{ $item['completed'] }} Completed
+                    {{ $item['completed'] }} Closed
                 </span>
                 <span class="cvr-stat issues">
                     <i class="fas fa-exclamation-triangle"></i>
