@@ -30,6 +30,7 @@ class RolePermissionSeeder extends Seeder
             'permission-edit',
             'permission-delete',
             'permission-view',
+            
             'inventry-upload',
             'inventory-details-view',
 
@@ -39,6 +40,10 @@ class RolePermissionSeeder extends Seeder
 
             'manage-gallery',
             'login-history',
+            'explore-inventory',
+
+            'post-installation-images',
+            'download-deales',
             
 
         ];
@@ -92,7 +97,7 @@ class RolePermissionSeeder extends Seeder
 
         $executive->givePermissionTo([
 
-            'user-view'
+            // 'user-view'  
 
         ]);
 

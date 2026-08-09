@@ -100,6 +100,15 @@ selected
 
 </select>
 
+<select name="manager_id" class="form-control">
+                                    <option value="">No Manager</option>
+                                    @foreach($managers as $manager)
+                                    <option value="{{$manager->id}}">
+                                    {{$manager->name}}
+                                    </option>
+                                    @endforeach
+                                </select>
+
 
 </div>
 

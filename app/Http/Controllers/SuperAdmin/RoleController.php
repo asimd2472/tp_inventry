@@ -12,6 +12,11 @@ class RoleController extends Controller
     public function index()
 {
 
+    abort_unless(
+        auth()->user()->can('role-view'),
+        403
+    );
+
 $roles = Role::with('permissions')->get();
 
 

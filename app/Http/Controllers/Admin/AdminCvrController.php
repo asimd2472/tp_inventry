@@ -327,6 +327,57 @@ class AdminCvrController extends Controller
         return response()->json($this->buildRepositoryPayload($request));
     }
 
+    private function isSuperUser(?\App\Models\User $user): bool
+    {
+        if (!$user) {
+            return false;
+        }
+
+        return $user->hasRole('Super User');
+    }
+
+    private function isSalesManager(?\App\Models\User $user): bool
+    {
+        return $user !== null && $user->hasRole('Sales Manager');
+    }
+
+    private function isSalesExecutive(?\App\Models\User $user): bool
+    {
+        return $user !== null && $user->hasRole('Sales Executive');
+    }
+
+    private function canViewAllCvr(?\App\Models\User $user): bool
+    {
+        return $this->isSuperUser($user) || $this->isSalesManager($user);
+    }
+
+    private function canUpdateCvrStatus(?\App\Models\User $user): bool
+    {
+        return $this->isSuperUser($user) || $this->isSalesManager($user);
+    }
+
+    private function getAccessibleUserIds(?\App\Models\User $user): array
+    {
+        if (!$user) {
+            return [];
+        }
+
+        if ($this->isSuperUser($user)) {
+            return [];
+        }
+
+        $userIds = [$user->id];
+
+        if ($this->isSalesManager($user)) {
+            $userIds = array_merge($userIds, \App\Models\User::query()
+                ->where('manager_id', $user->id)
+                ->pluck('id')
+                ->all());
+        }
+
+        return array_values(array_unique(array_filter($userIds)));
+    }
+
     private function buildRepositoryPayload(Request $request): array
     {
         $currentUser = Auth::user();
@@ -336,23 +387,36 @@ class AdminCvrController extends Controller
         $tab = in_array($request->get('tab'), ['all', 'my'], true) ? $request->get('tab') : 'my';
         $page = max(1, (int) $request->get('page', 1));
         $perPage = 30;
-        $canViewAll = $currentUser && (int) $currentUser->super_admin === 1;
-        $dealerOptions = CvrDetails::query()
-            ->whereNotNull('host')
-            ->where('host', '!=', '')
-            ->select('host')
-            ->distinct()
-            ->orderBy('host')
-            ->pluck('host')
-            ->filter()
-            ->values()
-            ->all();
+        $canViewAll = $this->canViewAllCvr($currentUser);
+        $showDealerFilter = $this->isSuperUser($currentUser);
+        $dealerOptions = [];
+
+        if ($showDealerFilter) {
+            $dealerOptions = CvrDetails::query()
+                ->whereNotNull('host')
+                ->where('host', '!=', '')
+                ->select('host')
+                ->distinct()
+                ->orderBy('host')
+                ->pluck('host')
+                ->filter()
+                ->values()
+                ->all();
+        }
+
+        $accessibleUserIds = $this->getAccessibleUserIds($currentUser);
 
         $query = CvrDetails::with(['actionPoints', 'complaints', 'user'])
-            ->when($canViewAll && $tab === 'all', function ($query) {
-                // admin can view all CVRs
-            }, function ($query) use ($userId) {
-                $query->where('user_id', $userId);
+            ->when($this->isSuperUser($currentUser), function ($query) use ($tab, $dealer) {
+                if ($tab === 'my') {
+                    $query->where('user_id', Auth::id());
+                }
+            }, function ($query) use ($currentUser, $tab, $accessibleUserIds, $userId) {
+                if ($this->isSalesManager($currentUser) && $tab === 'all') {
+                    $query->whereIn('user_id', $accessibleUserIds);
+                } else {
+                    $query->where('user_id', $userId);
+                }
             })
             ->when($dealer !== '', function ($query) use ($dealer) {
                 $query->where('host', $dealer);
@@ -583,9 +647,22 @@ class AdminCvrController extends Controller
         $user = Auth::user();
         $query = CvrDetails::with(['actionPoints', 'complaints', 'user'])->where('id', $id);
 
-        if (!( $user && (int) $user->super_admin === 1 )) {
-            $query->where('user_id', Auth::id());
+        if ($this->isSuperUser($user)) {
+            return $query->firstOrFail();
         }
+
+        if ($this->isSalesManager($user)) {
+            $query->where(function ($subQuery) use ($user) {
+                $subQuery->where('user_id', $user->id)
+                    ->orWhereHas('user', function ($userQuery) use ($user) {
+                        $userQuery->where('manager_id', $user->id);
+                    });
+            });
+
+            return $query->firstOrFail();
+        }
+
+        $query->where('user_id', Auth::id());
 
         return $query->firstOrFail();
     }
@@ -614,6 +691,8 @@ class AdminCvrController extends Controller
         $sentiment = ucfirst(strtolower($data['sentiment'] ?? 'Neutral'));
         $uploadedBy = $cvr->user->name ?? 'Unknown User';
 
+        $canChangeStatus = $this->canUpdateCvrStatus(Auth::user());
+
         return view('admin.cvr.details', compact(
             'cvr',
             'dealerName',
@@ -627,7 +706,8 @@ class AdminCvrController extends Controller
             'sentiment',
             'uploadedBy',
             'actionPoints',
-            'complaints'
+            'complaints',
+            'canChangeStatus'
         ));
     }
 
@@ -722,6 +802,10 @@ class AdminCvrController extends Controller
 
     public function updateActionPointStatus(Request $request, $id)
     {
+        if (! $this->canUpdateCvrStatus(Auth::user())) {
+            abort(403, 'You are not allowed to update CVR status.');
+        }
+
         $ap = CvrActionPoints::findOrFail($id);
         $this->getAuthorizedCvr((int) $ap->cvr_id);
 

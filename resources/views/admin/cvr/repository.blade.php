@@ -50,7 +50,11 @@
                                 </div>
                         
                                 @php
-                                    $canViewAll = Auth::user() && (int) Auth::user()->super_admin === 1;
+                                    $isSuperUser = Auth::user() && Auth::user()->hasRole('Super User');
+                                    $isSalesManager = Auth::user() && Auth::user()->hasRole('Sales Manager');
+                                    $canViewAll = $isSuperUser || $isSalesManager;
+                                    $showDealerFilter = $isSuperUser;
+
                                 @endphp
 
                                 {{-- Tabs --}}
@@ -72,20 +76,22 @@
                                                    autocomplete="off"
                                                    value="{{ old('search', $search ?? '') }}">
                                         </div>
-                                        <div class="repo-filter" style="position: relative;">
-                                            <button type="button" id="dealerFilterToggle" class="repo-filter-button" aria-label="Filter by dealer" aria-expanded="false" title="Filter by dealer">
-                                                <i class="fas fa-filter"></i>
-                                            </button>
-                                            <div class="repo-filter-dropdown" id="dealerFilterDropdown" style="display:none;">
-                                                <label for="dealerFilterSelect">Dealer</label>
-                                                <select id="dealerFilterSelect">
-                                                    <option value="">All Dealers</option>
-                                                    @foreach(($dealerOptions ?? []) as $dealerOption)
-                                                        <option value="{{ $dealerOption }}" {{ ($dealer ?? '') === $dealerOption ? 'selected' : '' }}>{{ $dealerOption }}</option>
-                                                    @endforeach
-                                                </select>
+                                        @if($showDealerFilter)
+                                            <div class="repo-filter" style="position: relative;">
+                                                <button type="button" id="dealerFilterToggle" class="repo-filter-button" aria-label="Filter by dealer" aria-expanded="false" title="Filter by dealer">
+                                                    <i class="fas fa-filter"></i>
+                                                </button>
+                                                <div class="repo-filter-dropdown" id="dealerFilterDropdown" style="display:none;">
+                                                    <label for="dealerFilterSelect">Dealer</label>
+                                                    <select id="dealerFilterSelect">
+                                                        <option value="">All Dealers</option>
+                                                        @foreach(($dealerOptions ?? []) as $dealerOption)
+                                                            <option value="{{ $dealerOption }}" {{ ($dealer ?? '') === $dealerOption ? 'selected' : '' }}>{{ $dealerOption }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
                                             </div>
-                                        </div>
+                                        @endif
                                     </div>
                                     <div class="repo-match-count">
                                         <span id="matchCount">{{ $totalVisits }}</span> Matches Found

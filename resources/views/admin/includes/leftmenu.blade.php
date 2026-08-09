@@ -29,18 +29,17 @@
             </li>
         </ul> --}}
 
-        @php
-            $user = Auth::user();
-
-            $isSuperAdmin = $user->super_admin == 1;
-            $isUserAdmin = $user->user_access == 2;
-        @endphp
-
         <ul>
 
-            {{-- SUPER ADMIN + USER ADMIN --}}
-            @if($isSuperAdmin || $isUserAdmin)
-
+            
+                @can('explore-inventory')
+                <li class="">
+                    <a href="{{ url('user/inventry-check') }}">
+                        <i class="menu-icon fa-solid fa-chalkboard"></i>
+                        Explore Inventory
+                    </a>
+                </li>
+                @endcan
                 @can('inventory-details-view')
                 <li class="{{ Route::currentRouteName() == 'admin.inventory_details' ? 'active' : '' }}">
                     <a href="{{ url('admin/inventry-details') }}">
@@ -50,63 +49,80 @@
                 </li>
                 @endcan
 
+                @can('inventry-upload')
                 <li class="{{ Route::currentRouteName() == 'admin.inventory_upload' ? 'active' : '' }}">
                     <a href="{{ url('admin/inventry-upload') }}">
                         <i class="menu-icon fa-solid fa-upload"></i>
                         Upload Inventory
                     </a>
                 </li>
-
-            @endif
-
-
-            {{-- SUPER ADMIN ONLY --}}
-            @if($isSuperAdmin)
-
+                @endcan
+                @can('download-deales')
+                <li class="{{ Route::currentRouteName() == 'admin.inventory_upload' ? 'active' : '' }}">
+                    <a href="{{ url('admin/download-deales') }}">
+                        <i class="menu-icon fa-solid fa-download"></i>
+                        Download Dealer list
+                    </a>
+                </li>
+                @endcan
+                @can('post-installation-images')
+                <li class="{{ Route::currentRouteName() == 'admin.inventory_upload' ? 'active' : '' }}">
+                    <a href="{{ url('admin/post-installation-images') }}">
+                        <i class="menu-icon fa-solid fa-download"></i>
+                        Post Installation Images
+                    </a>
+                </li>
+                @endcan
+                @can('user-view')
                 <li class="{{ Route::currentRouteName() == 'admin.users' ? 'active' : '' }}">
                     <a href="{{ url('admin/users') }}">
                         <i class="menu-icon fa-solid fa-users"></i>
                         Users
                     </a>
                 </li>
+                @endcan
 
-                {{-- <li class="{{ Route::currentRouteName() == 'admin.cvr_details' ? 'active' : '' }}">
-                    <a href="{{ url('admin/cvr-details') }}">
-                        <i class="menu-icon fa-solid fa-chalkboard"></i>
-                        CVR Details
+                @can('role-view')
+                <li class="{{ Route::currentRouteName() == 'admin.users' ? 'active' : '' }}">
+                    <a href="{{ url('admin/roles') }}">
+                        <i class="menu-icon fa-solid fa-users"></i>
+                        Role Management
                     </a>
-                </li> --}}
+                </li>
+                @endcan
 
+                @can('cvr-view')
                 <li class="{{ Route::currentRouteName() == 'admin.cvr' ? 'active' : '' }}">
                     <a href="{{ url('admin/cvr') }}">
                         <i class="menu-icon fa-solid fa-chalkboard"></i>
                         CVR
                     </a>
                 </li>
-
+                @endcan
+                @can('repository')
                 <li class="{{ Route::currentRouteName() == 'admin.repository' ? 'active' : '' }}">
                     <a href="{{ url('admin/cvr/repository') }}">
                         <i class="menu-icon fa-solid fa-chalkboard"></i>
                         CVR Repository
                     </a>
                 </li>
-
+                @endcan
+                @can('manage-gallery')
                 <li class="{{ Route::currentRouteName() == 'admin.gallery' ? 'active' : '' }}">
                     <a href="{{ url('admin/gallery') }}">
                         <i class="menu-icon fa-solid fa-image"></i>
                         Manage Gallery
                     </a>
                 </li>
-
+                @endcan
+                @can('login-history')
                 <li class="{{ Route::currentRouteName() == 'admin.login_history' ? 'active' : '' }}">
                     <a href="{{ url('admin/login-history') }}">
                         <i class="menu-icon fa-solid fa-clock-rotate-left"></i>
                         Login History
                     </a>
                 </li>
-
-            @endif
-
+                @endcan
 
             {{-- LOGOUT --}}
             <li>

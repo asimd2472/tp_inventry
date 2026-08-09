@@ -4,13 +4,15 @@
             <h4>{{ $ap->task ?? 'Untitled' }}</h4>
         </div>
         <div class="ap-actions">
-            <div class="ap-status-select-wrap">
-                <select class="ap-status-select" data-id="{{ $ap->id }}" data-url="{{ route('admin.cvr.updateActionPointStatus', $ap->id) }}">
-                    @foreach(['Open','In Progress','Closed'] as $statusOption)
-                        <option value="{{ $statusOption }}" {{ ($ap->status ?? 'Open') === $statusOption ? 'selected' : '' }}>{{ $statusOption }}</option>
-                    @endforeach
-                </select>
-            </div>
+            @if(!empty($canChangeStatus) && $canChangeStatus)
+                <div class="ap-status-select-wrap">
+                    <select class="ap-status-select" data-id="{{ $ap->id }}" data-url="{{ route('admin.cvr.updateActionPointStatus', $ap->id) }}">
+                        @foreach(['Open','In Progress','Closed'] as $statusOption)
+                            <option value="{{ $statusOption }}" {{ ($ap->status ?? 'Open') === $statusOption ? 'selected' : '' }}>{{ $statusOption }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
             <button class="icon-btn delete-btn" data-delete-url="{{ route('admin.cvr.deleteActionPoint', $ap->id) }}" title="Delete">
                 <i class="fas fa-trash"></i>
             </button>

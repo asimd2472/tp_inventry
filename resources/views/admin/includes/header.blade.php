@@ -29,125 +29,88 @@
 
                             {{-- <ul class="account-login" style="display: none;">
 
-                                @if(Auth::user()->super_admin==1)
+                                
                                     <li><a href="{{url('admin/users')}}">Create User</a></li>
                                     <li><a href="{{url('admin/cvr-details')}}">CVR Details</a></li>
-                                @endif
-
-                                @if(Auth::user()->is_admin==1)
                                     <li><a href="{{url('admin/inventry-upload')}}">Upload Inventory</a></li>
                                     <li><a href="{{url('admin/inventry-details')}}">Inventory Details</a></li>
                                     <li><a href="{{url('admin/gallery')}}">Manage Gallery</a></li>
                                     <li><a href="{{url('admin/login-history')}}">Login history</a></li>
-                                    
-                                    @if(Auth::user()->user_access==2)
-                                        <li><a href="{{url('user/inventry-check')}}">Explore Inventory</a></li>
-                                        <li><a href="javascript:void(0)" onclick="inventorySend()">Download Catalog</a></li>
-                                    @endif
+                                    <li><a href="{{url('user/inventry-check')}}">Explore Inventory</a></li>
+                                    <li><a href="javascript:void(0)" onclick="inventorySend()">Download Catalog</a></li>
                                     
 
                                     <li><a href="{{url('admin/user_logout')}}">Logout</a></li>
-                                @else
 
-                                    @if(Auth::user()->user_access==2)
                                         <li><a href="{{url('admin/inventry-upload')}}">Upload Inventory</a></li>
                                         <li><a href="{{url('admin/inventry-details')}}">Inventory Details</a></li>
-                                        
-                                        @if(!request()->is('user/*'))
                                             <li><a href="{{url('user/inventry-check')}}">Explore Inventory</a></li>
-                                        @endif
-                                        
-                                    @endif
-                                    <li><a href="javascript:void(0)" onclick="inventorySend()">Download Catalog</a></li>
                                     <li><a href="{{url('user/user_logout')}}">Logout</a></li>
-                                @endif
                             </ul> --}}
 
-                            @php
-                                $user = Auth::user();
-
-                                $isSuperAdmin = $user->super_admin == 1;
-                                $isAdmin = $user->is_admin == 1;
-                                $isUserAdmin = $user->user_access == 2;
-                            @endphp
 
                             <ul class="account-login" style="display: none;">
+                                @can('explore-inventory')
+                                <li>
+                                    <a href="{{ url('user/inventry-check') }}">
+                                        Explore Inventory
+                                    </a>
+                                </li>
+                                @endcan
+                                @can('download-deales')
+                                <li>
+                                    <a href="{{ url('admin/download-deales') }}">
+                                        Download Dealer list
+                                    </a>
+                                </li>
+                                @endcan
+                                @can('post-installation-images')
+                                <li>
+                                    <a href="{{ url('admin/post-installation-images') }}">
+                                        Post Installation Images
+                                    </a>
+                                </li>
+                                @endcan
+                                @can('inventry-upload')
+                                <li><a href="{{ url('admin/inventry-upload') }}">Upload Inventory</a></li>
+                                @endcan
+                                @can('inventory-details-view')
+                                <li><a href="{{ url('admin/inventry-details') }}">Inventory Details</a></li>
+                                @endcan
+                                @can('user-view')
+                                <li><a href="{{ url('admin/users') }}">Create User</a></li>
+                                @endcan
+                                @can('cvr-view')
+                                <li>
+                                    <a href="{{ url('admin/cvr') }}">
+                                        CVR
+                                    </a>
+                                </li>
+                                @endcan  
+                                @can('repository') 
+                                <li>
+                                    <a href="{{ url('admin/cvr/repository') }}">
+                                        CVR Repository
+                                    </a>
+                                </li>
+                                @endcan
 
-                                {{-- SUPER ADMIN --}}
-                                @if($isSuperAdmin)
-                                    <li><a href="{{ url('admin/users') }}">Create User</a></li>
-                                    {{-- <li><a href="{{ url('admin/cvr-details') }}">CVR Details</a></li> --}}
-
-                                    <li>
-                                        <a href="{{ url('admin/cvr') }}">
-                                            CVR
-                                        </a>
-                                    </li>
                                     
-                                    <li>
-                                        <a href="{{ url('admin/cvr/repository') }}">
-                                            CVR Repository
-                                        </a>
-                                    </li>
-                                @endif
-
-
-                                {{-- SUPER ADMIN + USER ADMIN --}}
-                                @if($isSuperAdmin || $isUserAdmin)
-
-                                    <li><a href="{{ url('admin/inventry-upload') }}">Upload Inventory</a></li>
-
-                                    <li><a href="{{ url('admin/inventry-details') }}">Inventory Details</a></li>
-
-                                @endif
-
-
-                                {{-- ALL USERS --}}
-                                @if($isSuperAdmin || $isUserAdmin || $user->user_access == 1)
-
-                                    @if(!request()->is('user/*'))
-                                        <li>
-                                            <a href="{{ url('user/inventry-check') }}">
-                                                Explore Inventory
-                                            </a>
-                                        </li>
-                                    @endif
+                                        
                                     
-                                    <li>
-                                        <a href="javascript:void(0)" onclick="inventorySend()">
-                                            Download Catalog
-                                        </a>
-                                    </li>
-                                    @if($user->user_access == 1)
-                                    <li>
-                                        <a href="{{ url('user/cvr') }}">
-                                            CVR
-                                        </a>
-                                    </li>
-                                    
-                                    <li>
-                                        <a href="{{ url('user/cvr/repository') }}">
-                                            CVR Repository
-                                        </a>
-                                    </li>
-                                    @endif
-
-                                @endif
-
-
-                                {{-- ONLY SUPER ADMIN --}}
-                                @if($isSuperAdmin)
+                                <li>
+                                    <a href="javascript:void(0)" onclick="inventorySend()">
+                                        Download Catalog
+                                    </a>
+                                </li>
+                                @can('manage-gallery')
                                     <li><a href="{{ url('admin/gallery') }}">Manage Gallery</a></li>
+                                @endcan
+                                @can('login-history')
                                     <li><a href="{{ url('admin/login-history') }}">Login history</a></li>
-                                @endif
+                                @endcan
 
-
-                                {{-- LOGOUT --}}
-                                @if($isSuperAdmin || $isAdmin)
-                                    <li><a href="{{ url('admin/user_logout') }}">Logout</a></li>
-                                @else
                                     <li><a href="{{ url('user/user_logout') }}">Logout</a></li>
-                                @endif
 
                             </ul>
 

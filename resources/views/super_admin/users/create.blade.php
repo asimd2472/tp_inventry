@@ -11,7 +11,7 @@
                         
                         <div class="user-body">
 
-                            <form method="POST" action="{{route('users.store')}}">
+                            <form method="POST" action="{{route('admin.users.store')}}">
                                 @csrf
                                 <input class="form-control mb-2" name="name" placeholder="Name">
                                 <input class="form-control mb-2" name="email" placeholder="Email">

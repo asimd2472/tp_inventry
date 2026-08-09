@@ -12,6 +12,10 @@ class UserController extends Controller
 {
     public function index()
 {
+    abort_unless(
+        auth()->user()->can('user-view'),
+        403
+    );
 
     $users = User::with('roles')->get();
 
@@ -62,7 +66,8 @@ $user = User::create([
 'password'=>Hash::make($request->password),
 
 
-'manager_id'=>$request->manager_id
+'manager_id'=>$request->manager_id,
+'status'=>1,
 
 ]);
 
@@ -75,7 +80,7 @@ $request->role
 
 
 return redirect()
-->route('users.index');
+->route('admin.users.index');
 
 }
 
@@ -85,6 +90,9 @@ return redirect()
 public function edit(User $user)
 {
 
+$managers = User::role(
+        'Sales Manager'
+    )->get();
 
 $roles = Role::all();
 
@@ -93,7 +101,8 @@ return view(
 'super_admin.users.edit',
 compact(
 'user',
-'roles'
+'roles',
+'managers'
 ));
 
 }
@@ -119,7 +128,8 @@ $user->update([
 
 'name'=>$request->name,
 
-'email'=>$request->email
+'email'=>$request->email,
+'manager_id'=>$request->manager_id
 
 ]);
 
@@ -145,7 +155,7 @@ $request->role
 
 
 return redirect()
-->route('users.index');
+->route('admin.users.index');
 
 }
 

@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="{{ url('assets/fonts/stylesheet.css')}}" media="all">
     <link rel="stylesheet" href="{{ url('assets/intlTelInput/intlTelInput.css') }}">
     <script src="{{ url('assets/intlTelInput/intlTelInput.js') }}"></script>
+    @stack('styles')
 </head>
 
 <body>

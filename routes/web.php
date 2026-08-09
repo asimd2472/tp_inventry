@@ -127,6 +127,15 @@ Route::get('/login-history', [MyaccountController::class, 'login_history'])->nam
 Route::get('/login-history-user/{id}', [MyaccountController::class,'user_login_history'])->name('admin.user_login_history');
 
 
+Route::get('/user_logout', [MyaccountController::class, 'user_logout'])->name('user_logout');
+
+
+Route::get('/download-deales', [MyaccountController::class, 'download_deales'])->name('download_deales');
+Route::post('/send_dealers', [MyaccountController::class, 'send_dealers'])->name('send_dealers');
+Route::match(['get', 'post'], '/post-installation-images', [MyaccountController::class, 'post_installation_images'])->name('post_installation_images');
+
+
+
 
 });
 
@@ -152,13 +161,7 @@ Route::prefix('user')->name('user.')->group(function () {
 
         Route::post('/inventory-item-check', [UserInventryController::class, 'inventoryItemCheck']);
 
-        // Route::get('/cvr', [UserCVRController::class, 'cvr']);
-        // Route::post('/upload-cvr', [UserCVRController::class, 'uploadCvr']);
-        // Route::get('/cvr/repository', [UserCVRController::class, 'repository'])->name('repository');
-        // Route::get('/cvr/repository-data', [UserCVRController::class, 'repositoryData'])->name('repository.data');
-        // Route::get('/cvr/view/{id}', [UserCVRController::class, 'viewCvrDetails'])->name('cvr.details');
-        // Route::post('/cvr/{id}/action-points', [UserCVRController::class, 'addActionPoint'])->name('cvr.addActionPoint');
-        // Route::post('/cvr/{id}/complaints', [UserCVRController::class, 'addComplaint'])->name('cvr.addComplaint');
+        
     });
 });
 
