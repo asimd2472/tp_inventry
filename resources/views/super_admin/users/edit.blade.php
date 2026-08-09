@@ -12,7 +12,7 @@
                         <div class="user-body">
 
                             <form method="POST"
-action="{{route('users.update',$user->id)}}">
+action="{{route('admin.users.update',$user->id)}}">
 
 
 @csrf
@@ -114,7 +114,7 @@ Update User
 
 
 
-<a href="{{route('users.index')}}"
+<a href="{{route('admin.users.index')}}"
 class="btn btn-secondary">
 
 Back

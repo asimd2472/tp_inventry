@@ -11,7 +11,7 @@
                         
                         <div class="user-body">
                            
-                            <a href="{{route('users.create')}}"
+                            <a href="{{route('admin.users.create')}}"
                             class="btn btn-primary">
 
                             Add User
@@ -43,8 +43,8 @@
                                             @endforeach
                                         </td>
                                         <td>
-                                            <a href="{{route('users.edit',$user)}}" class="btn btn-warning btn-sm">Edit</a>
-                                            <form action="{{route('users.destroy',$user)}}" method="POST" style="display:inline">
+                                            <a href="{{route('admin.users.edit',$user)}}" class="btn btn-warning btn-sm">Edit</a>
+                                            <form action="{{route('admin.users.destroy',$user)}}" method="POST" style="display:inline">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button class="btn btn-danger btn-sm">

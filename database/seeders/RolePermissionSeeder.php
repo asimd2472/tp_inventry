@@ -30,6 +30,16 @@ class RolePermissionSeeder extends Seeder
             'permission-edit',
             'permission-delete',
             'permission-view',
+            'inventry-upload',
+            'inventory-details-view',
+
+            'cvr',
+            'repository',
+            'cvr-view',
+
+            'manage-gallery',
+            'login-history',
+            
 
         ];
 

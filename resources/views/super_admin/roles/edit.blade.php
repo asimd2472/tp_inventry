@@ -10,7 +10,7 @@
                         <div class="user-heading">Users</div>
                             <div class="user-body">
                                 
-                                <form method="POST" action="{{route('roles.update',$role->id)}}">
+                                <form method="POST" action="{{route('admin.roles.update',$role->id)}}">
                                     @csrf
                                 @method('PUT')
 
@@ -89,7 +89,7 @@
 
 
 
-                                <a href="{{route('roles.index')}}"
+                                <a href="{{route('admin.roles.index')}}"
                                 class="btn btn-secondary mt-3">
                                 Back
                                 </a>

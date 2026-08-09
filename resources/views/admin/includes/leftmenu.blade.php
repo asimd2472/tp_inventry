@@ -41,12 +41,14 @@
             {{-- SUPER ADMIN + USER ADMIN --}}
             @if($isSuperAdmin || $isUserAdmin)
 
+                @can('inventory-details-view')
                 <li class="{{ Route::currentRouteName() == 'admin.inventory_details' ? 'active' : '' }}">
                     <a href="{{ url('admin/inventry-details') }}">
                         <i class="menu-icon fa-solid fa-chalkboard"></i>
                         Inventory Details
                     </a>
                 </li>
+                @endcan
 
                 <li class="{{ Route::currentRouteName() == 'admin.inventory_upload' ? 'active' : '' }}">
                     <a href="{{ url('admin/inventry-upload') }}">

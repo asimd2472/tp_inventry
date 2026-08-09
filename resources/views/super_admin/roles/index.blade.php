@@ -11,7 +11,7 @@
                         
                             <div class="user-body">
                                 
-                                {{-- <a href="{{route('roles.create')}}" class="btn btn-primary">Add Role</a> --}}
+                                {{-- <a href="{{route('admin.roles.create')}}" class="btn btn-primary">Add Role</a> --}}
                                 <table class="table mt-3">
                                     <tr>
                                         <th>Role</th>
@@ -29,7 +29,7 @@
                                                 @endforeach
                                             </td>
                                             <td>
-                                                <a href="{{route('roles.edit',$role)}}" class="btn btn-warning btn-sm">Edit</a>
+                                                <a href="{{route('admin.roles.edit',$role)}}" class="btn btn-warning btn-sm">Edit</a>
                                             </td>
                                         </tr>
                                     @endforeach

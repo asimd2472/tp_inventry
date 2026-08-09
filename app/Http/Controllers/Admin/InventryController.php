@@ -13,7 +13,12 @@ use Illuminate\Support\Facades\DB;
 class InventryController extends Controller
 {
     public function index(Request $request)
-    {   
+    {
+        
+        abort_unless(
+            auth()->user()->can('inventory-details-view'),
+            403
+        );
         
         if ($request->ajax()) {
 
@@ -61,6 +66,11 @@ class InventryController extends Controller
 
     public function inventry_upload()
     {   
+        abort_unless(
+            auth()->user()->can('inventry-upload'),
+            403
+        );
+
         return view('admin.inventry.inventry_upload');
     }
 

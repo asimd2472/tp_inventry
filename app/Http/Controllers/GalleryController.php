@@ -10,6 +10,11 @@ class GalleryController extends Controller
 {
     public function gallery()
     {   
+        abort_unless(
+            auth()->user()->can('manage-gallery'),
+            403
+        );
+
         $dealers = Gallery::where('type', 'dealers')->get();
         $brochure = Gallery::where('type', 'brochure')->get();
         $installationImages = Gallery::where('type', 'installation_images')->get();

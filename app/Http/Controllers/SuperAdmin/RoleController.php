@@ -67,7 +67,7 @@ $request->permission
 
 
 return redirect()
-->route('roles.index');
+->route('admin.roles.index');
 
 }
 
@@ -114,7 +114,7 @@ $request->permission
 
 
 return redirect()
-->route('roles.index');
+->route('admin.roles.index');
 
 }
 

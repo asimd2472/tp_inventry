@@ -18,6 +18,10 @@ use Illuminate\Support\Facades\Log;
 class AdminCvrController extends Controller
 {
     public function cvr(){
+        abort_unless(
+            auth()->user()->can('cvr'),
+            403
+        );
         return view('admin.cvr.index');
     }
 
@@ -307,7 +311,12 @@ class AdminCvrController extends Controller
     }
 
     public function repository(Request $request)
-    {
+    {   
+        abort_unless(
+            auth()->user()->can('repository'),
+            403
+        );
+
         $payload = $this->buildRepositoryPayload($request);
 
         return view('admin.cvr.repository', $payload);
@@ -582,7 +591,12 @@ class AdminCvrController extends Controller
     }
 
     public function viewCvrDetails($id)
-    {
+    {   
+        abort_unless(
+            auth()->user()->can('repository'),
+            403
+        );
+        
         $cvr = $this->getAuthorizedCvr((int) $id);
 
         $data = $cvr->cvr_data ?? [];

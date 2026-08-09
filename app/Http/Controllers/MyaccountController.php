@@ -202,6 +202,11 @@ class MyaccountController extends Controller
     }
 
     public function login_history(Request $request){
+        abort_unless(
+            auth()->user()->can('login-history'),
+            403
+        );
+
         if ($request->ajax()) {
             // $loginHistory = DB::table('login_histories')
             //     ->join('users', 'login_histories.user_id', '=', 'users.id')
