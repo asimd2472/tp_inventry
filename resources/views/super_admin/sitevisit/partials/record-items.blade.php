@@ -6,7 +6,8 @@
     </div>
 @else
     @foreach($items as $item)
-        <article class="sv-record-card">
+        <article class="sv-record-card is-clickable"
+                 onclick="window.location.href='{{ route('admin.site_visit_record.show', $item['id']) }}'">
             <div class="sv-record-card-head">
                 <div>
                     <h3 class="sv-record-card-title">{{ $item['customer_name'] }}</h3>

@@ -371,9 +371,70 @@ class SiteVisitController extends Controller
         return [is_numeric($lat) ? $lat : null, is_numeric($lng) ? $lng : null];
     }
 
+    private function getAuthorizedSiteVisit(int $id): SiteVisit
+    {
+        $user = Auth::user();
+        $this->authorizeSiteVisitDashboard();
+
+        $visit = SiteVisit::with(['user.manager'])->findOrFail($id);
+
+        if ($this->isSuperUser($user)) {
+            return $visit;
+        }
+
+        if ($this->isSalesManager($user)) {
+            $accessibleUserIds = array_values(array_unique(array_merge(
+                [$user->id],
+                User::query()->where('manager_id', $user->id)->pluck('id')->all()
+            )));
+
+            abort_unless(in_array($visit->user_id, $accessibleUserIds, true), 403);
+
+            return $visit;
+        }
+
+        abort_unless((int) $visit->user_id === (int) $user->id, 403);
+
+        return $visit;
+    }
+
     public function show(string $id)
     {
-        //
+        $visit = $this->getAuthorizedSiteVisit((int) $id);
+        $currentUser = Auth::user();
+
+        $visitDate = $visit->visit_date
+            ? Carbon::parse($visit->visit_date)->format('d M, Y')
+            : '—';
+        $visitTime = $visit->visit_time
+            ? Carbon::parse($visit->visit_time)->format('h:i A')
+            : '—';
+
+        $interestClass = match (strtolower($visit->interest ?? '')) {
+            'high' => 'high',
+            'medium' => 'medium',
+            default => 'low',
+        };
+
+        $products = is_array($visit->products) ? $visit->products : [];
+        $categories = is_array($visit->categories) ? $visit->categories : [];
+
+        return view('super_admin.sitevisit.details', [
+            'visit' => $visit,
+            'visitDate' => $visitDate,
+            'visitTime' => $visitTime,
+            'interestClass' => $interestClass,
+            'products' => $products,
+            'categories' => $categories,
+            'executiveName' => $visit->user->name ?? $visit->executive_name ?? 'Unknown',
+            'executiveEmail' => $visit->user->email ?? $visit->executive_email ?? '—',
+            'managerName' => $visit->user?->manager?->name ?? '—',
+            'showManager' => $this->isSuperUser($currentUser),
+            'location' => trim(($visit->district ?? '') . ', ' . ($visit->state ?? ''), ', '),
+            'gpsCoordinates' => ($visit->latitude && $visit->longitude)
+                ? $visit->latitude . ', ' . $visit->longitude
+                : null,
+        ]);
     }
 
     public function edit(string $id)

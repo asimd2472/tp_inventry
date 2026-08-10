@@ -143,4 +143,33 @@ class SiteVisitRecordTest extends TestCase
         $response->assertJsonPath('estimatedProducts', 8);
         $this->assertSame('Customer One', $response->json('items.0.customer_name'));
     }
+
+    public function test_authorized_user_can_view_site_visit_details(): void
+    {
+        $this->seed(RolePermissionSeeder::class);
+
+        $executive = User::factory()->create();
+        $executive->assignRole('Sales Executive');
+
+        $visit = SiteVisit::create([
+            'user_id' => $executive->id,
+            'visit_date' => '2026-08-04',
+            'visit_time' => '09:00:00',
+            'customer_name' => 'Customer Details',
+            'mobile' => '9111111111',
+            'state' => 'State 1',
+            'district' => 'District 1',
+            'construction_stage' => 'Foundation',
+            'products' => ['Doors'],
+            'timeline' => '1 month',
+            'interest' => 'High',
+            'qty_total' => 8,
+        ]);
+
+        $this->actingAs($executive)
+            ->get(route('admin.site_visit_record.show', $visit->id))
+            ->assertOk()
+            ->assertSee('Customer Details')
+            ->assertSee('Foundation');
+    }
 }

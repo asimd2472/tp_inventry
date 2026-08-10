@@ -254,6 +254,10 @@
         border: 1px solid #edf1f6;
         transition: 0.25s;
 
+        &.is-clickable {
+            cursor: pointer;
+        }
+
         &:hover {
             transform: translateY(-2px);
             box-shadow: 0 12px 32px rgba(0, 118, 215, 0.1);
