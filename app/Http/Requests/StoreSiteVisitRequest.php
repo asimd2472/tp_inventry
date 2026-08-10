@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StoreSiteVisitRequest extends FormRequest
 {
@@ -15,7 +17,7 @@ class StoreSiteVisitRequest extends FormRequest
     {
         return [
             'visit_date'          => ['required', 'date'],
-            'visit_time'          => ['required', 'date_format:H:i'],
+            'visit_time'          => ['required', 'date_format:H:i,H:i:s'],
 
             'customer_name'       => ['required', 'string', 'max:150'],
             'mobile'              => ['required', 'regex:/^[6-9][0-9]{9}$/'],
@@ -49,6 +51,49 @@ class StoreSiteVisitRequest extends FormRequest
             'follow_up'           => ['nullable', 'in:Yes,1,on'],
             'remarks'             => ['nullable', 'string', 'max:1000'],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $nullableFields = [
+            'alt_mobile',
+            'customer_email',
+            'pincode',
+            'gps',
+            'maps_link',
+            'budget',
+            'competitor',
+            'remarks',
+        ];
+
+        $normalized = [];
+        foreach ($nullableFields as $field) {
+            $value = $this->input($field);
+            if ($value === '' || $value === null) {
+                $normalized[$field] = null;
+            }
+        }
+
+        if ($this->filled('visit_time')) {
+            $normalized['visit_time'] = substr((string) $this->input('visit_time'), 0, 5);
+        }
+
+        if (! empty($normalized)) {
+            $this->merge($normalized);
+        }
+    }
+
+    protected function failedValidation(Validator $validator): void
+    {
+        if ($this->expectsJson() || $this->ajax()) {
+            throw new HttpResponseException(response()->json([
+                'success' => false,
+                'message' => 'Please fix the highlighted fields and try again.',
+                'errors' => $validator->errors(),
+            ], 422));
+        }
+
+        parent::failedValidation($validator);
     }
 
     public function messages(): array
