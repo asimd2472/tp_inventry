@@ -54,7 +54,9 @@
                                     $isSalesManager = Auth::user() && Auth::user()->hasRole('Sales Manager');
                                     $canViewAll = $isSuperUser || $isSalesManager;
                                     $showDealerFilter = $isSuperUser;
-
+                                    $teamFilter = $teamFilter ?? ['show' => false, 'type' => null, 'options' => [], 'value' => ''];
+                                    $showTeamFilter = $canViewAll && !empty($teamFilter['type']);
+                                    $teamFilterLabel = ($teamFilter['type'] ?? '') === 'sales_manager' ? 'Sales Manager' : 'Sales Executive';
                                 @endphp
 
                                 {{-- Tabs --}}
@@ -87,6 +89,22 @@
                                                         <option value="">All Dealers</option>
                                                         @foreach(($dealerOptions ?? []) as $dealerOption)
                                                             <option value="{{ $dealerOption }}" {{ ($dealer ?? '') === $dealerOption ? 'selected' : '' }}>{{ $dealerOption }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        @endif
+                                        @if($showTeamFilter)
+                                            <div class="repo-filter repo-team-filter" id="teamFilterWrap" style="position: relative; {{ ($tab ?? 'my') === 'all' ? '' : 'display:none;' }}">
+                                                <button type="button" id="teamFilterToggle" class="repo-filter-button" aria-label="Filter by team" aria-expanded="false" title="Filter by {{ $teamFilterLabel }}">
+                                                    <i class="fas fa-users"></i>
+                                                </button>
+                                                <div class="repo-filter-dropdown" id="teamFilterDropdown" style="display:none;">
+                                                    <label for="teamFilterSelect">{{ $teamFilterLabel }}</label>
+                                                    <select id="teamFilterSelect" data-filter-type="{{ $teamFilter['type'] ?? '' }}">
+                                                        <option value="">All {{ $teamFilterLabel }}s</option>
+                                                        @foreach(($teamFilter['options'] ?? []) as $teamOption)
+                                                            <option value="{{ $teamOption['id'] }}" {{ ($teamFilter['value'] ?? '') == $teamOption['id'] ? 'selected' : '' }}>{{ $teamOption['name'] }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -150,10 +168,16 @@
     var $dealerToggle = $('#dealerFilterToggle');
     var $dealerDropdown = $('#dealerFilterDropdown');
     var $dealerSelect = $('#dealerFilterSelect');
+    var $teamFilterWrap = $('#teamFilterWrap');
+    var $teamToggle = $('#teamFilterToggle');
+    var $teamDropdown = $('#teamFilterDropdown');
+    var $teamSelect = $('#teamFilterSelect');
     var debounceTimer = null;
     var baseUrl = '{{ route('admin.repository.data') }}';
     var currentTab = '{{ $tab ?? 'my' }}';
     var selectedDealer = @json($dealer ?? '');
+    var teamFilterType = @json($teamFilter['type'] ?? '');
+    var selectedTeamUser = @json($teamFilter['value'] ?? '');
 
     if (!$input.length) {
         return;
@@ -218,6 +242,31 @@
         }
     }
 
+    function toggleTeamFilterVisibility() {
+        if (!$teamFilterWrap.length) {
+            return;
+        }
+
+        if (currentTab === 'all' && teamFilterType) {
+            $teamFilterWrap.show();
+        } else {
+            $teamFilterWrap.hide();
+            toggleTeamDropdown(false);
+        }
+    }
+
+    function appendTeamFilterParams(params) {
+        if (currentTab !== 'all' || !teamFilterType || !selectedTeamUser) {
+            return;
+        }
+
+        if (teamFilterType === 'sales_manager') {
+            params.set('sales_manager', selectedTeamUser);
+        } else if (teamFilterType === 'sales_executive') {
+            params.set('sales_executive', selectedTeamUser);
+        }
+    }
+
     function buildExportUrl() {
         var query = $input.val().trim();
         var params = new URLSearchParams({
@@ -226,6 +275,8 @@
             dealer: selectedDealer
         });
 
+        appendTeamFilterParams(params);
+
         return '{{ route('admin.export') }}?' + params.toString();
     }
 
@@ -233,6 +284,12 @@
         var shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : $dealerDropdown.is(':hidden');
         $dealerDropdown.toggle(shouldOpen);
         $dealerToggle.attr('aria-expanded', shouldOpen ? 'true' : 'false');
+    }
+
+    function toggleTeamDropdown(forceOpen) {
+        var shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : $teamDropdown.is(':hidden');
+        $teamDropdown.toggle(shouldOpen);
+        $teamToggle.attr('aria-expanded', shouldOpen ? 'true' : 'false');
     }
 
     function loadPage(page, search, dealer) {
@@ -248,6 +305,8 @@
             tab: currentTab,
             dealer: activeDealer || ''
         });
+
+        appendTeamFilterParams(params);
 
         fetch(baseUrl + '?' + params.toString(), {
             headers: {
@@ -284,6 +343,7 @@
         currentTab = $(this).data('tab');
         $tabs.removeClass('btn-primary').addClass('btn-outline-secondary');
         $(this).removeClass('btn-outline-secondary').addClass('btn-primary');
+        toggleTeamFilterVisibility();
         loadPage(1, $input.val().trim(), selectedDealer);
     });
 
@@ -298,9 +358,23 @@
         loadPage(1, $input.val().trim(), selectedDealer);
     });
 
+    $teamToggle.on('click', function (event) {
+        event.stopPropagation();
+        toggleTeamDropdown();
+    });
+
+    $teamSelect.on('change', function () {
+        selectedTeamUser = $(this).val() || '';
+        toggleTeamDropdown(false);
+        loadPage(1, $input.val().trim(), selectedDealer);
+    });
+
     $(document).on('click', function (event) {
         if (!$dealerDropdown.is(event.target) && !$dealerToggle.is(event.target) && !$dealerDropdown.has(event.target).length) {
             toggleDealerDropdown(false);
+        }
+        if ($teamDropdown.length && !$teamDropdown.is(event.target) && !$teamToggle.is(event.target) && !$teamDropdown.has(event.target).length) {
+            toggleTeamDropdown(false);
         }
     });
 
@@ -347,6 +421,11 @@
         $dealerSelect.val(selectedDealer);
     }
 
+    if ($teamSelect.length && selectedTeamUser) {
+        $teamSelect.val(selectedTeamUser);
+    }
+
+    toggleTeamFilterVisibility();
     loadPage(1, '', selectedDealer);
 })();
 </script>

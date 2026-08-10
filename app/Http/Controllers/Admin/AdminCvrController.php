@@ -10,6 +10,7 @@ use App\Models\CvrDetails;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -378,6 +379,108 @@ class AdminCvrController extends Controller
         return array_values(array_unique(array_filter($userIds)));
     }
 
+    private function getSalesManagerFilterOptions(): array
+    {
+        return User::role('Sales Manager')
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn ($user) => ['id' => $user->id, 'name' => $user->name])
+            ->all();
+    }
+
+    private function getSalesExecutiveFilterOptions(int $managerId): array
+    {
+        return User::query()
+            ->where('manager_id', $managerId)
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn ($user) => ['id' => $user->id, 'name' => $user->name])
+            ->all();
+    }
+
+    private function getTeamUserIdsForManager(int $managerId): array
+    {
+        $employeeIds = User::query()
+            ->where('manager_id', $managerId)
+            ->pluck('id')
+            ->all();
+
+        return array_values(array_unique(array_merge([$managerId], $employeeIds)));
+    }
+
+    private function resolveTeamFilterContext(?User $user, Request $request): array
+    {
+        $context = [
+            'show' => false,
+            'type' => null,
+            'options' => [],
+            'value' => '',
+        ];
+
+        if (!$user) {
+            return $context;
+        }
+
+        $tab = in_array($request->get('tab'), ['all', 'my'], true) ? $request->get('tab') : 'my';
+
+        if ($this->isSuperUser($user)) {
+            $selectedManagerId = (int) $request->get('sales_manager', 0);
+            $context = [
+                'show' => $tab === 'all',
+                'type' => 'sales_manager',
+                'options' => $this->getSalesManagerFilterOptions(),
+                'value' => $selectedManagerId > 0 ? (string) $selectedManagerId : '',
+            ];
+        } elseif ($this->isSalesManager($user)) {
+            $selectedExecutiveId = (int) $request->get('sales_executive', 0);
+            $context = [
+                'show' => $tab === 'all',
+                'type' => 'sales_executive',
+                'options' => $this->getSalesExecutiveFilterOptions($user->id),
+                'value' => $selectedExecutiveId > 0 ? (string) $selectedExecutiveId : '',
+            ];
+        }
+
+        return $context;
+    }
+
+    private function applyTeamFilter($query, ?User $user, string $tab, Request $request): void
+    {
+        if ($tab !== 'all' || !$user) {
+            return;
+        }
+
+        if ($this->isSuperUser($user)) {
+            $salesManagerId = (int) $request->get('sales_manager', 0);
+            if ($salesManagerId <= 0) {
+                return;
+            }
+
+            $manager = User::role('Sales Manager')->where('id', $salesManagerId)->first();
+            if ($manager) {
+                $query->whereIn('user_id', $this->getTeamUserIdsForManager($salesManagerId));
+            }
+
+            return;
+        }
+
+        if ($this->isSalesManager($user)) {
+            $salesExecutiveId = (int) $request->get('sales_executive', 0);
+            if ($salesExecutiveId <= 0) {
+                return;
+            }
+
+            $executive = User::query()
+                ->where('id', $salesExecutiveId)
+                ->where('manager_id', $user->id)
+                ->first();
+
+            if ($executive) {
+                $query->where('user_id', $salesExecutiveId);
+            }
+        }
+    }
+
     private function buildRepositoryPayload(Request $request): array
     {
         $currentUser = Auth::user();
@@ -389,6 +492,7 @@ class AdminCvrController extends Controller
         $perPage = 30;
         $canViewAll = $this->canViewAllCvr($currentUser);
         $showDealerFilter = $this->isSuperUser($currentUser);
+        $teamFilter = $this->resolveTeamFilterContext($currentUser, $request);
         $dealerOptions = [];
 
         if ($showDealerFilter) {
@@ -420,8 +524,11 @@ class AdminCvrController extends Controller
             })
             ->when($dealer !== '', function ($query) use ($dealer) {
                 $query->where('host', $dealer);
-            })
-            ->when($search !== '', function ($query) use ($search) {
+            });
+
+        $this->applyTeamFilter($query, $currentUser, $tab, $request);
+
+        $query->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($subQuery) use ($search) {
                     $subQuery->where('host', 'like', "%{$search}%")
                         ->orWhere('distributor', 'like', "%{$search}%")
@@ -546,6 +653,7 @@ class AdminCvrController extends Controller
             'search' => $search,
             'dealer' => $dealer,
             'dealerOptions' => $dealerOptions,
+            'teamFilter' => $teamFilter,
             'tab' => $tab,
             'canViewAll' => $canViewAll,
             'pagination' => [
