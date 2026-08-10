@@ -30,14 +30,39 @@ class CvrExport implements FromCollection, WithHeadings
             $isSalesManager = $user->hasRole('Sales Manager');
 
             if ($isSuperUser && $tab === 'all') {
-                // export all CVR records for the super admin
+                $salesManagerId = (int) $this->request->get('sales_manager', 0);
+                if ($salesManagerId > 0) {
+                    $manager = User::role('Sales Manager')->where('id', $salesManagerId)->first();
+                    if ($manager) {
+                        $employeeIds = User::query()
+                            ->where('manager_id', $salesManagerId)
+                            ->pluck('id')
+                            ->all();
+                        $teamUserIds = array_values(array_unique(array_merge([$salesManagerId], $employeeIds)));
+                        $query->whereIn('user_id', $teamUserIds);
+                    }
+                }
             } elseif ($isSalesManager && $tab === 'all') {
-                $query->where(function ($subQuery) use ($user) {
-                    $subQuery->where('user_id', $user->id)
-                        ->orWhereHas('user', function ($userQuery) use ($user) {
-                            $userQuery->where('manager_id', $user->id);
-                        });
-                });
+                $salesExecutiveId = (int) $this->request->get('sales_executive', 0);
+                if ($salesExecutiveId > 0) {
+                    $executive = User::query()
+                        ->where('id', $salesExecutiveId)
+                        ->where('manager_id', $user->id)
+                        ->first();
+
+                    if ($executive) {
+                        $query->where('user_id', $salesExecutiveId);
+                    } else {
+                        $query->whereRaw('1 = 0');
+                    }
+                } else {
+                    $query->where(function ($subQuery) use ($user) {
+                        $subQuery->where('user_id', $user->id)
+                            ->orWhereHas('user', function ($userQuery) use ($user) {
+                                $userQuery->where('manager_id', $user->id);
+                            });
+                    });
+                }
             } else {
                 $query->where('user_id', $user->id);
             }
@@ -93,25 +118,32 @@ class CvrExport implements FromCollection, WithHeadings
                 $complaints .= ($c->category ?? 'Issue') . ' - ' . ($c->description ?? '') . ' (' . ($c->severity ?? 'Minor') . ")\n";
             }
 
-            $actions = '';
+            $openCount = 0;
+            $closedCount = 0;
+
             foreach ($item->actionPoints as $a) {
-                $statusUpdatedBy = '';
-                if (!empty($a->status_change_by)) {
-                    $statusUpdatedBy = ' | Updated By: ' . ($a->status_change_by ? User::find($a->status_change_by)->name : 'Admin');
+                $status = strtolower(trim($a->status ?? 'open'));
+
+                if (in_array($status, ['completed', 'done', 'closed'])) {
+                    $closedCount++;
+                } else {
+                    $openCount++;
                 }
-
-                $actions .= ($a->task ?? 'Untitled')
-                    . ' | Owner: ' . ($a->owner ?? 'Unassigned')
-                    . ' | Deadline: ' . ($a->deadline ?? '—')
-                    . ' | Priority: ' . ($a->priority ?? 'Medium')
-                    . ' | Status: ' . ($a->status ?? 'Pending')
-                    . $statusUpdatedBy
-                    . "\n";
             }
 
-            if ($actions === '') {
-                $actions = $data['actionPoints'] ?? '';
+            if ($item->actionPoints->isEmpty() && !empty($data['actionPoints'])) {
+                foreach ($data['actionPoints'] as $a) {
+                    $status = strtolower(trim($a['status'] ?? 'open'));
+
+                    if (in_array($status, ['completed', 'done', 'closed'])) {
+                        $closedCount++;
+                    } else {
+                        $openCount++;
+                    }
+                }
             }
+
+            $actions = 'Open: ' . $openCount . ', Closed: ' . $closedCount;
 
             if ($complaints === '') {
                 $complaints = collect($data['complaints'] ?? [])->map(function ($c) {
@@ -120,7 +152,7 @@ class CvrExport implements FromCollection, WithHeadings
             }
 
             return [
-                'Visit Date' => $date . ' ' . $time,
+                'Visit Date' => $date,
                 'Visitor Name' => $data['visitorName'] ?? $item->visitor ?? '',
                 'Customer Name' => $data['dealer']['customerName'] ?? $item->visitor ?? '',
                 'Phone' => $data['dealer']['customerPhone'] ?? $item->contact_no ?? '',
@@ -128,9 +160,6 @@ class CvrExport implements FromCollection, WithHeadings
                 'Distributor' => $data['dealer']['distributorName'] ?? $item->distributor ?? '',
                 'Location' => $data['dealer']['locationName'] ?? $item->location ?? '',
                 'Uploaded By' => $item->user->name ?? 'Unknown User',
-                'Summary' => $data['summary'] ?? '',
-                'Sentiment' => $data['sentiment'] ?? '',
-                'Complaints' => $complaints,
                 'Action Points' => $actions,
             ];
         });
@@ -140,16 +169,13 @@ class CvrExport implements FromCollection, WithHeadings
     {
         return [
             'Visit Date',
-            'Visitor Name',
+            'SE Name',
             'Customer Name',
             'Phone',
             'Dealer',
             'Distributor',
             'Location',
             'Uploaded By',
-            'Summary',
-            'Sentiment',
-            'Complaints',
             'Action Points',
         ];
     }

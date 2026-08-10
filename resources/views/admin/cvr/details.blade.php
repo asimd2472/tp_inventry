@@ -55,7 +55,7 @@
                                     </div>
                                     <div class="info-row">
                                         <div class="info-col">
-                                            <label>Visitor Name</label>
+                                            <label>SE Name</label>
                                             <p>{{ $visitor ?: '—' }}</p>
                                         </div>
                                         <div class="info-col">

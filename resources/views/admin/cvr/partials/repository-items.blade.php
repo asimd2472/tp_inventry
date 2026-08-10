@@ -49,7 +49,7 @@
                     DATE: <span>{{ $item['date'] }}</span>
                 </div>
                 <div class="cvr-meta-item">
-                    CONTACT: <span>{{ $item['contact'] }}</span>
+                    SE: <span>{{ $item['contact'] }}</span>
                 </div>
                 {{-- <div class="cvr-meta-item">
                     UPLOADED BY: <span>{{ $item['uploaded_by'] ?? 'Unknown User' }}</span>
