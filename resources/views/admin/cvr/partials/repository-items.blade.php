@@ -38,8 +38,9 @@
                     @endif
                 </div>
                 <span class="sentiment-badge {{ $sentimentClass }}">
-                    <i class="fas {{ $sentimentIcon }}"></i>
-                    {{ $item['sentiment'] }}
+                    <i class="fas fa-user"></i>
+                    {{-- {{ $item['sentiment'] }} --}}
+                    {{ $item['uploaded_by'] ?? 'Unknown User' }}
                 </span>
             </div>
 
@@ -50,9 +51,9 @@
                 <div class="cvr-meta-item">
                     CONTACT: <span>{{ $item['contact'] }}</span>
                 </div>
-                <div class="cvr-meta-item">
+                {{-- <div class="cvr-meta-item">
                     UPLOADED BY: <span>{{ $item['uploaded_by'] ?? 'Unknown User' }}</span>
-                </div>
+                </div> --}}
             </div>
 
             @if($item['summary'])
@@ -62,11 +63,11 @@
             <div class="cvr-card-footer">
                 <span class="cvr-stat pending">
                     <i class="fas fa-clock"></i>
-                    {{ $item['pending'] }} Action{{ $item['pending'] !== 1 ? 's' : '' }} Pending
+                    {{ $item['pending'] }} Action{{ $item['pending'] !== 1 ? 's' : '' }} Open
                 </span>
                 <span class="cvr-stat completed">
                     <i class="fas fa-check-circle"></i>
-                    {{ $item['completed'] }} Completed
+                    {{ $item['completed'] }} Closed
                 </span>
                 <span class="cvr-stat issues">
                     <i class="fas fa-exclamation-triangle"></i>

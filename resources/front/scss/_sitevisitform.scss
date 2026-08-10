@@ -1,0 +1,691 @@
+@use "sass:color";
+
+// resources/sass/site-visit-form.scss
+// Mobile-first, professional field-sales form UI.
+
+// ---------- tokens ----------
+$ink:        #0f1722;
+$ink-soft:   #5b6779;
+$line:       #e3e8ef;
+$surface:    #ffffff;
+$canvas:     #f4f6f9;
+$brand:      #0c71c3;      // deep teal
+$brand-dark: #036ec5;
+$brand-tint: #e6e9f3;
+$accent:     #c8892b;      // brass
+$danger:     #c0392b;
+$low:        #d98324;
+$med:        #2f6fd0;
+$high:       #17835f;
+
+$r-sm: 10px;
+$r-md: 14px;
+$r-lg: 20px;
+
+$shadow-1: 0 1px 2px rgba(15, 23, 34, .06), 0 8px 24px -12px rgba(15, 23, 34, .18);
+$shadow-2: 0 12px 32px -16px rgba(15, 23, 34, .28);
+
+$bp-sm: 480px;
+$bp-md: 768px;
+$bp-lg: 1024px;
+
+@mixin up($bp) { @media (min-width: $bp) { @content; } }
+
+@mixin focus-ring {
+  outline: none;
+  border-color: $brand;
+  box-shadow: 0 0 0 4px rgba($brand, .14);
+}
+
+// ---------- base ----------
+*, *::before, *::after { box-sizing: border-box; }
+
+.svf-body {
+  margin: 0;
+  padding: 0 0 calc(28px + env(safe-area-inset-bottom));
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: $ink;
+  background:
+    radial-gradient(120% 60% at 50% 0%, rgba($brand, .10), transparent 62%),
+    $canvas;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+
+// ---------- top bar ----------
+.svf-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba($surface, .88);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid $line;
+
+  &__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 12px 16px;
+
+    @include up($bp-md) { padding: 14px 24px; }
+  }
+}
+
+.svf-brand {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+
+  &__mark {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: linear-gradient(145deg, $brand, $brand-dark);
+    color: #fff;
+    font-family: "Sora", sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: .04em;
+  }
+
+  &__text {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+
+    strong {
+      font-family: "Sora", sans-serif;
+      font-size: 15px;
+      letter-spacing: -.01em;
+    }
+    small { color: $ink-soft; font-size: 11.5px; }
+  }
+}
+
+.svf-chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid $line;
+  background: $surface;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: $ink-soft;
+  white-space: nowrap;
+
+  &--live { border-color: rgba($high, .3); color: color.adjust($high, $lightness: -6%); background: rgba($high, .07); }
+}
+
+.svf-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: $high;
+  box-shadow: 0 0 0 3px rgba($high, .18);
+}
+
+.svf-progress {
+  height: 3px;
+  background: $line;
+
+  &__bar {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, $brand, $accent);
+    transition: width .35s ease;
+  }
+}
+
+// ---------- shell ----------
+.svf-shell {
+  max-width: 940px;
+  margin: 0 auto;
+  padding: 20px 16px 0;
+
+  @include up($bp-md) { padding: 32px 24px 0; }
+}
+
+.svf-hero {
+  margin-bottom: 18px;
+
+  h1 {
+    margin: 0 0 6px;
+    font-family: "Sora", sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.45rem, 5.5vw, 2.15rem);
+    letter-spacing: -.02em;
+  }
+  p { margin: 0; color: $ink-soft; font-size: 14px; max-width: 46ch; }
+}
+
+// ---------- card ----------
+.svf-form { display: flex; flex-direction: column; gap: 16px; }
+
+.svf-card {
+  background: $surface;
+  border: 1px solid $line;
+  border-radius: $r-lg;
+  padding: 18px 16px;
+  box-shadow: $shadow-1;
+
+  @include up($bp-md) { padding: 24px; }
+
+  &__head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+    border-bottom: 1px dashed $line;
+
+    h2 {
+      margin: 0;
+      font-family: "Sora", sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -.01em;
+    }
+    p { margin: 2px 0 0; font-size: 12.5px; color: $ink-soft; }
+  }
+}
+
+.svf-step {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  background: $brand-tint;
+  color: $brand-dark;
+  font-family: "Sora", sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+// ---------- fields ----------
+.svf-grid {
+  display: grid;
+  gap: 14px;
+
+  &--2 { @include up($bp-sm) { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+}
+
+.svf-col-span { @include up($bp-sm) { grid-column: 1 / -1; } }
+
+.svf-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: .01em;
+  color: $ink;
+
+  b { color: $danger; font-weight: 600; }
+  small {
+    margin-left: 6px;
+    font-weight: 500;
+    color: $ink-soft;
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: .07em;
+  }
+}
+
+.svf-field {
+  display: block;
+  min-width: 0;
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    padding: 12px 13px;
+    font: inherit;
+    font-size: 15px;            // >=16px avoids iOS zoom; 15px + max-scale off is fine
+    color: $ink;
+    background: #fbfcfd;
+    border: 1px solid $line;
+    border-radius: $r-sm;
+    transition: border-color .18s, box-shadow .18s, background .18s;
+    appearance: none;
+
+    &::placeholder { color: #9aa5b4; }
+    &:hover { background: #fff; }
+    &:focus { background: #fff; @include focus-ring; }
+    &:user-invalid { border-color: rgba($danger, .55); }
+  }
+
+  textarea { resize: vertical; min-height: 104px; line-height: 1.55; }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235b6779' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+
+    &:disabled { color: #9aa5b4; background-color: #f2f4f7; cursor: not-allowed; }
+  }
+
+  &.is-locked input {
+    background: $canvas;
+    color: $ink-soft;
+    border-style: dashed;
+    cursor: default;
+  }
+}
+
+.svf-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: $ink-soft;
+
+  &.is-error { color: $danger; }
+}
+
+.svf-gps {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+
+  input {
+    width: 100%;
+    padding: 12px 13px;
+    font: inherit;
+    background: $canvas;
+    border: 1px dashed $line;
+    border-radius: $r-sm;
+    color: $ink-soft;
+  }
+}
+
+// ---------- pills (radio) ----------
+.svf-pills {
+  display: grid;
+  gap: 10px;
+
+  @include up($bp-sm) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.svf-pill {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 14px;
+  border: 1px solid $line;
+  border-radius: $r-md;
+  background: #fbfcfd;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color .18s, background .18s, box-shadow .18s;
+
+  input { position: absolute; opacity: 0; pointer-events: none; }
+
+  &::before {
+    content: "";
+    flex: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 2px solid #c3ccd8;
+    transition: border-color .18s, box-shadow .18s;
+  }
+
+  &:hover { background: #fff; border-color: color.adjust($line, $lightness: -8%); }
+
+  &:has(input:checked) {
+    border-color: $brand;
+    background: $brand-tint;
+    box-shadow: 0 0 0 1px $brand inset;
+
+    &::before { border-color: $brand; box-shadow: inset 0 0 0 4px $brand; }
+  }
+  &:has(input:focus-visible) { @include focus-ring; }
+}
+
+// ---------- checkboxes ----------
+.svf-checks {
+  display: grid;
+  gap: 10px;
+
+  @include up($bp-sm) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @include up($bp-lg) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+  &--tiles { @include up($bp-sm) { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+}
+
+.svf-check {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px 13px;
+  border: 1px solid $line;
+  border-radius: $r-md;
+  background: #fbfcfd;
+  cursor: pointer;
+  transition: border-color .18s, background .18s;
+
+  input { position: absolute; opacity: 0; pointer-events: none; }
+
+  &__box {
+    flex: none;
+    position: relative;
+    width: 19px; height: 19px;
+    border: 2px solid #c3ccd8;
+    border-radius: 6px;
+    background: #fff;
+    transition: border-color .18s, background .18s;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 5px; height: 9px;
+      border: 2px solid #fff;
+      border-top: 0;
+      border-left: 0;
+      transform: rotate(45deg) scale(0);
+      transform-origin: center;
+      transition: transform .16s ease;
+      margin-top: 2px;
+    }
+  }
+
+  &__text { min-width: 0; font-size: 13.5px; font-weight: 500; }
+
+  &:hover { background: #fff; border-color: color.adjust($line, $lightness: -8%); }
+
+  &:has(input:checked) {
+    border-color: $brand;
+    background: $brand-tint;
+
+    .svf-check__box { background: $brand; border-color: $brand; }
+    .svf-check__box::after { transform: rotate(45deg) scale(1); }
+  }
+  &:has(input:focus-visible) { @include focus-ring; }
+}
+
+.svf-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: $ink;
+
+  small {
+    margin-left: 6px;
+    font-weight: 500;
+    color: $ink-soft;
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: .07em;
+  }
+
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: $line;
+  }
+}
+
+// ---------- quantity ----------
+.svf-qty {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  &__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 13px;
+    border: 1px solid $line;
+    border-radius: $r-md;
+    background: #fbfcfd;
+  }
+
+  &__label {
+    min-width: 0;
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+
+  &__total {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    margin-top: 4px;
+    padding: 14px 16px;
+    border-radius: $r-md;
+    background: linear-gradient(135deg, $brand-dark, $brand);
+    color: #fff;
+    box-shadow: $shadow-2;
+
+    span { font-size: 13px; font-weight: 500; opacity: .88; }
+    strong { font-family: "Sora", sans-serif; font-size: 22px; }
+  }
+}
+
+.svf-stepper {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid $line;
+  border-radius: 999px;
+  background: #fff;
+
+  &__btn {
+    width: 32px; height: 32px;
+    border: 0;
+    border-radius: 50%;
+    background: $canvas;
+    color: $ink;
+    font-size: 17px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background .16s, color .16s;
+
+    &:hover { background: $brand-tint; color: $brand-dark; }
+    &:active { transform: scale(.94); }
+  }
+
+  input {
+    width: 46px;
+    padding: 4px 0;
+    border: 0;
+    text-align: center;
+    font: inherit;
+    font-weight: 600;
+    font-size: 14px;
+    color: $ink;
+    background: transparent;
+    appearance: textfield;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    &:focus { outline: none; }
+  }
+}
+
+// ---------- segmented interest ----------
+.svf-segment {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 18px;
+
+  &__item {
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: 13px 8px;
+    border: 1px solid $line;
+    border-radius: $r-md;
+    background: #fbfcfd;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .18s;
+
+    input { position: absolute; opacity: 0; pointer-events: none; }
+    span { display: flex; align-items: center; gap: 7px; }
+
+    span::before {
+      content: "";
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: .55;
+    }
+
+    &--low  { color: $low; }
+    &--med  { color: $med; }
+    &--high { color: $high; }
+
+    &:has(input:checked) {
+      color: #fff;
+      border-color: transparent;
+      box-shadow: $shadow-2;
+      span::before { opacity: 1; background: #fff; }
+    }
+
+    &--low:has(input:checked)  { background: $low; }
+    &--med:has(input:checked)  { background: $med; }
+    &--high:has(input:checked) { background: $high; }
+    &:has(input:focus-visible) { @include focus-ring; }
+  }
+}
+
+// ---------- switch ----------
+.svf-switchrow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  margin-bottom: 18px;
+  border: 1px solid $line;
+  border-radius: $r-md;
+  background: #fbfcfd;
+
+  .svf-label { margin-bottom: 2px; }
+  .svf-hint { margin-top: 0; }
+}
+
+.svf-switch {
+  flex: none;
+  cursor: pointer;
+
+  input { position: absolute; opacity: 0; pointer-events: none; }
+
+  &__track {
+    display: block;
+    width: 52px; height: 30px;
+    padding: 3px;
+    border-radius: 999px;
+    background: #cfd6e0;
+    transition: background .2s;
+  }
+
+  &__knob {
+    display: block;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .22);
+    transition: transform .2s cubic-bezier(.34, 1.4, .64, 1);
+  }
+
+  input:checked + .svf-switch__track { background: $brand; }
+  input:checked + .svf-switch__track .svf-switch__knob { transform: translateX(22px); }
+  input:focus-visible + .svf-switch__track { box-shadow: 0 0 0 4px rgba($brand, .18); }
+}
+
+// ---------- buttons / actions ----------
+.svf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 20px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .14s, box-shadow .18s, background .18s, color .18s;
+
+  &:active { transform: translateY(1px); }
+
+  &--primary {
+    background: linear-gradient(135deg, $brand, $brand-dark);
+    color: #fff;
+    box-shadow: 0 10px 22px -12px rgba($brand-dark, .9);
+
+    &:hover { box-shadow: 0 14px 28px -12px rgba($brand-dark, .95); }
+  }
+
+  &--ghost {
+    background: #fff;
+    border-color: $line;
+    color: $ink;
+
+    &:hover { border-color: $brand; color: $brand-dark; background: $brand-tint; }
+  }
+}
+
+.svf-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 15;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  margin: 4px -16px 0;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  background: rgba($surface, .92);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid $line;
+
+  @include up($bp-md) {
+    position: static;
+    margin: 8px 0 32px;
+    padding: 0;
+    background: none;
+    border: 0;
+    justify-content: flex-end;
+    grid-template-columns: auto auto;
+    backdrop-filter: none;
+  }
+}
+
+// ---------- a11y / prefs ----------
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

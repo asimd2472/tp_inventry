@@ -25,14 +25,22 @@ class CvrExport implements FromCollection, WithHeadings
         $tab = in_array($this->request->get('tab'), ['all', 'my'], true) ? $this->request->get('tab') : 'my';
         $user = auth()->user();
 
-        if ($user && (int) $user->is_admin === 1 && $tab === 'my') {
-            $query->where('user_id', $user->id);
-        }
+        if ($user) {
+            $isSuperUser = (int) $user->super_admin === 1 || $user->hasRole('Super User');
+            $isSalesManager = $user->hasRole('Sales Manager');
 
-        if ($user && (int) $user->is_admin === 1 && $tab === 'all') {
-            // export all CVR records for the super admin
-        } elseif ($user) {
-            $query->where('user_id', $user->id);
+            if ($isSuperUser && $tab === 'all') {
+                // export all CVR records for the super admin
+            } elseif ($isSalesManager && $tab === 'all') {
+                $query->where(function ($subQuery) use ($user) {
+                    $subQuery->where('user_id', $user->id)
+                        ->orWhereHas('user', function ($userQuery) use ($user) {
+                            $userQuery->where('manager_id', $user->id);
+                        });
+                });
+            } else {
+                $query->where('user_id', $user->id);
+            }
         }
 
         $search = trim((string) $this->request->get('search', ''));

@@ -18,6 +18,10 @@ use Illuminate\Support\Facades\Log;
 class AdminCvrController extends Controller
 {
     public function cvr(){
+        abort_unless(
+            auth()->user()->can('cvr'),
+            403
+        );
         return view('admin.cvr.index');
     }
 
@@ -127,7 +131,7 @@ class AdminCvrController extends Controller
                             "owner"    => $ap['owner'] ?? 'Assigned Manually',
                             "deadline" => $ap['deadline'] ?? $date,
                             "priority" => $ap['priority'] ?? 'Medium',
-                            "status"   => "Pending"
+                            "status"   => "Open"
                         ];
 
                         $actionPoints[] = $actionPoint;
@@ -144,7 +148,7 @@ class AdminCvrController extends Controller
                     foreach (($geminiResult['complaints'] ?? []) as $index => $comp) {
                         $complaint = [
                             "id"          => "comp_{$meetingId}_{$index}",
-                            "category"    => $comp['category'] ?? 'Voucher Issues',
+                            "category"    => $comp['category'] ?? 'Other Issues',
                             "description" => $comp['description'] ?? '',
                             "severity"    => $comp['severity'] ?? 'Critical'
                         ];
@@ -173,7 +177,7 @@ class AdminCvrController extends Controller
                                 "owner" => "Assigned Manually",
                                 "deadline" => $date,
                                 "priority" => "Medium",
-                                "status" => "Pending"
+                                "status" => "Open"
                             ];
                             $actionPoints[] = $actionPoint;
                             $actionPointRecords[] = [
@@ -194,7 +198,7 @@ class AdminCvrController extends Controller
                             if ($item === '') continue;
                             $complaint = [
                                 "id" => "comp_{$meetingId}_{$index}",
-                                "category" => "Voucher Issues",
+                                "category" => "Other Issues",
                                 "description" => $item,
                                 "severity" => "Critical"
                             ];
@@ -307,7 +311,12 @@ class AdminCvrController extends Controller
     }
 
     public function repository(Request $request)
-    {
+    {   
+        abort_unless(
+            auth()->user()->can('repository'),
+            403
+        );
+
         $payload = $this->buildRepositoryPayload($request);
 
         return view('admin.cvr.repository', $payload);
@@ -318,21 +327,99 @@ class AdminCvrController extends Controller
         return response()->json($this->buildRepositoryPayload($request));
     }
 
+    private function isSuperUser(?\App\Models\User $user): bool
+    {
+        if (!$user) {
+            return false;
+        }
+
+        return $user->hasRole('Super User');
+    }
+
+    private function isSalesManager(?\App\Models\User $user): bool
+    {
+        return $user !== null && $user->hasRole('Sales Manager');
+    }
+
+    private function isSalesExecutive(?\App\Models\User $user): bool
+    {
+        return $user !== null && $user->hasRole('Sales Executive');
+    }
+
+    private function canViewAllCvr(?\App\Models\User $user): bool
+    {
+        return $this->isSuperUser($user) || $this->isSalesManager($user);
+    }
+
+    private function canUpdateCvrStatus(?\App\Models\User $user): bool
+    {
+        return $this->isSuperUser($user) || $this->isSalesManager($user);
+    }
+
+    private function getAccessibleUserIds(?\App\Models\User $user): array
+    {
+        if (!$user) {
+            return [];
+        }
+
+        if ($this->isSuperUser($user)) {
+            return [];
+        }
+
+        $userIds = [$user->id];
+
+        if ($this->isSalesManager($user)) {
+            $userIds = array_merge($userIds, \App\Models\User::query()
+                ->where('manager_id', $user->id)
+                ->pluck('id')
+                ->all());
+        }
+
+        return array_values(array_unique(array_filter($userIds)));
+    }
+
     private function buildRepositoryPayload(Request $request): array
     {
         $currentUser = Auth::user();
         $userId = Auth::id();
         $search = trim((string) $request->get('search', ''));
+        $dealer = trim((string) $request->get('dealer', ''));
         $tab = in_array($request->get('tab'), ['all', 'my'], true) ? $request->get('tab') : 'my';
         $page = max(1, (int) $request->get('page', 1));
         $perPage = 30;
-        $canViewAll = $currentUser && (int) $currentUser->super_admin === 1;
+        $canViewAll = $this->canViewAllCvr($currentUser);
+        $showDealerFilter = $this->isSuperUser($currentUser);
+        $dealerOptions = [];
+
+        if ($showDealerFilter) {
+            $dealerOptions = CvrDetails::query()
+                ->whereNotNull('host')
+                ->where('host', '!=', '')
+                ->select('host')
+                ->distinct()
+                ->orderBy('host')
+                ->pluck('host')
+                ->filter()
+                ->values()
+                ->all();
+        }
+
+        $accessibleUserIds = $this->getAccessibleUserIds($currentUser);
 
         $query = CvrDetails::with(['actionPoints', 'complaints', 'user'])
-            ->when($canViewAll && $tab === 'all', function ($query) {
-                // admin can view all CVRs
-            }, function ($query) use ($userId) {
-                $query->where('user_id', $userId);
+            ->when($this->isSuperUser($currentUser), function ($query) use ($tab, $dealer) {
+                if ($tab === 'my') {
+                    $query->where('user_id', Auth::id());
+                }
+            }, function ($query) use ($currentUser, $tab, $accessibleUserIds, $userId) {
+                if ($this->isSalesManager($currentUser) && $tab === 'all') {
+                    $query->whereIn('user_id', $accessibleUserIds);
+                } else {
+                    $query->where('user_id', $userId);
+                }
+            })
+            ->when($dealer !== '', function ($query) use ($dealer) {
+                $query->where('host', $dealer);
             })
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($subQuery) use ($search) {
@@ -360,6 +447,8 @@ class AdminCvrController extends Controller
         $criticalIssues = 0;
         $items = [];
 
+        // dd($totalVisits);
+
         foreach ($allResults as $cvr) {
             foreach ($cvr->actionPoints as $ap) {
                 $status = strtolower(trim($ap->status ?? 'pending'));
@@ -370,7 +459,9 @@ class AdminCvrController extends Controller
             }
 
             foreach ($cvr->complaints as $comp) {
-                if (strtolower(trim($comp->severity ?? '')) === 'critical') {
+                // dd(trim($comp->severity));
+                // echo $comp->id . ' - ' . $comp->severity . "\n";
+                if (strtolower(trim($comp->severity ?? '')) == 'critical') {
                     $criticalIssues++;
                 }
             }
@@ -453,6 +544,8 @@ class AdminCvrController extends Controller
             'openActions' => $openActions,
             'criticalIssues' => $criticalIssues,
             'search' => $search,
+            'dealer' => $dealer,
+            'dealerOptions' => $dealerOptions,
             'tab' => $tab,
             'canViewAll' => $canViewAll,
             'pagination' => [
@@ -554,15 +647,33 @@ class AdminCvrController extends Controller
         $user = Auth::user();
         $query = CvrDetails::with(['actionPoints', 'complaints', 'user'])->where('id', $id);
 
-        if (!( $user && (int) $user->super_admin === 1 )) {
-            $query->where('user_id', Auth::id());
+        if ($this->isSuperUser($user)) {
+            return $query->firstOrFail();
         }
+
+        if ($this->isSalesManager($user)) {
+            $query->where(function ($subQuery) use ($user) {
+                $subQuery->where('user_id', $user->id)
+                    ->orWhereHas('user', function ($userQuery) use ($user) {
+                        $userQuery->where('manager_id', $user->id);
+                    });
+            });
+
+            return $query->firstOrFail();
+        }
+
+        $query->where('user_id', Auth::id());
 
         return $query->firstOrFail();
     }
 
     public function viewCvrDetails($id)
-    {
+    {   
+        abort_unless(
+            auth()->user()->can('repository'),
+            403
+        );
+        
         $cvr = $this->getAuthorizedCvr((int) $id);
 
         $data = $cvr->cvr_data ?? [];
@@ -580,6 +691,8 @@ class AdminCvrController extends Controller
         $sentiment = ucfirst(strtolower($data['sentiment'] ?? 'Neutral'));
         $uploadedBy = $cvr->user->name ?? 'Unknown User';
 
+        $canChangeStatus = $this->canUpdateCvrStatus(Auth::user());
+
         return view('admin.cvr.details', compact(
             'cvr',
             'dealerName',
@@ -593,7 +706,8 @@ class AdminCvrController extends Controller
             'sentiment',
             'uploadedBy',
             'actionPoints',
-            'complaints'
+            'complaints',
+            'canChangeStatus'
         ));
     }
 
@@ -634,7 +748,7 @@ class AdminCvrController extends Controller
             'owner' => $data['owner'] ?? null,
             'deadline' => $data['deadline'] ?? null,
             'priority' => $data['priority'] ?? 'Medium',
-            'status' => 'Pending',
+            'status' => 'Open',
             'status_change_by' => null,
         ]);
 
@@ -688,11 +802,15 @@ class AdminCvrController extends Controller
 
     public function updateActionPointStatus(Request $request, $id)
     {
+        if (! $this->canUpdateCvrStatus(Auth::user())) {
+            abort(403, 'You are not allowed to update CVR status.');
+        }
+
         $ap = CvrActionPoints::findOrFail($id);
         $this->getAuthorizedCvr((int) $ap->cvr_id);
 
         $data = $request->validate([
-            'status' => 'required|string|in:Pending,In Progress,Completed,Closed',
+            'status' => 'required|string|in:Open,In Progress,Closed',
         ]);
 
         $ap->status = $data['status'];

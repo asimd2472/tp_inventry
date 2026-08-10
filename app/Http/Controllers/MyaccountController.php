@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Yajra\DataTables\DataTables;
+use App\Models\Gallery;
 
 class MyaccountController extends Controller
 {
@@ -202,6 +203,11 @@ class MyaccountController extends Controller
     }
 
     public function login_history(Request $request){
+        abort_unless(
+            auth()->user()->can('login-history'),
+            403
+        );
+
         if ($request->ajax()) {
             // $loginHistory = DB::table('login_histories')
             //     ->join('users', 'login_histories.user_id', '=', 'users.id')
@@ -270,5 +276,86 @@ class MyaccountController extends Controller
             'status' => 1,
             'data' => $history
         ]);
+    }
+
+    public function download_deales(){
+        return view('admin.download_deales.index');
+    }
+
+    public function send_dealers(Request $request)
+    {
+        $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        set_time_limit(600);
+
+        $dealers = Gallery::where('type', 'dealers')
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if (!$dealers || empty($dealers->file_name)) {
+            return response()->json([
+                'status' => 0,
+                'msg' => 'No dealer file is available to send.'
+            ], 404);
+        }
+
+        $filePath = public_path('gallery/' . $dealers->file_name);
+
+        if (!file_exists($filePath)) {
+            return response()->json([
+                'status' => 0,
+                'msg' => 'Dealer file is missing.'
+            ], 404);
+        }
+
+        $body = "<p>Dear Team,</p><p>Please find attached dealers.</p>";
+
+        \Mail::html($body, function ($message) use ($dealers, $request, $filePath) {
+            $message->to($request->email)
+                ->subject('Tata Pravesh Dealers List');
+
+            $message->attach($filePath, [
+                'as' => $dealers->file_name,
+                'mime' => mime_content_type($filePath),
+            ]);
+        });
+
+        return response()->json([
+            'status' => 1,
+            'msg' => 'Dealer email sent successfully.'
+        ]);
+    }
+
+    public function post_installation_images(Request $request)
+    {
+        $installationImages = Gallery::where('type', 'installation_images')
+            ->orderBy('id', 'desc')
+            ->get()
+            ->map(function ($item) {
+                $filePath = null;
+                $possiblePaths = [
+                    public_path('uploads/dealers/' . $item->file_name),
+                    public_path('gallery/' . $item->file_name),
+                    public_path('uploads/' . $item->file_name),
+                ];
+
+                foreach ($possiblePaths as $path) {
+                    if (file_exists($path)) {
+                        $filePath = $path;
+                        break;
+                    }
+                }
+
+                $item->image_url = $filePath
+                    ? asset(ltrim(str_replace(public_path(), '', $filePath), '/'))
+                    : '';
+
+                return $item;
+            })
+            ->filter(fn ($item) => !empty($item->image_url));
+
+        return view('admin.post_installation_images.index', compact('installationImages'));
     }
 }

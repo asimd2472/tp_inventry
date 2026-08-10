@@ -50,7 +50,11 @@
                                 </div>
                         
                                 @php
-                                    $canViewAll = Auth::user() && (int) Auth::user()->super_admin === 1;
+                                    $isSuperUser = Auth::user() && Auth::user()->hasRole('Super User');
+                                    $isSalesManager = Auth::user() && Auth::user()->hasRole('Sales Manager');
+                                    $canViewAll = $isSuperUser || $isSalesManager;
+                                    $showDealerFilter = $isSuperUser;
+
                                 @endphp
 
                                 {{-- Tabs --}}
@@ -63,19 +67,38 @@
 
                                 {{-- Search --}}
                                 <div class="repo-search-wrap">
-                                    <div class="repo-search">
-                                        <i class="fas fa-search"></i>
-                                        <input type="text"
-                                               id="cvrSearchInput"
-                                               placeholder="Search dealers, people, actions..."
-                                               autocomplete="off">
+                                    <div class="repo-search-row">
+                                        <div class="repo-search">
+                                            <i class="fas fa-search"></i>
+                                            <input type="text"
+                                                   id="cvrSearchInput"
+                                                   placeholder="Search dealers, people, actions..."
+                                                   autocomplete="off"
+                                                   value="{{ old('search', $search ?? '') }}">
+                                        </div>
+                                        @if($showDealerFilter)
+                                            <div class="repo-filter" style="position: relative;">
+                                                <button type="button" id="dealerFilterToggle" class="repo-filter-button" aria-label="Filter by dealer" aria-expanded="false" title="Filter by dealer">
+                                                    <i class="fas fa-filter"></i>
+                                                </button>
+                                                <div class="repo-filter-dropdown" id="dealerFilterDropdown" style="display:none;">
+                                                    <label for="dealerFilterSelect">Dealer</label>
+                                                    <select id="dealerFilterSelect">
+                                                        <option value="">All Dealers</option>
+                                                        @foreach(($dealerOptions ?? []) as $dealerOption)
+                                                            <option value="{{ $dealerOption }}" {{ ($dealer ?? '') === $dealerOption ? 'selected' : '' }}>{{ $dealerOption }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
                                     <div class="repo-match-count">
                                         <span id="matchCount">{{ $totalVisits }}</span> Matches Found
                                     </div>
                                 </div>
                         
-                                @if(count($items) === 0)
+                                {{-- @if(count($items) === 0)
                                     <div class="repo-empty">
                                         <i class="fas fa-folder-open"></i>
                                         <h4>No CVR Records Yet</h4>
@@ -85,7 +108,7 @@
                                             Upload CVR
                                         </a>
                                     </div>
-                                @else
+                                @else --}}
                                     <div class="repo-list has-items" id="cvrList">
                                         @include('admin.cvr.partials.repository-items', ['items' => $items])
                                     </div>
@@ -94,7 +117,7 @@
                                         <i class="fas fa-search"></i>
                                         <p>No matches found for your search.</p>
                                     </div>
-                                @endif
+                                {{-- @endif --}}
                         
                                 <div class="repo-pagination" style="margin-top: 15px;" id="paginationContainer"></div>
                         
@@ -124,9 +147,13 @@
     var $tabs = $('.repo-tab');
     var $downloadBtn = $('#downloadCvrBtn');
     var $downloadLoader = $('#downloadLoader');
+    var $dealerToggle = $('#dealerFilterToggle');
+    var $dealerDropdown = $('#dealerFilterDropdown');
+    var $dealerSelect = $('#dealerFilterSelect');
     var debounceTimer = null;
     var baseUrl = '{{ route('admin.repository.data') }}';
     var currentTab = '{{ $tab ?? 'my' }}';
+    var selectedDealer = @json($dealer ?? '');
 
     if (!$input.length) {
         return;
@@ -195,18 +222,31 @@
         var query = $input.val().trim();
         var params = new URLSearchParams({
             tab: 'all',
-            search: query
+            search: query,
+            dealer: selectedDealer
         });
 
         return '{{ route('admin.export') }}?' + params.toString();
     }
 
-    function loadPage(page, search) {
+    function toggleDealerDropdown(forceOpen) {
+        var shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : $dealerDropdown.is(':hidden');
+        $dealerDropdown.toggle(shouldOpen);
+        $dealerToggle.attr('aria-expanded', shouldOpen ? 'true' : 'false');
+    }
+
+    function loadPage(page, search, dealer) {
         var query = search === undefined ? $input.val().trim() : search;
+        var activeDealer = dealer === undefined ? selectedDealer : dealer;
+        selectedDealer = activeDealer;
+        if ($dealerSelect.length) {
+            $dealerSelect.val(selectedDealer || '');
+        }
         var params = new URLSearchParams({
             page: page || 1,
             search: query,
-            tab: currentTab
+            tab: currentTab,
+            dealer: activeDealer || ''
         });
 
         fetch(baseUrl + '?' + params.toString(), {
@@ -236,7 +276,7 @@
     $input.on('input', function () {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(function () {
-            loadPage(1, $input.val().trim());
+            loadPage(1, $input.val().trim(), selectedDealer);
         }, 250);
     });
 
@@ -244,7 +284,24 @@
         currentTab = $(this).data('tab');
         $tabs.removeClass('btn-primary').addClass('btn-outline-secondary');
         $(this).removeClass('btn-outline-secondary').addClass('btn-primary');
-        loadPage(1, $input.val().trim());
+        loadPage(1, $input.val().trim(), selectedDealer);
+    });
+
+    $dealerToggle.on('click', function (event) {
+        event.stopPropagation();
+        toggleDealerDropdown();
+    });
+
+    $dealerSelect.on('change', function () {
+        selectedDealer = $(this).val() || '';
+        toggleDealerDropdown(false);
+        loadPage(1, $input.val().trim(), selectedDealer);
+    });
+
+    $(document).on('click', function (event) {
+        if (!$dealerDropdown.is(event.target) && !$dealerToggle.is(event.target) && !$dealerDropdown.has(event.target).length) {
+            toggleDealerDropdown(false);
+        }
     });
 
     $downloadBtn.on('click', function () {
@@ -286,7 +343,11 @@
             });
     });
 
-    loadPage(1, '');
+    if ($dealerSelect.length && selectedDealer) {
+        $dealerSelect.val(selectedDealer);
+    }
+
+    loadPage(1, '', selectedDealer);
 })();
 </script>
 @endpush
