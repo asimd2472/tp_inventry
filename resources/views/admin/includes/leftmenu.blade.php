@@ -107,6 +107,14 @@
                     </a>
                 </li>
                 @endcan
+                @if(Auth::user() && (Auth::user()->hasRole('Super User') || Auth::user()->hasRole('Sales Manager') || Auth::user()->hasRole('Sales Executive')))
+                <li class="{{ Route::currentRouteName() == 'admin.site_visit_record' ? 'active' : '' }}">
+                    <a href="{{ route('admin.site_visit_record') }}">
+                        <i class="menu-icon fa-solid fa-map-marker-alt"></i>
+                        Site Visit Dashboard
+                    </a>
+                </li>
+                @endif
                 @can('manage-gallery')
                 <li class="{{ Route::currentRouteName() == 'admin.gallery' ? 'active' : '' }}">
                     <a href="{{ url('admin/gallery') }}">

@@ -1,0 +1,259 @@
+@extends('layouts.app')
+@section('content')
+
+    <section class="user-dashboard-sec">
+        <div class="container-fluid container-gap">
+            <div class="row">
+                @include('admin.includes.leftmenu')
+                <div class="userwrap-rgt">
+                    <div class="user-dashboard-dtls">
+                        <section class="sv-record-dashboard">
+
+                            <div class="sv-record-header">
+                                <div class="sv-record-header-inner">
+                                    <a href="{{ url('/admin/site-visit') }}" class="sv-record-back" title="Back">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                    <div class="sv-record-header-text">
+                                        <span class="sv-record-eyebrow">Site Visit</span>
+                                        <h1 class="sv-record-title">{{ $dashboardTitle ?? 'Site Visit Dashboard' }}</h1>
+                                    </div>
+                                    <a href="{{ url('/admin/site-visit') }}" class="sv-record-header-action" title="New Site Visit">
+                                        <i class="fas fa-plus"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="sv-record-body">
+
+                                <div class="sv-record-stats">
+                                    <div class="sv-stat-card">
+                                        <div class="sv-stat-icon blue"><i class="fas fa-map-marked-alt"></i></div>
+                                        <div class="sv-stat-value blue" id="statTotalVisits">{{ $totalVisits ?? 0 }}</div>
+                                        <div class="sv-stat-label">Total Site Visits</div>
+                                    </div>
+                                    <div class="sv-stat-card">
+                                        <div class="sv-stat-icon green"><i class="fas fa-users"></i></div>
+                                        <div class="sv-stat-value green" id="statUniqueCustomers">{{ $uniqueCustomers ?? 0 }}</div>
+                                        <div class="sv-stat-label">Unique Customers Visited</div>
+                                    </div>
+                                    <div class="sv-stat-card">
+                                        <div class="sv-stat-icon orange"><i class="fas fa-star"></i></div>
+                                        <div class="sv-stat-value orange" id="statHighPotential">{{ $highPotentialCustomers ?? 0 }}</div>
+                                        <div class="sv-stat-label">High-Potential Customers</div>
+                                    </div>
+                                    <div class="sv-stat-card">
+                                        <div class="sv-stat-icon purple"><i class="fas fa-boxes"></i></div>
+                                        <div class="sv-stat-value purple" id="statEstimatedProducts">{{ $estimatedProducts ?? 0 }}</div>
+                                        <div class="sv-stat-label">Estimated Total Products Required</div>
+                                    </div>
+                                </div>
+
+                                @php
+                                    $teamFilter = $teamFilter ?? ['show' => false, 'type' => null, 'options' => [], 'value' => '', 'label' => ''];
+                                @endphp
+
+                                <div class="sv-record-toolbar">
+                                    <div class="sv-record-search-row">
+                                        <div class="sv-record-search">
+                                            <i class="fas fa-search"></i>
+                                            <input type="text"
+                                                   id="siteVisitSearchInput"
+                                                   placeholder="Search customer, location, executive..."
+                                                   autocomplete="off"
+                                                   value="{{ $search ?? '' }}">
+                                        </div>
+
+                                        @if(!empty($teamFilter['show']))
+                                            <div class="sv-record-filter">
+                                                <label for="teamFilterSelect">{{ $teamFilter['label'] ?? 'Filter' }}</label>
+                                                <select id="teamFilterSelect" data-filter-type="{{ $teamFilter['type'] ?? '' }}">
+                                                    <option value="">All {{ $teamFilter['label'] ?? 'Users' }}</option>
+                                                    @foreach(($teamFilter['options'] ?? []) as $option)
+                                                        <option value="{{ $option['id'] }}" {{ ($teamFilter['value'] ?? '') == $option['id'] ? 'selected' : '' }}>
+                                                            {{ $option['name'] }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <div class="sv-record-match-count">
+                                        <span id="matchCount">{{ $totalVisits ?? 0 }}</span> visit records found
+                                    </div>
+                                </div>
+
+                                <div class="sv-record-section-head">
+                                    <h2>Listing</h2>
+                                    <p>Review submitted site visit reports with customer, location, and product details.</p>
+                                </div>
+
+                                <div class="sv-record-list has-items" id="siteVisitList">
+                                    @include('super_admin.sitevisit.partials.record-items', [
+                                        'items' => $items ?? [],
+                                        'showManagerColumn' => $showManagerColumn ?? false,
+                                    ])
+                                </div>
+
+                                <div class="sv-record-no-results" id="noResults" style="display:none;">
+                                    <i class="fas fa-search"></i>
+                                    <p>No site visits match your search.</p>
+                                </div>
+
+                                <div class="sv-record-pagination" id="paginationContainer"></div>
+                            </div>
+
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+@endsection
+
+@push('scripts')
+<script type="module">
+(function () {
+    var $input = $('#siteVisitSearchInput');
+    var $matchCount = $('#matchCount');
+    var $noResults = $('#noResults');
+    var $list = $('#siteVisitList');
+    var $pagination = $('#paginationContainer');
+    var $statTotal = $('#statTotalVisits');
+    var $statUnique = $('#statUniqueCustomers');
+    var $statHighPotential = $('#statHighPotential');
+    var $statProducts = $('#statEstimatedProducts');
+    var $teamSelect = $('#teamFilterSelect');
+    var debounceTimer = null;
+    var baseUrl = '{{ route('admin.site_visit_record.data') }}';
+    var teamFilterType = @json($teamFilter['type'] ?? '');
+    var selectedTeamUser = @json($teamFilter['value'] ?? '');
+
+    if (!$input.length) {
+        return;
+    }
+
+    function updateStats(data) {
+        if (data.totalVisits !== undefined) {
+            $statTotal.text(data.totalVisits);
+        }
+        if (data.uniqueCustomers !== undefined) {
+            $statUnique.text(data.uniqueCustomers);
+        }
+        if (data.highPotentialCustomers !== undefined) {
+            $statHighPotential.text(data.highPotentialCustomers);
+        }
+        if (data.estimatedProducts !== undefined) {
+            $statProducts.text(data.estimatedProducts);
+        }
+        if (data.pagination && data.pagination.total !== undefined) {
+            $matchCount.text(data.pagination.total);
+        }
+    }
+
+    function appendTeamFilterParams(params) {
+        if (!teamFilterType || !selectedTeamUser) {
+            return;
+        }
+
+        if (teamFilterType === 'sales_manager') {
+            params.set('sales_manager', selectedTeamUser);
+        } else if (teamFilterType === 'sales_executive') {
+            params.set('sales_executive', selectedTeamUser);
+        }
+    }
+
+    function renderPagination(data) {
+        $pagination.empty();
+
+        if (!data.pagination || data.pagination.last_page <= 1) {
+            return;
+        }
+
+        var currentPage = data.pagination.current_page || 1;
+        var lastPage = data.pagination.last_page || 1;
+        var prevPage = data.pagination.prev_page;
+        var nextPage = data.pagination.next_page;
+
+        var buildButton = function (page, label, active) {
+            var btn = $('<button>', {
+                type: 'button',
+                class: 'btn btn-sm me-2 ' + (active ? 'btn-primary' : 'btn-outline-secondary'),
+                text: label
+            });
+
+            btn.on('click', function () {
+                loadPage(page);
+            });
+
+            return btn;
+        };
+
+        if (prevPage) {
+            $pagination.append(buildButton(prevPage, 'Previous', false));
+        }
+
+        for (var page = 1; page <= lastPage; page++) {
+            $pagination.append(buildButton(page, page, page === currentPage));
+        }
+
+        if (nextPage) {
+            $pagination.append(buildButton(nextPage, 'Next', false));
+        }
+    }
+
+    function loadPage(page, search) {
+        var query = search === undefined ? $input.val().trim() : search;
+        var params = new URLSearchParams({
+            page: page || 1,
+            search: query
+        });
+
+        appendTeamFilterParams(params);
+
+        fetch(baseUrl + '?' + params.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (data) {
+                updateStats(data);
+
+                if (data.items && data.items.length > 0) {
+                    $list.html(data.itemsHtml);
+                    $list.show();
+                    $noResults.hide();
+                } else {
+                    $list.hide();
+                    $noResults.show();
+                }
+
+                renderPagination(data);
+            });
+    }
+
+    $input.on('input', function () {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function () {
+            loadPage(1, $input.val().trim());
+        }, 250);
+    });
+
+    $teamSelect.on('change', function () {
+        selectedTeamUser = $(this).val() || '';
+        loadPage(1, $input.val().trim());
+    });
+
+    if ($teamSelect.length && selectedTeamUser) {
+        $teamSelect.val(selectedTeamUser);
+    }
+
+    loadPage(1, $input.val().trim());
+})();
+</script>
+@endpush

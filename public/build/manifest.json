@@ -71,6 +71,10 @@
     "file": "assets/placeholder-e702fc3c.png",
     "src": "resources/admin/img/placeholder.png"
   },
+  "resources/admin/js/app.css": {
+    "file": "assets/app-1c167df1.css",
+    "src": "resources/admin/js/app.css"
+  },
   "resources/admin/js/app.js": {
     "assets": [
       "assets/bootstrap-icons-6c757103.woff2",
@@ -87,7 +91,7 @@
     "css": [
       "assets/app-1c167df1.css"
     ],
-    "file": "assets/app-2ccc9240.js",
+    "file": "assets/app-2375a98c.js",
     "imports": [
       "_additional-methods.min-6ba532ba.js"
     ],
@@ -96,8 +100,7 @@
   },
   "resources/admin/scss/app.scss": {
     "file": "assets/app-1c167df1.css",
-    "isEntry": true,
-    "src": "resources/admin/scss/app.scss"
+    "src": "resources/admin/js/app.css"
   },
   "resources/admin/webfonts/fa-brands-400.ttf": {
     "file": "assets/fa-brands-400-5656d596.ttf",
@@ -351,7 +354,7 @@
     "src": "resources/front/js/app.js"
   },
   "resources/front/scss/style.scss": {
-    "file": "assets/style-020847ed.css",
+    "file": "assets/style-a3d5f167.css",
     "isEntry": true,
     "src": "resources/front/scss/style.scss"
   },
