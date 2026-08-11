@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\SuperAdmin;
 
+use App\Exports\SiteVisitExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSiteVisitRequest;
 use App\Models\SiteVisit;
@@ -11,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SiteVisitController extends Controller
 {
@@ -99,6 +101,102 @@ class SiteVisitController extends Controller
         $this->authorizeSiteVisitDashboard();
 
         return response()->json($this->buildRecordPayload($request));
+    }
+
+    public function export(Request $request)
+    {
+        $this->authorizeSiteVisitDashboard();
+
+        $query = SiteVisit::query()->with(['user.manager']);
+        $this->applyExportAccessScope($query, Auth::user(), $request);
+
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+
+        if (!empty($dateFrom)) {
+            $query->whereDate('visit_date', '>=', $dateFrom);
+        }
+
+        if (!empty($dateTo)) {
+            $query->whereDate('visit_date', '<=', $dateTo);
+        }
+
+        $rows = $query
+            ->orderBy('visit_date')
+            ->orderBy('id')
+            ->get()
+            ->map(function (SiteVisit $visit) {
+                return [
+                    'Sales Manager' => $visit->user?->manager?->name ?? '—',
+                    'Sales Executive' => $visit->user?->name ?? $visit->executive_name ?? 'Unknown',
+                    'Customer Name' => $visit->customer_name ?? '',
+                    'Mobile' => $visit->mobile ?? '',
+                    'District' => $visit->district ?? '',
+                    'State' => $visit->state ?? '',
+                    'Visit Date' => $visit->visit_date ? Carbon::parse($visit->visit_date)->format('d/m/Y') : '',
+                    'Visit Time' => $visit->visit_time ? Carbon::parse($visit->visit_time)->format('h:i A') : '',
+                    'Construction Stage' => $visit->construction_stage ?? '',
+                    'Products' => is_array($visit->products) ? implode(', ', $visit->products) : ($visit->products ?? ''),
+                    'Interest' => $visit->interest ?? '',
+                    'Qty Total' => (int) ($visit->qty_total ?? 0),
+                    'Follow Up' => $visit->follow_up ? 'Yes' : 'No',
+                    'Remarks' => $visit->remarks ?? '',
+                ];
+            })
+            ->all();
+
+        $type = strtolower((string) $request->input('type', 'csv'));
+        $exportMode = strtolower((string) $request->input('export_mode', 'consolidated'));
+        $fileName = 'site-visit-' . $exportMode . '-' . now()->format('YmdHis');
+
+        if (in_array($type, ['excel', 'xlsx'], true)) {
+            return Excel::download(new SiteVisitExport($rows), $fileName . '.xlsx');
+        }
+
+        return response()->streamDownload(function () use ($rows) {
+            $handle = fopen('php://output', 'w');
+            $headers = [
+                'Sales Manager',
+                'Sales Executive',
+                'Customer Name',
+                'Mobile',
+                'District',
+                'State',
+                'Visit Date',
+                'Visit Time',
+                'Construction Stage',
+                'Products',
+                'Interest',
+                'Qty Total',
+                'Follow Up',
+                'Remarks',
+            ];
+
+            fputcsv($handle, $headers);
+
+            foreach ($rows as $row) {
+                fputcsv($handle, [
+                    $row['Sales Manager'] ?? '',
+                    $row['Sales Executive'] ?? '',
+                    $row['Customer Name'] ?? '',
+                    $row['Mobile'] ?? '',
+                    $row['District'] ?? '',
+                    $row['State'] ?? '',
+                    $row['Visit Date'] ?? '',
+                    $row['Visit Time'] ?? '',
+                    $row['Construction Stage'] ?? '',
+                    $row['Products'] ?? '',
+                    $row['Interest'] ?? '',
+                    $row['Qty Total'] ?? '',
+                    $row['Follow Up'] ?? '',
+                    $row['Remarks'] ?? '',
+                ]);
+            }
+
+            fclose($handle);
+        }, $fileName . '.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 
     private function authorizeSiteVisitDashboard(): void
@@ -248,6 +346,64 @@ class SiteVisitController extends Controller
         $query->where('user_id', $user->id);
     }
 
+    private function applyExportAccessScope($query, ?User $user, Request $request): void
+    {
+        if (!$user) {
+            $query->whereRaw('1 = 0');
+
+            return;
+        }
+
+        $managerIds = $this->normalizeSelectedIds($request, 'sales_manager');
+        $executiveIds = $this->normalizeSelectedIds($request, 'sales_executive');
+
+        if ($this->isSuperUser($user)) {
+            if ($managerIds !== []) {
+                $teamIds = [];
+
+                foreach ($managerIds as $managerId) {
+                    $teamIds = array_merge($teamIds, $this->getTeamUserIdsForManager($managerId));
+                }
+
+                $query->whereIn('user_id', array_values(array_unique($teamIds)));
+            }
+
+            return;
+        }
+
+        if ($this->isSalesManager($user)) {
+            $accessibleUserIds = array_values(array_unique(array_merge(
+                [$user->id],
+                User::query()->where('manager_id', $user->id)->pluck('id')->all()
+            )));
+
+            $query->whereIn('user_id', $accessibleUserIds);
+
+            if ($executiveIds !== []) {
+                $query->whereIn('user_id', $executiveIds);
+            }
+
+            return;
+        }
+
+        $query->where('user_id', $user->id);
+    }
+
+    private function normalizeSelectedIds(Request $request, string $key): array
+    {
+        $rawValue = $request->input($key, []);
+
+        if (is_array($rawValue)) {
+            $values = $rawValue;
+        } elseif (is_string($rawValue) && trim($rawValue) !== '') {
+            $values = preg_split('/[\s,]+/', trim($rawValue), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        } else {
+            $values = [];
+        }
+
+        return array_values(array_filter(array_map('intval', $values), fn ($value) => $value > 0));
+    }
+
     private function buildRecordPayload(Request $request): array
     {
         $currentUser = Auth::user();
@@ -343,6 +499,8 @@ class SiteVisitController extends Controller
             'dashboardTitle' => $this->isSuperUser($currentUser)
                 ? 'Super User Dashboard'
                 : ($this->isSalesManager($currentUser) ? 'Sales Manager Dashboard' : 'Site Visit Dashboard'),
+            'exportManagerOptions' => $this->isSuperUser($currentUser) ? $this->getSalesManagerFilterOptions() : [],
+            'exportExecutiveOptions' => $this->isSalesManager($currentUser) ? $this->getSalesExecutiveFilterOptions($currentUser->id) : [],
             'pagination' => [
                 'current_page' => $visits->currentPage(),
                 'last_page' => $visits->lastPage(),

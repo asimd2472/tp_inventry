@@ -44,6 +44,9 @@ class RolePermissionSeeder extends Seeder
 
             'post-installation-images',
             'download-deales',
+
+            'site-visit-create',
+            'site-visit-view',
             
 
         ];

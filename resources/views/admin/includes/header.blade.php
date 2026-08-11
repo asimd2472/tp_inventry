@@ -95,6 +95,14 @@
                                 </li>
                                 @endcan
 
+                                @can('site-visit-view')
+                                <li>
+                                    <a href="{{ route('admin.site_visit_record') }}">
+                                        Site Visit Dashboard
+                                    </a>
+                                </li>
+                                @endcan
+
                                     
                                         
                                     
