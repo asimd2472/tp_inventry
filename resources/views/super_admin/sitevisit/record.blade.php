@@ -54,29 +54,84 @@
                                 @endphp
 
                                 <div class="sv-record-toolbar">
-                                    <div class="sv-record-search-row">
-                                        <div class="sv-record-search">
-                                            <i class="fas fa-search"></i>
-                                            <input type="text"
-                                                   id="siteVisitSearchInput"
-                                                   placeholder="Search customer, location, executive..."
-                                                   autocomplete="off"
-                                                   value="{{ $search ?? '' }}">
+                                    <div class="sv-record-toolbar-row">
+                                        <div class="sv-record-search-row">
+                                            <div class="sv-record-search">
+                                                <i class="fas fa-search"></i>
+                                                <input type="text"
+                                                       id="siteVisitSearchInput"
+                                                       placeholder="Search customer, location, executive..."
+                                                       autocomplete="off"
+                                                       value="{{ $search ?? '' }}">
+                                            </div>
+
+                                            @if(!empty($teamFilter['show']))
+                                                <div class="sv-record-filter">
+                                                    <label for="teamFilterSelect">{{ $teamFilter['label'] ?? 'Filter' }}</label>
+                                                    <select id="teamFilterSelect" data-filter-type="{{ $teamFilter['type'] ?? '' }}">
+                                                        <option value="">All {{ $teamFilter['label'] ?? 'Users' }}</option>
+                                                        @foreach(($teamFilter['options'] ?? []) as $option)
+                                                            <option value="{{ $option['id'] }}" {{ ($teamFilter['value'] ?? '') == $option['id'] ? 'selected' : '' }}>
+                                                                {{ $option['name'] }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            @endif
+
                                         </div>
 
-                                        @if(!empty($teamFilter['show']))
-                                            <div class="sv-record-filter">
-                                                <label for="teamFilterSelect">{{ $teamFilter['label'] ?? 'Filter' }}</label>
-                                                <select id="teamFilterSelect" data-filter-type="{{ $teamFilter['type'] ?? '' }}">
-                                                    <option value="">All {{ $teamFilter['label'] ?? 'Users' }}</option>
-                                                    @foreach(($teamFilter['options'] ?? []) as $option)
-                                                        <option value="{{ $option['id'] }}" {{ ($teamFilter['value'] ?? '') == $option['id'] ? 'selected' : '' }}>
-                                                            {{ $option['name'] }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
+                                        <div class="sv-record-export-panel">
+                                            <div class="sv-record-export-form">
+                                                <div class="sv-record-export-field">
+                                                    <label for="exportDateFrom">From date</label>
+                                                    <input type="date" id="exportDateFrom" value="{{ request('date_from') ?? '' }}">
+                                                </div>
+                                                <div class="sv-record-export-field">
+                                                    <label for="exportDateTo">To date</label>
+                                                    <input type="date" id="exportDateTo" value="{{ request('date_to') ?? '' }}">
+                                                </div>
+
+                                                @if(Auth::user() && Auth::user()->hasRole('Super User'))
+                                                    <div class="sv-record-export-field sv-record-export-field--wide">
+                                                        <label for="exportSalesManager">Sales Manager</label>
+                                                        <select class="select2" id="exportSalesManager" multiple>
+                                                            @foreach(($exportManagerOptions ?? []) as $option)
+                                                                <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                @elseif(Auth::user() && Auth::user()->hasRole('Sales Manager'))
+                                                    <div class="sv-record-export-field sv-record-export-field--wide">
+                                                        <label for="exportSalesExecutive">Sales Executive</label>
+                                                        <select class="select2" id="exportSalesExecutive" multiple>
+                                                            @foreach(($exportExecutiveOptions ?? []) as $option)
+                                                                <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                @endif
+
+                                                <div class="sv-record-export-field sv-record-export-field--compact">
+                                                    <label for="exportMode">Mode</label>
+                                                    <select id="exportMode">
+                                                        <option value="consolidated">Consolidated</option>
+                                                        <option value="individual">Individual</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="sv-record-export-actions">
+                                                    <div class="sv-record-export-actions-wrap">
+                                                        <button type="button" class="sv-record-export-btn is-secondary" id="exportCsvBtn">
+                                                            <i class="fas fa-file-csv"></i> CSV
+                                                        </button>
+                                                        <button type="button" class="sv-record-export-btn is-primary" id="exportExcelBtn">
+                                                            <i class="fas fa-file-excel"></i> Excel
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        @endif
+                                        </div>
                                     </div>
 
                                     <div class="sv-record-match-count">
@@ -126,8 +181,16 @@
     var $statHighPotential = $('#statHighPotential');
     var $statProducts = $('#statEstimatedProducts');
     var $teamSelect = $('#teamFilterSelect');
+    var $exportCsvBtn = $('#exportCsvBtn');
+    var $exportExcelBtn = $('#exportExcelBtn');
+    var $exportDateFrom = $('#exportDateFrom');
+    var $exportDateTo = $('#exportDateTo');
+    var $exportMode = $('#exportMode');
+    var $exportSalesManager = $('#exportSalesManager');
+    var $exportSalesExecutive = $('#exportSalesExecutive');
     var debounceTimer = null;
     var baseUrl = '{{ route('admin.site_visit_record.data') }}';
+    var exportBaseUrl = '{{ route('admin.site_visit_record.export') }}';
     var teamFilterType = @json($teamFilter['type'] ?? '');
     var selectedTeamUser = @json($teamFilter['value'] ?? '');
 
@@ -163,6 +226,43 @@
         } else if (teamFilterType === 'sales_executive') {
             params.set('sales_executive', selectedTeamUser);
         }
+    }
+
+    function buildExportParams(type) {
+        var params = new URLSearchParams();
+        params.set('type', type);
+        params.set('date_from', $exportDateFrom.val() || '');
+        params.set('date_to', $exportDateTo.val() || '');
+        params.set('export_mode', $exportMode.val() || 'consolidated');
+
+        if ($exportSalesManager && $exportSalesManager.length && $exportSalesManager.val()) {
+            $exportSalesManager.val().forEach(function (value) {
+                params.append('sales_manager[]', value);
+            });
+        }
+
+        if ($exportSalesExecutive && $exportSalesExecutive.length && $exportSalesExecutive.val()) {
+            $exportSalesExecutive.val().forEach(function (value) {
+                params.append('sales_executive[]', value);
+            });
+        }
+
+        if (!teamFilterType || !selectedTeamUser) {
+            return params;
+        }
+
+        if (teamFilterType === 'sales_manager') {
+            params.append('sales_manager[]', selectedTeamUser);
+        } else if (teamFilterType === 'sales_executive') {
+            params.append('sales_executive[]', selectedTeamUser);
+        }
+
+        return params;
+    }
+
+    function triggerExport(type) {
+        var url = exportBaseUrl + '?' + buildExportParams(type).toString();
+        window.location.href = url;
     }
 
     function renderPagination(data) {
@@ -247,6 +347,14 @@
     $teamSelect.on('change', function () {
         selectedTeamUser = $(this).val() || '';
         loadPage(1, $input.val().trim());
+    });
+
+    $exportCsvBtn.on('click', function () {
+        triggerExport('csv');
+    });
+
+    $exportExcelBtn.on('click', function () {
+        triggerExport('excel');
     });
 
     if ($teamSelect.length && selectedTeamUser) {

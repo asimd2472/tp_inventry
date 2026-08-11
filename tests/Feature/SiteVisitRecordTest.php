@@ -144,6 +144,132 @@ class SiteVisitRecordTest extends TestCase
         $this->assertSame('Customer One', $response->json('items.0.customer_name'));
     }
 
+    public function test_sales_manager_can_export_filtered_site_visit_csv(): void
+    {
+        $this->seed(RolePermissionSeeder::class);
+
+        $manager = User::factory()->create();
+        $manager->assignRole('Sales Manager');
+
+        $executiveOne = User::factory()->create([
+            'manager_id' => $manager->id,
+            'name' => 'Executive One',
+        ]);
+        $executiveOne->assignRole('Sales Executive');
+
+        $executiveTwo = User::factory()->create([
+            'manager_id' => $manager->id,
+            'name' => 'Executive Two',
+        ]);
+        $executiveTwo->assignRole('Sales Executive');
+
+        SiteVisit::create([
+            'user_id' => $executiveOne->id,
+            'visit_date' => '2026-08-04',
+            'visit_time' => '09:00:00',
+            'customer_name' => 'Customer One',
+            'mobile' => '9111111111',
+            'state' => 'State 1',
+            'district' => 'District 1',
+            'construction_stage' => 'Foundation',
+            'products' => ['Doors'],
+            'timeline' => '1 month',
+            'interest' => 'High',
+            'qty_total' => 8,
+        ]);
+
+        SiteVisit::create([
+            'user_id' => $executiveTwo->id,
+            'visit_date' => '2026-08-12',
+            'visit_time' => '10:00:00',
+            'customer_name' => 'Customer Two',
+            'mobile' => '9222222222',
+            'state' => 'State 2',
+            'district' => 'District 2',
+            'construction_stage' => 'Structure',
+            'products' => ['Windows'],
+            'timeline' => '2 months',
+            'interest' => 'Low',
+            'qty_total' => 4,
+        ]);
+
+        $response = $this->actingAs($manager)
+            ->get(route('admin.site_visit_record.export', [
+                'type' => 'csv',
+                'date_from' => '2026-08-01',
+                'date_to' => '2026-08-10',
+                'sales_executive' => [$executiveOne->id],
+                'export_mode' => 'individual',
+            ]));
+
+        $response->assertOk()
+            ->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+        $this->assertStringContainsString('Customer One', $response->streamedContent());
+    }
+
+    public function test_super_user_can_export_filtered_site_visit_csv(): void
+    {
+        $this->seed(RolePermissionSeeder::class);
+
+        $superUser = User::factory()->create();
+        $superUser->assignRole('Super User');
+
+        $managerOne = User::factory()->create(['name' => 'Manager One']);
+        $managerOne->assignRole('Sales Manager');
+
+        $managerTwo = User::factory()->create(['name' => 'Manager Two']);
+        $managerTwo->assignRole('Sales Manager');
+
+        $executive = User::factory()->create([
+            'name' => 'Executive A',
+            'manager_id' => $managerOne->id,
+        ]);
+        $executive->assignRole('Sales Executive');
+
+        SiteVisit::create([
+            'user_id' => $executive->id,
+            'visit_date' => '2026-08-08',
+            'visit_time' => '09:00:00',
+            'customer_name' => 'Customer A',
+            'mobile' => '9333333333',
+            'state' => 'State A',
+            'district' => 'District A',
+            'construction_stage' => 'Foundation',
+            'products' => ['Doors'],
+            'timeline' => '1 month',
+            'interest' => 'High',
+            'qty_total' => 9,
+        ]);
+
+        SiteVisit::create([
+            'user_id' => $managerTwo->id,
+            'visit_date' => '2026-08-09',
+            'visit_time' => '11:00:00',
+            'customer_name' => 'Customer B',
+            'mobile' => '9444444444',
+            'state' => 'State B',
+            'district' => 'District B',
+            'construction_stage' => 'Structure',
+            'products' => ['Windows'],
+            'timeline' => '2 months',
+            'interest' => 'Medium',
+            'qty_total' => 6,
+        ]);
+
+        $response = $this->actingAs($superUser)
+            ->get(route('admin.site_visit_record.export', [
+                'type' => 'csv',
+                'date_from' => '2026-08-01',
+                'date_to' => '2026-08-10',
+                'sales_manager' => [$managerOne->id],
+                'export_mode' => 'consolidated',
+            ]));
+
+        $response->assertOk()
+            ->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+        $this->assertStringContainsString('Customer A', $response->streamedContent());
+    }
+
     public function test_authorized_user_can_view_site_visit_details(): void
     {
         $this->seed(RolePermissionSeeder::class);
