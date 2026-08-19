@@ -10,10 +10,11 @@ class SiteVisit extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'products'   => 'array',
-        'categories' => 'array',
-        'follow_up'  => 'boolean',
-        'visit_date' => 'date',
+        'products'     => 'array',
+        'categories'   => 'array',
+        'follow_up'    => 'boolean',
+        'follow_update'=> 'date',
+        'visit_date'   => 'date',
     ];
 
     public function user(): BelongsTo

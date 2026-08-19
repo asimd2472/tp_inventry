@@ -15,9 +15,21 @@
                         <i class="fas fa-phone"></i> {{ $item['mobile'] }}
                     </p>
                 </div>
-                <span class="sv-interest-badge {{ $item['interest_class'] }}">
-                    {{ $item['interest'] }} Interest
-                </span>
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+                    <span style="display:inline-flex; align-items:center; justify-content:center; padding:4px 10px; border-radius:999px; background:#eef2ff; color:#4338ca; font-size:11px; font-weight:700; letter-spacing:0.02em; text-transform:lowercase;">
+                        {{ $item['visit_number_label'] ?? '1st visit' }}
+                    </span>
+                    <button type="button"
+                            class="sv-revisit-btn"
+                            title="Revisit this customer"
+                            style="display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; border:1px solid #dbeafe; background:#eff6ff; color:#1d4ed8; cursor:pointer;"
+                            onclick="event.stopPropagation(); window.location.href='{{ route('admin.site_visit_record.revisit', $item['id']) }}';">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                    <span class="sv-interest-badge {{ $item['interest_class'] }}">
+                        {{ $item['interest'] }} Interest
+                    </span>
+                </div>
             </div>
 
             <div class="sv-record-card-meta">

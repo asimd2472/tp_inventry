@@ -101,6 +101,7 @@ Route::post('site-visit-store', [SiteVisitController::class, 'store'])->name('si
 Route::get('site-visit-record', [SiteVisitController::class, 'site_visit_record'])->name('site_visit_record');
 Route::get('site-visit-record/data', [SiteVisitController::class, 'siteVisitRecordData'])->name('site_visit_record.data');
 Route::get('site-visit-record/export', [SiteVisitController::class, 'export'])->name('site_visit_record.export');
+Route::get('site-visit-record/{id}/revisit', [SiteVisitController::class, 'revisit'])->name('site_visit_record.revisit');
 Route::get('site-visit-record/{id}', [SiteVisitController::class, 'show'])->name('site_visit_record.show');
 
 Route::get('/inventry-details',[InventryController::class,'index'])->name('inventry_details');
