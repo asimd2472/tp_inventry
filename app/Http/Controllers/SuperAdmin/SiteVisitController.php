@@ -69,6 +69,7 @@ class SiteVisitController extends Controller
 
             'interest'           => $data['interest'],
             'follow_up'          => isset($data['follow_up']),
+            'follow_update'      => isset($data['follow_up']) ? ($data['follow_update'] ?? null) : null,
             'remarks'            => $data['remarks'] ?? null,
         ]);
 
@@ -436,6 +437,7 @@ class SiteVisitController extends Controller
 
         $allResults = (clone $query)->get();
         $visits = (clone $query)->paginate($perPage, ['*'], 'page', $page);
+        $visitNumberMap = $this->buildVisitNumberMap($allResults);
 
         $totalVisits = $allResults->count();
         $uniqueCustomers = $allResults->pluck('mobile')->filter()->unique()->count();
@@ -467,6 +469,7 @@ class SiteVisitController extends Controller
             };
 
             $products = is_array($visit->products) ? implode(', ', $visit->products) : '';
+            $visitNumber = (int) ($visitNumberMap[$visit->id] ?? 1);
 
             $items[] = [
                 'id' => $visit->id,
@@ -479,9 +482,14 @@ class SiteVisitController extends Controller
                 'manager_name' => $managerName,
                 'interest' => $visit->interest ?? 'Low',
                 'interest_class' => $interestClass,
+                'visit_number' => $visitNumber,
+                'visit_number_label' => $this->formatVisitNumberLabel($visitNumber),
                 'qty_total' => (int) ($visit->qty_total ?? 0),
                 'construction_stage' => $visit->construction_stage ?? '—',
                 'follow_up' => (bool) $visit->follow_up,
+                'follow_update' => $visit->follow_update
+                    ? Carbon::parse($visit->follow_update)->format('d/m/Y')
+                    : null,
                 'products' => $products,
                 'remarks' => $visit->remarks ?? '',
             ];
@@ -516,6 +524,87 @@ class SiteVisitController extends Controller
                 'showManagerColumn' => $showManagerColumn,
             ])->render(),
         ];
+    }
+
+    private function buildVisitNumberMap($visits): array
+    {
+        $customerVisitCounts = [];
+        $visitNumberMap = [];
+
+        foreach ($visits->sortBy([['visit_date', 'asc'], ['id', 'asc']]) as $visit) {
+            $customerKey = $this->getCustomerVisitKey($visit);
+            $sequence = ($customerVisitCounts[$customerKey] ?? 0) + 1;
+            $customerVisitCounts[$customerKey] = $sequence;
+            $visitNumberMap[$visit->id] = $sequence;
+        }
+
+        return $visitNumberMap;
+    }
+
+    private function getCustomerVisitKey(SiteVisit $visit): string
+    {
+        $mobile = preg_replace('/\D+/', '', (string) ($visit->mobile ?? ''));
+        if ($mobile !== '') {
+            return 'mobile:' . $mobile;
+        }
+
+        return 'name:' . strtolower(trim((string) ($visit->customer_name ?? '')));
+    }
+
+    private function formatVisitNumberLabel(int $visitNumber): string
+    {
+        $suffix = match ($visitNumber % 10) {
+            1 => 'st',
+            2 => 'nd',
+            3 => 'rd',
+            default => 'th',
+        };
+
+        if ($visitNumber % 100 >= 11 && $visitNumber % 100 <= 13) {
+            $suffix = 'th';
+        }
+
+        return $visitNumber . $suffix . ' visit';
+    }
+
+    public function revisit(string $id)
+    {
+        $visit = $this->getAuthorizedSiteVisit((int) $id);
+
+        return view('super_admin.sitevisit.create', [
+            'revisitData' => [
+                'customer_name' => $visit->customer_name,
+                'mobile' => $visit->mobile,
+                'alt_mobile' => $visit->alt_mobile,
+                'customer_email' => $visit->customer_email,
+                'state' => $visit->state,
+                'district' => $visit->district,
+                'pincode' => $visit->pincode,
+                'gps' => ($visit->latitude !== null && $visit->longitude !== null)
+                    ? $visit->latitude . ', ' . $visit->longitude
+                    : null,
+                'maps_link' => $visit->maps_link,
+                'construction_stage' => $visit->construction_stage,
+                'products' => is_array($visit->products) ? $visit->products : [],
+                'categories' => is_array($visit->categories) ? $visit->categories : [],
+                'qty' => [
+                    'doors' => (int) ($visit->qty_doors ?? 0),
+                    'windows' => (int) ($visit->qty_windows ?? 0),
+                    'frames' => (int) ($visit->qty_frames ?? 0),
+                    'others' => (int) ($visit->qty_others ?? 0),
+                ],
+                'timeline' => $visit->timeline,
+                'budget' => $visit->budget,
+                'competitor' => $visit->competitor,
+                'interest' => $visit->interest,
+                'follow_up' => (bool) $visit->follow_up,
+                'follow_update' => $visit->follow_update ? Carbon::parse($visit->follow_update)->format('Y-m-d') : null,
+                'remarks' => $visit->remarks,
+                'visit_date' => $visit->visit_date ? Carbon::parse($visit->visit_date)->format('Y-m-d') : null,
+                'visit_time' => $visit->visit_time ? Carbon::parse($visit->visit_time)->format('H:i') : null,
+            ],
+            'revisitSourceId' => $visit->id,
+        ]);
     }
 
     private function parseGps(?string $gps): array

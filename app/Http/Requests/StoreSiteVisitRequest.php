@@ -49,6 +49,7 @@ class StoreSiteVisitRequest extends FormRequest
 
             'interest'            => ['required', 'in:Low,Medium,High'],
             'follow_up'           => ['nullable', 'in:Yes,1,on'],
+            'follow_update'       => ['nullable', 'date', 'required_if:follow_up,Yes', 'required_if:follow_up,1', 'required_if:follow_up,on'],
             'remarks'             => ['nullable', 'string', 'max:1000'],
         ];
     }
@@ -63,6 +64,7 @@ class StoreSiteVisitRequest extends FormRequest
             'maps_link',
             'budget',
             'competitor',
+            'follow_update',
             'remarks',
         ];
 

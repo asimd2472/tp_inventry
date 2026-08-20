@@ -36,12 +36,15 @@
 
     <main class="svf-shell">
         <div class="svf-hero">
-            <h1>Customer Site Visit Form</h1>
-            <p>Capture the visit in one pass — details, site, requirement, and next step.</p>
+            <h1>{{ !empty($revisitData) ? 'Revisit Customer Site Visit' : 'Customer Site Visit Form' }}</h1>
+            <p>{{ !empty($revisitData) ? 'Update the previous visit details and save as a fresh follow-up visit.' : 'Capture the visit in one pass — details, site, requirement, and next step.' }}</p>
         </div>
 
         <form class="svf-form" id="svfForm" method="POST" action="{{ route('admin.site-visit.store') }}" novalidate>
             @csrf
+            @if(!empty($revisitSourceId))
+                <input type="hidden" name="revisit_source_id" value="{{ $revisitSourceId }}">
+            @endif
 
             {{-- 1. Sales Executive --}}
             <section class="svf-card">
@@ -314,6 +317,13 @@
                     </label>
                 </div>
 
+                <div class="svf-follow-up-date" id="followUpDateWrap" style="display: none;">
+                    <label class="svf-field">
+                        <span class="svf-label">Follow-up Date <b>*</b></span>
+                        <input type="date" name="follow_update" id="followUpdateDate" min="{{ date('Y-m-d') }}">
+                    </label>
+                </div>
+
                 <label class="svf-field">
                     <span class="svf-label">Remarks</span>
                     <textarea name="remarks" rows="4" maxlength="1000" placeholder="Observations, commitments, objections…"></textarea>
@@ -352,6 +362,29 @@
         // public/js/site-visit-form.js
         (function() {
             "use strict";
+
+            var revisitData = @json($revisitData ?? []);
+
+            function setFormValue(name, value) {
+                if (!name) return;
+                var el = form.querySelector('[name="' + name + '"]');
+                if (!el) return;
+
+                if (el.type === 'checkbox') {
+                    el.checked = !!value;
+                    return;
+                }
+
+                if (el.type === 'radio') {
+                    var radios = form.querySelectorAll('[name="' + name + '"]');
+                    radios.forEach(function(radio) {
+                        radio.checked = String(radio.value) === String(value);
+                    });
+                    return;
+                }
+
+                el.value = value ?? '';
+            }
 
             // ---- Replace / extend with your own master data (or inject from Laravel) ----
             var STATE_DISTRICTS = window.SVF_STATE_DISTRICTS || {
@@ -1279,8 +1312,96 @@
                         distSel.appendChild(o);
                     });
                     distSel.disabled = !list.length;
+                    if (revisitData && revisitData.district && !distSel.dataset.applied) {
+                        distSel.value = revisitData.district;
+                    }
+                    distSel.dataset.applied = '1';
                     updateProgress();
                 });
+            }
+
+            function applyRevisitData() {
+                if (!revisitData || Object.keys(revisitData).length === 0) {
+                    return;
+                }
+
+                if (revisitData.visit_date) {
+                    var visitDateInput = document.getElementById('visitDate');
+                    if (visitDateInput) visitDateInput.value = revisitData.visit_date;
+                }
+
+                if (revisitData.visit_time) {
+                    var visitTimeInput = document.getElementById('visitTime');
+                    if (visitTimeInput) visitTimeInput.value = revisitData.visit_time;
+                }
+
+                setFormValue('customer_name', revisitData.customer_name);
+                setFormValue('mobile', revisitData.mobile);
+                setFormValue('alt_mobile', revisitData.alt_mobile);
+                setFormValue('customer_email', revisitData.customer_email);
+                setFormValue('pincode', revisitData.pincode);
+                setFormValue('gps', revisitData.gps);
+                setFormValue('maps_link', revisitData.maps_link);
+                setFormValue('timeline', revisitData.timeline);
+                setFormValue('budget', revisitData.budget);
+                setFormValue('competitor', revisitData.competitor);
+                setFormValue('remarks', revisitData.remarks);
+
+                if (stateSel && revisitData.state) {
+                    stateSel.value = revisitData.state;
+                    stateSel.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+
+                if (distSel && revisitData.district) {
+                    setTimeout(function () {
+                        distSel.value = revisitData.district;
+                    }, 0);
+                }
+
+                if (revisitData.construction_stage) {
+                    var constructionRadio = form.querySelector('input[name="construction_stage"][value="' + revisitData.construction_stage + '"]');
+                    if (constructionRadio) constructionRadio.checked = true;
+                }
+
+                if (Array.isArray(revisitData.products)) {
+                    form.querySelectorAll('input[name="products[]"]').forEach(function (box) {
+                        box.checked = revisitData.products.includes(box.value);
+                    });
+                }
+
+                if (Array.isArray(revisitData.categories)) {
+                    form.querySelectorAll('input[name="categories[]"]').forEach(function (box) {
+                        box.checked = revisitData.categories.includes(box.value);
+                    });
+                }
+
+                if (revisitData.qty) {
+                    Object.keys(revisitData.qty).forEach(function (key) {
+                        var qtyInput = form.querySelector('input[name="qty[' + key + ']"]');
+                        if (qtyInput) qtyInput.value = revisitData.qty[key] ?? 0;
+                    });
+                    recalcTotal();
+                }
+
+                if (revisitData.interest) {
+                    var interestRadio = form.querySelector('input[name="interest"][value="' + revisitData.interest + '"]');
+                    if (interestRadio) interestRadio.checked = true;
+                }
+
+                if (revisitData.follow_up) {
+                    var followUpCheckbox = form.querySelector('input[name="follow_up"]');
+                    if (followUpCheckbox) {
+                        followUpCheckbox.checked = true;
+                    }
+                }
+
+                if (followUpDate && revisitData.follow_update) {
+                    followUpDate.value = revisitData.follow_update;
+                }
+
+                if (followUpToggle) {
+                    toggleFollowUpDate();
+                }
             }
 
             // ---- 3. GPS capture + maps link ----
@@ -1329,7 +1450,9 @@
             if (gpsBtn) gpsBtn.addEventListener("click", function() {
                 captureGps(false);
             });
-            captureGps(true);
+            if (!revisitData || Object.keys(revisitData).length === 0) {
+                captureGps(true);
+            }
 
             // ---- 4. Quantity steppers + total ----
             var totalEl = document.getElementById("qtyTotal");
@@ -1361,7 +1484,32 @@
             });
             recalcTotal();
 
-            // ---- 5. Remarks counter ----
+            // ---- 5. Follow-up date toggle ----
+            var followUpToggle = form.querySelector('input[name="follow_up"]');
+            var followUpDateWrap = document.getElementById("followUpDateWrap");
+            var followUpDate = document.getElementById("followUpdateDate");
+
+            function toggleFollowUpDate() {
+                if (!followUpToggle || !followUpDateWrap || !followUpDate) return;
+
+                var isRequired = followUpToggle.checked;
+                followUpDateWrap.style.display = isRequired ? "block" : "none";
+                followUpDate.required = isRequired;
+                followUpDate.disabled = !isRequired;
+
+                if (!isRequired) {
+                    followUpDate.value = "";
+                }
+            }
+
+            if (followUpToggle) {
+                followUpToggle.addEventListener("change", toggleFollowUpDate);
+                toggleFollowUpDate();
+            }
+
+            applyRevisitData();
+
+            // ---- 6. Remarks counter ----
             var remarks = form.querySelector('textarea[name="remarks"]');
             var remarkCount = document.getElementById("remarkCount");
             if (remarks && remarkCount) {
@@ -1370,7 +1518,7 @@
                 });
             }
 
-            // ---- 6. Progress indicator ----
+            // ---- 7. Progress indicator ----
             var progress = document.getElementById("svfProgress");
             var tracked = [
                 'input[name="customer_name"]',
@@ -1560,10 +1708,14 @@
                         distSel.innerHTML = '<option value="">Select state first</option>';
                         distSel.disabled = true;
                     }
+                    if (followUpToggle) followUpToggle.checked = false;
+                    if (followUpDate) followUpDate.value = "";
+                    if (followUpDateWrap) followUpDateWrap.style.display = "none";
                     if (dateEl) dateEl.value = now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" +
                         pad(now.getDate());
                     if (timeEl) timeEl.value = pad(now.getHours()) + ":" + pad(now.getMinutes());
                     captureGps(true);
+                    toggleFollowUpDate();
                 }, 0);
             });
         })();
