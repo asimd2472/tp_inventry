@@ -487,6 +487,9 @@ class SiteVisitController extends Controller
                 'qty_total' => (int) ($visit->qty_total ?? 0),
                 'construction_stage' => $visit->construction_stage ?? '—',
                 'follow_up' => (bool) $visit->follow_up,
+                'follow_update' => $visit->follow_update
+                    ? Carbon::parse($visit->follow_update)->format('d/m/Y')
+                    : null,
                 'products' => $products,
                 'remarks' => $visit->remarks ?? '',
             ];

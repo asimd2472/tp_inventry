@@ -66,6 +66,7 @@
                     <div class="sv-detail-chip follow-up">
                         <i class="fas fa-bell"></i>
                         Follow-up Required
+                        @if(!empty($item['follow_update'])): {{ $item['follow_update'] }}@endif
                     </div>
                 @endif
             </div>
