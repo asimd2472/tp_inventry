@@ -19,7 +19,7 @@
                                     @if(Auth::user()->admin_img!='')
                                         <img src="{{asset('storage/images/'.Auth::user()->admin_img)}}">
                                     @else
-                                        <img src="{{ Vite::asset('resources/front/images/avatar.jpg')}}" alt="">
+                                        <img src="{{ Vite::asset('resources/front/images/avatar.png')}}" alt="">
                                     @endif
                                 </span>
                                 {{-- <p>{{Session::get('user_session')->name}}</p> --}}

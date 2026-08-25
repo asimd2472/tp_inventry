@@ -250,7 +250,40 @@
                                                 @endif
                                             </span>
                                         </div>
+                                        <div class="sv-visit-field">
+                                            <span class="sv-visit-field-label">Intermediary / Influencer</span>
+                                            <span class="sv-visit-field-value">{{ $visit->intermediary_name ?: '—' }}</span>
+                                        </div>
+                                        <div class="sv-visit-field">
+                                            <span class="sv-visit-field-label">Intermediary Type</span>
+                                            <span class="sv-visit-field-value">{{ $visit->intermediary_type ?: '—' }}</span>
+                                        </div>
                                     </div>
+
+                                    @if(count($visit->lead_status ?? []) > 0)
+                                        <div class="sv-visit-chip-group">
+                                            <span class="sv-visit-field-label">Lead Status</span>
+                                            <div class="sv-visit-chips">
+                                                @foreach($visit->lead_status as $status)
+                                                    <span class="sv-visit-chip">{{ $status }}</span>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if(count($visit->drop_reasons ?? []) > 0)
+                                        <div class="sv-visit-chip-group">
+                                            <span class="sv-visit-field-label">Reasons for Drop</span>
+                                            <div class="sv-visit-chips">
+                                                @foreach($visit->drop_reasons as $reason)
+                                                    <span class="sv-visit-chip sv-visit-chip--muted">{{ $reason }}</span>
+                                                @endforeach
+                                            </div>
+                                            @if($visit->drop_reason_other)
+                                                <p>{{ $visit->drop_reason_other }}</p>
+                                            @endif
+                                        </div>
+                                    @endif
 
                                     @if($visit->remarks)
                                         <div class="sv-visit-remarks">

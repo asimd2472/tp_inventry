@@ -218,6 +218,10 @@
     "file": "assets/@@logo-bc088433.png",
     "src": "resources/front/images/@@logo.png"
   },
+  "resources/front/images/@avatar.jpg": {
+    "file": "assets/@avatar-c4e6fe68.jpg",
+    "src": "resources/front/images/@avatar.jpg"
+  },
   "resources/front/images/@logo (2).png": {
     "file": "assets/@logo (2)-8c79c57c.png",
     "src": "resources/front/images/@logo (2).png"
@@ -238,9 +242,9 @@
     "file": "assets/Tata-Pravesh-Favicon-6f1d8add.png",
     "src": "resources/front/images/Tata-Pravesh-Favicon.png"
   },
-  "resources/front/images/avatar.jpg": {
-    "file": "assets/avatar-c4e6fe68.jpg",
-    "src": "resources/front/images/avatar.jpg"
+  "resources/front/images/avatar.png": {
+    "file": "assets/avatar-7480da99.png",
+    "src": "resources/front/images/avatar.png"
   },
   "resources/front/images/banner.jpg": {
     "file": "assets/banner-bd1a0240.jpg",
@@ -354,7 +358,7 @@
     "src": "resources/front/js/app.js"
   },
   "resources/front/scss/style.scss": {
-    "file": "assets/style-10074a76.css",
+    "file": "assets/style-6379f146.css",
     "isEntry": true,
     "src": "resources/front/scss/style.scss"
   },

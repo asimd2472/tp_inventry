@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class StoreSiteVisitRequest extends FormRequest
 {
@@ -50,6 +51,13 @@ class StoreSiteVisitRequest extends FormRequest
             'interest'            => ['required', 'in:Low,Medium,High'],
             'follow_up'           => ['nullable', 'in:Yes,1,on'],
             'follow_update'       => ['nullable', 'date', 'required_if:follow_up,Yes', 'required_if:follow_up,1', 'required_if:follow_up,on'],
+            'intermediary_name'   => ['nullable', 'string', 'max:150'],
+            'intermediary_type'   => ['nullable', Rule::in(['Influencer', 'Engineer', 'Architect', 'Interior Designer', 'Builder / Contractor', 'Other'])],
+            'lead_status'         => ['nullable', 'array'],
+            'lead_status.*'       => ['string', Rule::in(['Converted / Won', 'Follow-up Required', 'Dropped / Lost'])],
+            'drop_reasons'        => [Rule::requiredIf(fn () => in_array('Dropped / Lost', (array) $this->input('lead_status', []), true)), 'nullable', 'array', 'min:1'],
+            'drop_reasons.*'      => ['string', Rule::in(['Delivery timeline too long', 'Price too high', 'Product specification mismatch', 'Did not like product quality', 'Discount / commercial terms not acceptable', 'Did not like the design / finish', 'Poor after-sales service perception/experience', 'High maintenance concern', 'Warranty period considered inadequate', 'Preferred Wood / UPVC product', "Preferred competitor's product", 'Product not available / suitable for requirement', 'Requirement postponed / cancelled', 'Budget not available', 'Other'])],
+            'drop_reason_other'   => [Rule::requiredIf(fn () => in_array('Other', (array) $this->input('drop_reasons', []), true)), 'nullable', 'string', 'max:255'],
             'remarks'             => ['nullable', 'string', 'max:1000'],
         ];
     }
@@ -65,6 +73,9 @@ class StoreSiteVisitRequest extends FormRequest
             'budget',
             'competitor',
             'follow_update',
+            'intermediary_name',
+            'intermediary_type',
+            'drop_reason_other',
             'remarks',
         ];
 
@@ -78,6 +89,14 @@ class StoreSiteVisitRequest extends FormRequest
 
         if ($this->filled('visit_time')) {
             $normalized['visit_time'] = substr((string) $this->input('visit_time'), 0, 5);
+        }
+
+        if ($this->exists('lead_status')) {
+            $normalized['follow_up'] = in_array(
+                'Follow-up Required',
+                (array) $this->input('lead_status', []),
+                true
+            ) ? 'Yes' : null;
         }
 
         if (! empty($normalized)) {
