@@ -306,25 +306,59 @@
                     </label>
                 </div>
 
-                <div class="svf-switchrow">
-                    <div>
-                        <span class="svf-label">Follow-up Required</span>
-                        <span class="svf-hint">Schedule a callback or next visit</span>
-                    </div>
-                    <label class="svf-switch">
-                        <input type="checkbox" name="follow_up" value="Yes">
-                        <span class="svf-switch__track"><span class="svf-switch__knob"></span></span>
+                <div class="svf-divider"><span>Intermediary / Influencer Details</span></div>
+                <div class="svf-grid svf-grid--2">
+                    <label class="svf-field">
+                        <span class="svf-label">Intermediary Name</span>
+                        <input type="text" name="intermediary_name" maxlength="150" placeholder="Name of intermediary or influencer">
+                    </label>
+                    <label class="svf-field">
+                        <span class="svf-label">Intermediary Type</span>
+                        <select name="intermediary_type">
+                            <option value="">Select type</option>
+                            @foreach (['Influencer', 'Engineer', 'Architect', 'Interior Designer', 'Builder / Contractor', 'Other'] as $type)
+                                <option value="{{ $type }}">{{ $type }}</option>
+                            @endforeach
+                        </select>
                     </label>
                 </div>
 
-                <div class="svf-follow-up-date" id="followUpDateWrap" style="display: none;">
+                <div class="svf-divider"><span>Lead Status</span></div>
+                <div class="svf-checks svf-checks--tiles">
+                    @foreach (['Converted / Won', 'Follow-up Required', 'Dropped / Lost'] as $status)
+                        <label class="svf-check">
+                            <input type="checkbox" name="lead_status[]" value="{{ $status }}">
+                            <span class="svf-check__box" aria-hidden="true"></span>
+                            <span class="svf-check__text">{{ $status }}</span>
+                        </label>
+                    @endforeach
+                </div>
+
+                <div class="svf-follow-up-date" id="followUpDateWrap" style="display: none; margin-top: 1rem;">
                     <label class="svf-field">
                         <span class="svf-label">Follow-up Date <b>*</b></span>
-                        <input type="date" name="follow_update" id="followUpdateDate" min="{{ date('Y-m-d') }}">
+                        <input type="date" name="follow_update" id="followUpdateDate" min="{{ date('Y-m-d') }}" disabled>
                     </label>
                 </div>
 
-                <label class="svf-field">
+                <div id="dropDetails" style="display: none;">
+                    <div class="svf-divider"><span>Reason for Drop <b>*</b></span></div>
+                    <div class="svf-checks">
+                        @foreach (['Delivery timeline too long', 'Price too high', 'Product specification mismatch', 'Did not like product quality', 'Discount / commercial terms not acceptable', 'Did not like the design / finish', 'Poor after-sales service perception/experience', 'High maintenance concern', 'Warranty period considered inadequate', 'Preferred Wood / UPVC product', "Preferred competitor's product", 'Product not available / suitable for requirement', 'Requirement postponed / cancelled', 'Budget not available', 'Other'] as $reason)
+                            <label class="svf-check">
+                                <input type="checkbox" name="drop_reasons[]" value="{{ $reason }}">
+                                <span class="svf-check__box" aria-hidden="true"></span>
+                                <span class="svf-check__text">{{ $reason }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    <label class="svf-field" id="dropReasonOtherWrap" style="display: none; margin-top: 1rem;">
+                        <span class="svf-label">Other Drop Reason</span>
+                        <input type="text" name="drop_reason_other" id="dropReasonOther" maxlength="255" placeholder="Enter other reason" disabled>
+                    </label>
+                </div>
+
+                <label class="svf-field" style="margin-top: 1rem;">
                     <span class="svf-label">Remarks</span>
                     <textarea name="remarks" rows="4" maxlength="1000" placeholder="Observations, commitments, objections…"></textarea>
                     <span class="svf-hint"><span id="remarkCount">0</span>/1000</span>
@@ -1388,13 +1422,6 @@
                     if (interestRadio) interestRadio.checked = true;
                 }
 
-                if (revisitData.follow_up) {
-                    var followUpCheckbox = form.querySelector('input[name="follow_up"]');
-                    if (followUpCheckbox) {
-                        followUpCheckbox.checked = true;
-                    }
-                }
-
                 if (followUpDate && revisitData.follow_update) {
                     followUpDate.value = revisitData.follow_update;
                 }
@@ -1402,6 +1429,22 @@
                 if (followUpToggle) {
                     toggleFollowUpDate();
                 }
+
+                setFormValue('intermediary_name', revisitData.intermediary_name);
+                setFormValue('intermediary_type', revisitData.intermediary_type);
+                ['lead_status[]', 'drop_reasons[]'].forEach(function (name) {
+                    var values = revisitData[name.replace('[]', '')] || [];
+                    if (!Array.isArray(values)) values = [values];
+                    form.querySelectorAll('input[name="' + name + '"]').forEach(function (box) {
+                        box.checked = values.includes(box.value);
+                    });
+                });
+                setFormValue('drop_reason_other', revisitData.drop_reason_other);
+                if ((!Array.isArray(revisitData.lead_status) || revisitData.lead_status.length === 0) && revisitData.follow_up) {
+                    var legacyFollowUpStatus = form.querySelector('input[name="lead_status[]"][value="Follow-up Required"]');
+                    if (legacyFollowUpStatus) legacyFollowUpStatus.checked = true;
+                }
+                toggleLeadDropDetails();
             }
 
             // ---- 3. GPS capture + maps link ----
@@ -1484,8 +1527,11 @@
             });
             recalcTotal();
 
-            // ---- 5. Follow-up date toggle ----
-            var followUpToggle = form.querySelector('input[name="follow_up"]');
+            // ---- 5. Lead status and follow-up details ----
+            var leadStatusBoxes = form.querySelectorAll('input[name="lead_status[]"]');
+            var followUpToggle = Array.prototype.find.call(leadStatusBoxes, function (box) {
+                return box.value === "Follow-up Required";
+            });
             var followUpDateWrap = document.getElementById("followUpDateWrap");
             var followUpDate = document.getElementById("followUpdateDate");
 
@@ -1506,6 +1552,41 @@
                 followUpToggle.addEventListener("change", toggleFollowUpDate);
                 toggleFollowUpDate();
             }
+
+            // ---- 6. Dropped-lead details ----
+            var dropDetails = document.getElementById("dropDetails");
+            var dropReasonBoxes = form.querySelectorAll('input[name="drop_reasons[]"]');
+            var dropReasonOtherWrap = document.getElementById("dropReasonOtherWrap");
+            var dropReasonOther = document.getElementById("dropReasonOther");
+
+            function toggleLeadDropDetails() {
+                var dropped = Array.prototype.some.call(leadStatusBoxes, function (box) {
+                    return box.checked && box.value === "Dropped / Lost";
+                });
+                if (dropDetails) dropDetails.style.display = dropped ? "block" : "none";
+                dropReasonBoxes.forEach(function (box) {
+                    box.disabled = !dropped;
+                    box.required = false;
+                    if (!dropped) box.checked = false;
+                });
+                if (dropReasonOther) {
+                    var otherSelected = dropped && Array.prototype.some.call(dropReasonBoxes, function (box) {
+                        return box.checked && box.value === "Other";
+                    });
+                    if (dropReasonOtherWrap) dropReasonOtherWrap.style.display = otherSelected ? "block" : "none";
+                    dropReasonOther.disabled = !otherSelected;
+                    dropReasonOther.required = otherSelected;
+                    if (!otherSelected) dropReasonOther.value = "";
+                }
+            }
+
+            leadStatusBoxes.forEach(function (box) {
+                box.addEventListener("change", function () {
+                    toggleLeadDropDetails();
+                    toggleFollowUpDate();
+                });
+            });
+            dropReasonBoxes.forEach(function (box) { box.addEventListener("change", toggleLeadDropDetails); });
 
             applyRevisitData();
 
@@ -1711,6 +1792,8 @@
                     if (followUpToggle) followUpToggle.checked = false;
                     if (followUpDate) followUpDate.value = "";
                     if (followUpDateWrap) followUpDateWrap.style.display = "none";
+                    leadStatusBoxes.forEach(function (box) { box.checked = false; });
+                    toggleLeadDropDetails();
                     if (dateEl) dateEl.value = now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" +
                         pad(now.getDate());
                     if (timeEl) timeEl.value = pad(now.getHours()) + ":" + pad(now.getMinutes());

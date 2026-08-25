@@ -12,6 +12,8 @@ class SiteVisit extends Model
     protected $casts = [
         'products'     => 'array',
         'categories'   => 'array',
+        'lead_status'  => 'array',
+        'drop_reasons' => 'array',
         'follow_up'    => 'boolean',
         'follow_update'=> 'date',
         'visit_date'   => 'date',

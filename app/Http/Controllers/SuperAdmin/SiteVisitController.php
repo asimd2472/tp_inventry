@@ -70,6 +70,11 @@ class SiteVisitController extends Controller
             'interest'           => $data['interest'],
             'follow_up'          => isset($data['follow_up']),
             'follow_update'      => isset($data['follow_up']) ? ($data['follow_update'] ?? null) : null,
+            'intermediary_name'  => $data['intermediary_name'] ?? null,
+            'intermediary_type'  => $data['intermediary_type'] ?? null,
+            'lead_status'        => $data['lead_status'] ?? [],
+            'drop_reasons'       => $data['drop_reasons'] ?? [],
+            'drop_reason_other'  => $data['drop_reason_other'] ?? null,
             'remarks'            => $data['remarks'] ?? null,
         ]);
 

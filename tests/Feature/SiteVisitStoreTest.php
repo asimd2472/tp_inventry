@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class SiteVisitStoreTest extends TestCase
@@ -97,5 +98,53 @@ class SiteVisitStoreTest extends TestCase
             'follow_up' => true,
             'follow_update' => '2026-08-20',
         ]);
+    }
+
+    public function test_dropped_lead_requires_and_stores_drop_reasons(): void
+    {
+        $this->seed(RolePermissionSeeder::class);
+
+        $executive = User::factory()->create();
+        $executive->assignRole('Sales Executive');
+
+        $payload = [
+            'visit_date' => '2026-08-10',
+            'visit_time' => '14:30',
+            'customer_name' => 'Dropped Customer',
+            'mobile' => '9876543210',
+            'state' => 'Maharashtra',
+            'district' => 'Mumbai',
+            'construction_stage' => 'Foundation / Site Preparation',
+            'products' => ['Doors'],
+            'timeline' => 'Within 1 Month',
+            'interest' => 'Low',
+            'lead_status' => ['Dropped / Lost'],
+            'qty' => ['doors' => 1],
+        ];
+
+        $response = $this->actingAs($executive)->postJson('/admin/site-visit-store', $payload);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['drop_reasons']);
+
+        $payload['intermediary_name'] = 'A. Sharma';
+        $payload['intermediary_type'] = 'Architect';
+        $payload['drop_reasons'] = ['Price too high', 'Other'];
+        $payload['drop_reason_other'] = 'Budget was not approved';
+
+        $response = $this->actingAs($executive)->postJson('/admin/site-visit-store', $payload);
+
+        $response->assertOk();
+        $this->assertDatabaseHas('site_visits', [
+            'customer_name' => 'Dropped Customer',
+            'intermediary_name' => 'A. Sharma',
+            'intermediary_type' => 'Architect',
+            'drop_reason_other' => 'Budget was not approved',
+        ]);
+
+        $this->assertSame(
+            ['Dropped / Lost'],
+            json_decode((string) DB::table('site_visits')->where('customer_name', 'Dropped Customer')->value('lead_status'), true)
+        );
     }
 }
