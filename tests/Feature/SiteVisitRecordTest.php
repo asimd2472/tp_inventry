@@ -298,4 +298,53 @@ class SiteVisitRecordTest extends TestCase
             ->assertSee('Customer Details')
             ->assertSee('Foundation');
     }
+
+    public function test_listing_groups_customer_visits_and_details_can_switch_history(): void
+    {
+        $this->seed(RolePermissionSeeder::class);
+
+        $executive = User::factory()->create();
+        $executive->assignRole('Sales Executive');
+
+        $visits = collect([
+            ['date' => '2026-08-04', 'stage' => 'Foundation'],
+            ['date' => '2026-08-12', 'stage' => 'Structure'],
+            ['date' => '2026-08-20', 'stage' => 'Finishing'],
+        ])->map(fn (array $data) => SiteVisit::create([
+            'user_id' => $executive->id,
+            'visit_date' => $data['date'],
+            'visit_time' => '09:00:00',
+            'customer_name' => 'Repeat Customer',
+            'mobile' => '9111111111',
+            'state' => 'State 1',
+            'district' => 'District 1',
+            'construction_stage' => $data['stage'],
+            'products' => ['Doors'],
+            'timeline' => '1 month',
+            'interest' => 'High',
+            'qty_total' => 8,
+        ]));
+
+        $listing = $this->actingAs($executive)
+            ->getJson(route('admin.site_visit_record.data'));
+
+        $listing->assertOk()
+            ->assertJsonPath('pagination.total', 1)
+            ->assertJsonPath('items.0.id', $visits[2]->id)
+            ->assertJsonPath('items.0.visit_number_label', '3rd visit')
+            ->assertJsonPath('items.0.total_visits', 3);
+
+        $this->actingAs($executive)
+            ->get(route('admin.site_visit_record.show', $visits[2]->id))
+            ->assertOk()
+            ->assertSee('3rd visit')
+            ->assertSee('Finishing')
+            ->assertSee('2nd visit');
+
+        $this->actingAs($executive)
+            ->get(route('admin.site_visit_record.show', [$visits[2]->id, 'visit_id' => $visits[1]->id]))
+            ->assertOk()
+            ->assertSee('Structure')
+            ->assertSee('aria-selected="true"', false);
+    }
 }

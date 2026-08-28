@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -441,7 +442,18 @@ class SiteVisitController extends Controller
             ->orderByDesc('id');
 
         $allResults = (clone $query)->get();
-        $visits = (clone $query)->paginate($perPage, ['*'], 'page', $page);
+        $latestVisits = $allResults
+            ->sortByDesc(fn (SiteVisit $visit) => [$visit->visit_date?->timestamp ?? 0, $visit->id])
+            ->groupBy(fn (SiteVisit $visit) => $this->getCustomerVisitKey($visit))
+            ->map(fn ($customerVisits) => $customerVisits->first())
+            ->values();
+        $visits = new LengthAwarePaginator(
+            $latestVisits->forPage($page, $perPage)->values(),
+            $latestVisits->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url()]
+        );
         $visitNumberMap = $this->buildVisitNumberMap($allResults);
 
         $totalVisits = $allResults->count();
@@ -489,6 +501,7 @@ class SiteVisitController extends Controller
                 'interest_class' => $interestClass,
                 'visit_number' => $visitNumber,
                 'visit_number_label' => $this->formatVisitNumberLabel($visitNumber),
+                'total_visits' => $this->countCustomerVisits($allResults, $visit),
                 'qty_total' => (int) ($visit->qty_total ?? 0),
                 'construction_stage' => $visit->construction_stage ?? '—',
                 'follow_up' => (bool) $visit->follow_up,
@@ -556,6 +569,13 @@ class SiteVisitController extends Controller
         return 'name:' . strtolower(trim((string) ($visit->customer_name ?? '')));
     }
 
+    private function countCustomerVisits($visits, SiteVisit $visit): int
+    {
+        $customerKey = $this->getCustomerVisitKey($visit);
+
+        return $visits->filter(fn (SiteVisit $customerVisit) => $this->getCustomerVisitKey($customerVisit) === $customerKey)->count();
+    }
+
     private function formatVisitNumberLabel(int $visitNumber): string
     {
         $suffix = match ($visitNumber % 10) {
@@ -604,6 +624,11 @@ class SiteVisitController extends Controller
                 'interest' => $visit->interest,
                 'follow_up' => (bool) $visit->follow_up,
                 'follow_update' => $visit->follow_update ? Carbon::parse($visit->follow_update)->format('Y-m-d') : null,
+                'intermediary_name' => $visit->intermediary_name,
+                'intermediary_type' => $visit->intermediary_type,
+                'lead_status' => is_array($visit->lead_status) ? $visit->lead_status : [],
+                'drop_reasons' => is_array($visit->drop_reasons) ? $visit->drop_reasons : [],
+                'drop_reason_other' => $visit->drop_reason_other,
                 'remarks' => $visit->remarks,
                 'visit_date' => $visit->visit_date ? Carbon::parse($visit->visit_date)->format('Y-m-d') : null,
                 'visit_time' => $visit->visit_time ? Carbon::parse($visit->visit_time)->format('H:i') : null,
@@ -654,6 +679,26 @@ class SiteVisitController extends Controller
     {
         $visit = $this->getAuthorizedSiteVisit((int) $id);
         $currentUser = Auth::user();
+        $customerKey = $this->getCustomerVisitKey($visit);
+        $historyQuery = SiteVisit::with(['user.manager']);
+        $this->applyAccessScope($historyQuery, $currentUser, request());
+        $customerVisits = $historyQuery
+            ->where(function ($query) use ($visit, $customerKey) {
+                if (str_starts_with($customerKey, 'mobile:')) {
+                    $query->where('mobile', $visit->mobile);
+                } else {
+                    $query->whereNull('mobile')->where('customer_name', $visit->customer_name);
+                }
+            })
+            ->get()
+            ->filter(fn (SiteVisit $customerVisit) => $this->getCustomerVisitKey($customerVisit) === $customerKey)
+            ->sortBy([['visit_date', 'desc'], ['id', 'desc']])
+            ->values();
+
+        $selectedVisitId = (int) request()->query('visit_id', $visit->id);
+        $selectedVisit = $customerVisits->firstWhere('id', $selectedVisitId) ?? $customerVisits->first();
+        abort_unless($selectedVisit, 404);
+        $visit = $selectedVisit;
 
         $visitDate = $visit->visit_date
             ? Carbon::parse($visit->visit_date)->format('d M, Y')
@@ -686,6 +731,9 @@ class SiteVisitController extends Controller
             'gpsCoordinates' => ($visit->latitude && $visit->longitude)
                 ? $visit->latitude . ', ' . $visit->longitude
                 : null,
+            'customerVisits' => $customerVisits,
+            'selectedVisitId' => $visit->id,
+            'visitNumberMap' => $this->buildVisitNumberMap($customerVisits),
         ]);
     }
 

@@ -26,6 +26,30 @@
 
                             <div class="sv-visit-details-body">
 
+                                @if(($customerVisits ?? collect())->count() > 1)
+                                    <div class="sv-visit-history" role="tablist" aria-label="Customer visit history">
+                                        @foreach($customerVisits as $historyVisit)
+                                            @php
+                                                $historyNumber = (int) ($visitNumberMap[$historyVisit->id] ?? 1);
+                                                $historyLabel = $historyNumber . (match (true) {
+                                                    $historyNumber % 100 >= 11 && $historyNumber % 100 <= 13 => 'th',
+                                                    $historyNumber % 10 === 1 => 'st',
+                                                    $historyNumber % 10 === 2 => 'nd',
+                                                    $historyNumber % 10 === 3 => 'rd',
+                                                    default => 'th',
+                                                });
+                                            @endphp
+                                            <a href="{{ route('admin.site_visit_record.show', $visit->id) }}?visit_id={{ $historyVisit->id }}"
+                                               class="sv-visit-history-tab {{ $historyVisit->id === $selectedVisitId ? 'is-active' : '' }}"
+                                               role="tab"
+                                               aria-selected="{{ $historyVisit->id === $selectedVisitId ? 'true' : 'false' }}">
+                                                <span>{{ $historyLabel }} visit</span>
+                                                <small>{{ $historyVisit->visit_date?->format('d M, Y') ?? '—' }}</small>
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                @endif
+
                                 <div class="sv-visit-details-summary">
                                     <div class="sv-visit-summary-card">
                                         <span class="sv-visit-summary-label">Visit Date</span>

@@ -110,6 +110,46 @@
         z-index: 2;
     }
 
+    .sv-visit-history {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        margin-bottom: 20px;
+        padding-bottom: 2px;
+    }
+
+    .sv-visit-history-tab {
+        display: flex;
+        flex: 0 0 auto;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 120px;
+        padding: 11px 14px;
+        border: 1px solid #d9e3ee;
+        border-radius: 10px;
+        background: #fff;
+        color: #536174;
+        text-decoration: none;
+        transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+
+        span {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        small {
+            color: #8a96a8;
+            font-size: 11px;
+        }
+
+        &:hover,
+        &.is-active {
+            border-color: #0076d7;
+            background: #eef7ff;
+            color: #005da8;
+        }
+    }
+
     .sv-visit-details-summary {
         display: grid;
         grid-template-columns: repeat(4, 1fr);

@@ -168,6 +168,36 @@
 
 @endsection
 
+{{-- @push('styles')
+<style>
+    @media (max-width: 768px) {
+        .sv-record-dashboard .sv-record-toolbar-row {
+            height: auto !important;
+            min-height: 0 !important;
+            gap: 10px !important;
+        }
+
+        .sv-record-dashboard .sv-record-search-row {
+            flex: 0 0 auto !important;
+            height: auto !important;
+            min-height: 0 !important;
+        }
+
+        .sv-record-dashboard .sv-record-export-panel {
+            height: auto !important;
+            min-height: 0 !important;
+            margin-top: 0 !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .sv-record-dashboard .sv-record-stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+    }
+</style>
+@endpush --}}
+
 @push('scripts')
 <script type="module">
 (function () {
@@ -312,6 +342,7 @@
         });
 
         appendTeamFilterParams(params);
+        $('.loader-wrap').show();
 
         fetch(baseUrl + '?' + params.toString(), {
             headers: {
@@ -334,6 +365,9 @@
                 }
 
                 renderPagination(data);
+            })
+            .finally(function () {
+                $('.loader-wrap').hide();
             });
     }
 

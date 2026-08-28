@@ -1,9 +1,9 @@
 @if(count($items) === 0)
-    <div class="sv-record-empty">
+    {{-- <div class="sv-record-empty">
         <i class="fas fa-map-marker-alt"></i>
         <h4>No Site Visits Found</h4>
         <p>No visit records match your current filters.</p>
-    </div>
+    </div> --}}
 @else
     @foreach($items as $item)
         <article class="sv-record-card is-clickable"
@@ -19,6 +19,9 @@
                     <span style="display:inline-flex; align-items:center; justify-content:center; padding:4px 10px; border-radius:999px; background:#eef2ff; color:#4338ca; font-size:11px; font-weight:700; letter-spacing:0.02em; text-transform:lowercase;">
                         {{ $item['visit_number_label'] ?? '1st visit' }}
                     </span>
+                    {{-- <span style="display:inline-flex; align-items:center; justify-content:center; padding:4px 10px; border-radius:999px; background:#ecfdf5; color:#047857; font-size:11px; font-weight:700;">
+                        Last visit
+                    </span> --}}
                     <button type="button"
                             class="sv-revisit-btn"
                             title="Revisit this customer"
@@ -33,6 +36,10 @@
             </div>
 
             <div class="sv-record-card-meta">
+                {{-- <div class="sv-meta-item">
+                    <span class="sv-meta-label">Visit History</span>
+                    <span class="sv-meta-value">{{ $item['total_visits'] ?? 1 }} {{ ($item['total_visits'] ?? 1) === 1 ? 'visit' : 'visits' }}</span>
+                </div> --}}
                 <div class="sv-meta-item">
                     <span class="sv-meta-label">Visit Date</span>
                     <span class="sv-meta-value">{{ $item['visit_date'] }}@if($item['visit_time']) · {{ $item['visit_time'] }}@endif</span>
