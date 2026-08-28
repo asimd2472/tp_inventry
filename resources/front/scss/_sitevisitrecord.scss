@@ -607,8 +607,67 @@
         .sv-record-export-form,
         .sv-record-export-actions-wrap {
             display: flex;
-            flex-direction: column;
+            // flex-direction: column;
             flex-wrap: wrap;
+        }
+
+        .sv-record-export-panel{
+            margin-top: -140px !important;
+        }
+
+        .sv-record-toolbar-row {
+            height: auto !important;
+            min-height: 0 !important;
+            gap: 10px;
+        }
+
+        .sv-record-toolbar {
+            padding: 12px;
+        }
+
+        .sv-record-search-row {
+            gap: 10px;
+            flex: 0 0 auto !important;
+            height: auto !important;
+            min-height: 0 !important;
+        }
+
+        .sv-record-search,
+        .sv-record-filter,
+        .sv-record-export-panel,
+        .sv-record-export-field,
+        .sv-record-export-actions,
+        .sv-record-export-actions-wrap,
+        .sv-record-export-btn {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .sv-record-search input {
+            min-height: 46px;
+        }
+
+        .sv-record-export-form {
+            align-items: stretch;
+            gap: 8px;
+        }
+
+        .sv-record-export-panel {
+            height: auto !important;
+            min-height: 0 !important;
+            margin-top: 0 !important;
+        }
+
+        .sv-record-export-field {
+            gap: 4px;
+        }
+
+        .sv-record-export-field select[multiple] {
+            min-height: 56px;
+        }
+
+        .sv-record-export-actions-wrap {
+            gap: 8px;
         }
 
         .sv-record-title {
@@ -655,10 +714,6 @@
     }
 
     @media (max-width: 480px) {
-        .sv-record-stats {
-            grid-template-columns: 1fr;
-        }
-
         .sv-record-card-details {
             flex-direction: column;
             align-items: flex-start;
