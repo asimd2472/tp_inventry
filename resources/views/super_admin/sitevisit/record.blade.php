@@ -312,6 +312,7 @@
         });
 
         appendTeamFilterParams(params);
+        $('.loader-wrap').show();
 
         fetch(baseUrl + '?' + params.toString(), {
             headers: {
@@ -334,6 +335,9 @@
                 }
 
                 renderPagination(data);
+            })
+            .finally(function () {
+                $('.loader-wrap').hide();
             });
     }
 

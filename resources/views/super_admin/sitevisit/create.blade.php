@@ -1366,7 +1366,7 @@
 
                 if (revisitData.visit_time) {
                     var visitTimeInput = document.getElementById('visitTime');
-                    if (visitTimeInput) visitTimeInput.value = revisitData.visit_time;
+                    if (visitTimeInput) visitTimeInput.value = String(revisitData.visit_time).substring(0, 5);
                 }
 
                 setFormValue('customer_name', revisitData.customer_name);
@@ -1422,14 +1422,6 @@
                     if (interestRadio) interestRadio.checked = true;
                 }
 
-                if (followUpDate && revisitData.follow_update) {
-                    followUpDate.value = revisitData.follow_update;
-                }
-
-                if (followUpToggle) {
-                    toggleFollowUpDate();
-                }
-
                 setFormValue('intermediary_name', revisitData.intermediary_name);
                 setFormValue('intermediary_type', revisitData.intermediary_type);
                 ['lead_status[]', 'drop_reasons[]'].forEach(function (name) {
@@ -1443,6 +1435,12 @@
                 if ((!Array.isArray(revisitData.lead_status) || revisitData.lead_status.length === 0) && revisitData.follow_up) {
                     var legacyFollowUpStatus = form.querySelector('input[name="lead_status[]"][value="Follow-up Required"]');
                     if (legacyFollowUpStatus) legacyFollowUpStatus.checked = true;
+                }
+                if (followUpDate && revisitData.follow_update) {
+                    followUpDate.value = revisitData.follow_update;
+                }
+                if (followUpToggle) {
+                    toggleFollowUpDate();
                 }
                 toggleLeadDropDetails();
             }
