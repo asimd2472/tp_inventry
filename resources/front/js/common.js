@@ -17,6 +17,9 @@ $(function() {
             "otp": {
                 required: function() {
                     return $('.otp-input').is(':visible');
+                },
+                minlength: function() {
+                    return $('.otp-input').is(':visible') ? 6 : 0;
                 }
             }
         },
@@ -26,7 +29,8 @@ $(function() {
                 email: "Enter a valid email address."
             },
             otp: {
-                required: "OTP is required."
+                required: "OTP is required.",
+                minlength: "Enter all 6 digits."
             }
         },
         errorElement: 'span',
@@ -73,9 +77,8 @@ $(function() {
                                 "hideMethod": "fadeOut"
                             }
                             toastr.success('OTP Sent. Please check your email for the code.');
-                            // show otp input, hide password
-                            $('.otp-input').show();
-                            $("#email-input").removeClass("col-md-9").addClass("col-md-6");
+                            $('#masked-email').text(maskEmail($('input[name="username"]').val()));
+                            switchLoginStep('otp');
                             $('.pass_input').closest('.front-input').hide();
                             $('#login_btn').html('Verify OTP');
                             // re-enable button for next click
@@ -132,12 +135,69 @@ $(function() {
 
     // reset OTP stage when user modifies the email address
     $('input[name="username"]').on('input', function() {
-        if ($('.otp-input').is(':visible')) {
-            $('.otp-input').hide();
-            $('.password-input').show();
-            $('.otp-controls').hide();
-            $('#login_btn').html('Login');
+        if ($('.otp-input').is(':visible')) resetOtpStep();
+    });
+
+    function resetOtpStep() {
+        switchLoginStep('email');
+        $('.otp-controls').hide();
+        $('.otp-digit').val('');
+        $('#otp-value').val('');
+        $('#login_btn').html('Login');
+    }
+
+    function switchLoginStep(step) {
+        var $emailRow = $('.email-row');
+        var $otpRow = $('.otp-row');
+
+        if (step === 'otp') {
+            $emailRow.addClass('login-step-exit');
+            setTimeout(function() {
+                $emailRow.hide().removeClass('login-step-exit');
+                $('#login-action').appendTo($otpRow);
+                $otpRow.css('display', 'flex').addClass('login-step-enter');
+                setTimeout(function() { $otpRow.removeClass('login-step-enter'); }, 350);
+                $('.otp-digit').first().focus();
+            }, 220);
+            return;
         }
+
+        $otpRow.addClass('login-step-exit');
+        setTimeout(function() {
+            $otpRow.hide().removeClass('login-step-exit');
+            $('#login-action').appendTo($emailRow);
+            $emailRow.css('display', 'flex').addClass('login-step-enter');
+            setTimeout(function() { $emailRow.removeClass('login-step-enter'); }, 350);
+        }, 220);
+    }
+
+    function maskEmail(email) {
+        var parts = email.split('@');
+        if (parts.length !== 2) return email;
+        var name = parts[0];
+        var visible = name.length > 1 ? name.charAt(0) : '';
+        return visible + '***@' + parts[1];
+    }
+
+    $(document).on('click', '.otp-back', resetOtpStep);
+
+    $(document).on('input', '.otp-digit', function() {
+        this.value = this.value.replace(/\D/g, '').slice(0, 1);
+        $('#otp-value').val($('.otp-digit').map(function() { return this.value; }).get().join(''));
+        if (this.value) $(this).next('.otp-digit').focus();
+    });
+
+    $(document).on('keydown', '.otp-digit', function(e) {
+        if (e.key === 'Backspace' && !this.value) $(this).prev('.otp-digit').focus();
+    });
+
+    $(document).on('paste', '.otp-digit', function(e) {
+        var pasted = (e.originalEvent.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+        if (!pasted) return;
+        e.preventDefault();
+        $('.otp-digit').each(function(index) { this.value = pasted[index] || ''; });
+        $('#otp-value').val(pasted);
+        $('.otp-digit').eq(Math.min(pasted.length, 6) - 1).focus();
     });
 
     // resend OTP click

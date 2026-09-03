@@ -350,7 +350,7 @@
     "css": [
       "assets/app-9039b8de.css"
     ],
-    "file": "assets/app-ba7bc715.js",
+    "file": "assets/app-4de000ce.js",
     "imports": [
       "_additional-methods.min-6ba532ba.js"
     ],
@@ -358,7 +358,7 @@
     "src": "resources/front/js/app.js"
   },
   "resources/front/scss/style.scss": {
-    "file": "assets/style-dc0de6b1.css",
+    "file": "assets/style-a4208e00.css",
     "isEntry": true,
     "src": "resources/front/scss/style.scss"
   },
