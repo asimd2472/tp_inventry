@@ -30,6 +30,8 @@
                         
                             <div class="container">
                         
+                                <div class="cvr-grid">
+
                                 <div class="main-card">
                         
                                     <div class="icon-circle">
@@ -73,6 +75,43 @@
                                         Supports .xlsx & .xls Files
                                     </div>
                         
+                                </div>
+
+                                <aside class="excel-guide" aria-labelledby="excel-guide-title">
+                                    <div class="guide-heading">
+                                        <div class="guide-icon">
+                                            <i class="fas fa-table"></i>
+                                        </div>
+                                        <div>
+                                            <span class="guide-kicker">Before you upload</span>
+                                            <h3 id="excel-guide-title">Use the Excel format</h3>
+                                        </div>
+                                    </div>
+
+                                    <p class="guide-copy">
+                                        Keep the columns in this order. The Discussion Summary is used to identify action points and complaints.
+                                    </p>
+
+                                    <a class="download-template" href="{{ asset('assets/cvr-example.xlsx') }}" download>
+                                        <i class="fas fa-download"></i>
+                                        <span>
+                                            <strong>Download example file</strong>
+                                            <small>cvr-example.xlsx</small>
+                                        </span>
+                                        <i class="fas fa-arrow-right download-arrow"></i>
+                                    </a>
+
+                                    {{-- <div class="column-preview" role="list" aria-label="Required Excel columns">
+                                        <div class="column-row" role="listitem"><span>01</span><strong>Date</strong></div>
+                                        <div class="column-row" role="listitem"><span>02</span><strong>Host</strong></div>
+                                        <div class="column-row" role="listitem"><span>03</span><strong>Distributor</strong></div>
+                                        <div class="column-row" role="listitem"><span>04</span><strong>Customer Name</strong></div>
+                                        <div class="column-row" role="listitem"><span>05</span><strong>Contact No</strong></div>
+                                        <div class="column-row" role="listitem"><span>06</span><strong>Location</strong></div>
+                                        <div class="column-row column-row-highlight" role="listitem"><span>07</span><strong>Discussion Summary</strong><i class="fas fa-sparkles"></i></div>
+                                    </div> --}}
+                                </aside>
+
                                 </div>
                         
                             </div>

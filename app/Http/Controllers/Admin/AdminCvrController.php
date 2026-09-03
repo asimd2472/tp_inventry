@@ -27,6 +27,9 @@ class AdminCvrController extends Controller
     }
 
     public function uploadCvr(Request $request){
+        // Gemini is called once for each row, so allow the complete upload to finish.
+        set_time_limit(300);
+
         
         $request->validate([
             'excel' => 'required|file|mimes:xlsx,xls|max:10240'
@@ -109,16 +112,14 @@ class AdminCvrController extends Controller
                 $complaintRecords = [];
                 $geminiResult = null;
 
-                $hasActionPoints = !empty(trim((string) ($row[7] ?? '')));
-                $hasComplaints   = !empty(trim((string) ($row[8] ?? '')));
+                $discussionSummary = trim((string) ($row[6] ?? ''));
 
-                if ($hasActionPoints || $hasComplaints) {
+                if ($discussionSummary !== '') {
 
-                    $conversationText = "Executive Summary:\n" . ($row[6] ?? '') . "\n\n"
-                        . ($hasActionPoints ? "Action Points (raw):\n" . $row[7] . "\n\n" : '')
-                        . ($hasComplaints ? "Key Issues & Complaints (raw):\n" . $row[8] : '');
+                    $conversationText = "Discussion Summary:\n" . $discussionSummary;
 
-                    $geminiResult = $this->analyzeWithGemini($conversationText);
+                    $geminiResult = $this->analyzeWithGemini($conversationText)
+                        ?? $this->fallbackAnalysis($discussionSummary);
 
                     // dd($geminiResult);
                 }
@@ -126,6 +127,7 @@ class AdminCvrController extends Controller
                 if ($geminiResult) {
 
                     foreach (($geminiResult['actionPoints'] ?? []) as $index => $ap) {
+                        $ap = is_array($ap) ? $ap : ['task' => (string) $ap];
                         $actionPoint = [
                             "id"       => "ap_{$meetingId}_{$index}",
                             "task"     => $ap['task'] ?? '',
@@ -147,6 +149,7 @@ class AdminCvrController extends Controller
                     }
 
                     foreach (($geminiResult['complaints'] ?? []) as $index => $comp) {
+                        $comp = is_array($comp) ? $comp : ['description' => (string) $comp];
                         $complaint = [
                             "id"          => "comp_{$meetingId}_{$index}",
                             "category"    => $comp['category'] ?? 'Other Issues',
@@ -163,55 +166,6 @@ class AdminCvrController extends Controller
                         ];
                     }
 
-                } else {
-
-                    // ---- Fallback: your original manual line-split parsing ----
-
-                    if ($hasActionPoints) {
-                        $tasks = preg_split('/\r\n|\r|\n/', $row[7]);
-                        foreach ($tasks as $index => $task) {
-                            $task = trim($task);
-                            if ($task === '') continue;
-                            $actionPoint = [
-                                "id" => "ap_{$meetingId}_{$index}",
-                                "task" => $task,
-                                "owner" => "Assigned Manually",
-                                "deadline" => $date,
-                                "priority" => "Medium",
-                                "status" => "Open"
-                            ];
-                            $actionPoints[] = $actionPoint;
-                            $actionPointRecords[] = [
-                                'action_id' => $actionPoint['id'],
-                                'task' => $actionPoint['task'],
-                                'owner' => $actionPoint['owner'],
-                                'deadline' => $actionPoint['deadline'],
-                                'priority' => $actionPoint['priority'],
-                                'status' => $actionPoint['status'],
-                            ];
-                        }
-                    }
-
-                    if ($hasComplaints) {
-                        $items = preg_split('/\r\n|\r|\n/', $row[8]);
-                        foreach ($items as $index => $item) {
-                            $item = trim($item);
-                            if ($item === '') continue;
-                            $complaint = [
-                                "id" => "comp_{$meetingId}_{$index}",
-                                "category" => "Other Issues",
-                                "description" => $item,
-                                "severity" => "Critical"
-                            ];
-                            $complaints[] = $complaint;
-                            $complaintRecords[] = [
-                                'complaint_id' => $complaint['id'],
-                                'category' => $complaint['category'],
-                                'description' => $complaint['description'],
-                                'severity' => $complaint['severity'],
-                            ];
-                        }
-                    }
                 }
 
                 /*
@@ -670,7 +624,44 @@ class AdminCvrController extends Controller
         ];
     }
 
-    private function analyzeWithGemini(string $text, int $retries = 2): ?array
+    private function fallbackAnalysis(string $text): array
+    {
+        $actionPoints = [];
+        $complaints = [];
+        $lines = preg_split('/\r\n|\r|\n/', $text);
+
+        foreach ($lines as $line) {
+            $line = trim($line, " \t-*");
+            if ($line === '') {
+                continue;
+            }
+
+            if (preg_match('/\b(action|task|follow[- ]?up|need to|should|must|asked to|request(?:ed)?|confirm(?:ed)?|share|send|submit|provide|review)\b/i', $line)) {
+                $actionPoints[] = [
+                    'task' => preg_replace('/^\s*(action point|action|task|follow[- ]?up)\s*:?\s*/i', '', $line),
+                    'owner' => 'Unknown',
+                    'deadline' => 'Not specified',
+                    'priority' => 'Medium',
+                ];
+            }
+
+            if (preg_match('/\b(issue|problem|complaint|delay|difficult|shortage|not available|concern|challenge|competition|competitor|quoted less|price|pricing)\b/i', $line)) {
+                $category = preg_match('/\b(competition|competitor|quoted less)\b/i', $line)
+                    ? 'Competitor Activity'
+                    : (preg_match('/\b(price|pricing|quote|quoted)\b/i', $line) ? 'Pricing' : 'Other');
+
+                $complaints[] = [
+                    'category' => $category,
+                    'description' => $line,
+                    'severity' => 'Major',
+                ];
+            }
+        }
+
+        return ['actionPoints' => $actionPoints, 'complaints' => $complaints];
+    }
+
+    private function analyzeWithGemini(string $text, int $retries = 1): ?array
     {   
 
         $prompt = <<<PROMPT
@@ -708,7 +699,7 @@ class AdminCvrController extends Controller
     // dd($prompt);
 
     try {
-        $response = Http::withHeaders([
+        $response = Http::timeout(15)->connectTimeout(5)->withHeaders([
             'Content-Type'  => 'application/json',
             'X-goog-api-key' => env('GEMINI_API_KEY'),
         ])->post(
@@ -716,6 +707,9 @@ class AdminCvrController extends Controller
             [
                 'contents' => [
                     ['parts' => [['text' => $prompt]]]
+                ],
+                'generationConfig' => [
+                    'responseMimeType' => 'application/json',
                 ],
             ]
         );
@@ -725,24 +719,48 @@ class AdminCvrController extends Controller
 
         // Retry on 503 (model overloaded)
         if (($data['error']['code'] ?? null) == 503 && $retries > 0) {
-            sleep(2);
+            sleep(1);
             return $this->analyzeWithGemini($text, $retries - 1);
         }
 
         if (!empty($data['error'])) {
-            Log::warning('Gemini error: '.json_encode($data['error']));
+            Log::warning('Gemini error', [
+                'status' => $response->status(),
+                'error' => $data['error'],
+            ]);
             return null;
         }
 
         $resultText = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
 
+        if ($resultText === '') {
+            Log::warning('Gemini returned no candidate text', [
+                'status' => $response->status(),
+                'response' => $data,
+            ]);
+            return null;
+        }
+
         // dd($resultText);
 
         $resultText = trim(preg_replace('/```json|```/', '', $resultText));
+        $jsonStart = strpos($resultText, '{');
+        $jsonEnd = strrpos($resultText, '}');
+        if ($jsonStart !== false && $jsonEnd !== false) {
+            $resultText = substr($resultText, $jsonStart, $jsonEnd - $jsonStart + 1);
+        }
 
         $parsed = json_decode($resultText, true);
 
-        return json_last_error() === JSON_ERROR_NONE ? $parsed : null;
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($parsed)) {
+            Log::warning('Gemini returned invalid JSON', ['response' => $resultText]);
+            return null;
+        }
+
+        return [
+            'actionPoints' => is_array($parsed['actionPoints'] ?? null) ? $parsed['actionPoints'] : [],
+            'complaints' => is_array($parsed['complaints'] ?? null) ? $parsed['complaints'] : [],
+        ];
 
     } catch (\Exception $e) {
         Log::warning('Gemini call failed: '.$e->getMessage());

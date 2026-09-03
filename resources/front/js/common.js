@@ -51,11 +51,28 @@ $(function() {
                     if (data.status == 1) {
                         if (data.step && data.step === 'otp') {
                             // first step succeeded: OTP sent
-                            Swal.fire({
-                                title: 'OTP Sent',
-                                text: data.msg,
-                                icon: 'success',
-                            });
+                            // Swal.fire({
+                            //     title: 'OTP Sent',
+                            //     text: data.msg,
+                            //     icon: 'success',
+                            // });
+                            toastr.options = {
+                                "closeButton": true,
+                                "newestOnTop": false,
+                                "progressBar": true,
+                                "positionClass": "toast-top-right",
+                                "preventDuplicates": false,
+                                "onclick": null,
+                                "showDuration": "500",
+                                "hideDuration": "1000",
+                                "timeOut": "5000",
+                                "extendedTimeOut": "1000",
+                                "showEasing": "swing",
+                                "hideEasing": "linear",
+                                "showMethod": "fadeIn",
+                                "hideMethod": "fadeOut"
+                            }
+                            toastr.success('OTP Sent. Please check your email for the code.');
                             // show otp input, hide password
                             $('.otp-input').show();
                             $("#email-input").removeClass("col-md-9").addClass("col-md-6");
@@ -67,11 +84,29 @@ $(function() {
                             startOtpTimer(300); // 5 minutes in seconds
                         } else {
                             // final login success
-                            Swal.fire({
-                                title: 'Success',
-                                text: data.msg,
-                                icon: 'success',
-                            });
+                            // Swal.fire({
+                            //     title: 'Success',
+                            //     text: data.msg,
+                            //     icon: 'success',
+                            // });
+                            toastr.options = {
+                                "closeButton": true,
+                                "newestOnTop": false,
+                                "progressBar": true,
+                                "positionClass": "toast-top-right",
+                                "preventDuplicates": false,
+                                "onclick": null,
+                                "showDuration": "500",
+                                "hideDuration": "1000",
+                                "timeOut": "5000",
+                                "extendedTimeOut": "1000",
+                                "showEasing": "swing",
+                                "hideEasing": "linear",
+                                "showMethod": "fadeIn",
+                                "hideMethod": "fadeOut"
+                            }
+                            toastr.success('Login Success.');
+                            
                             $('#login_btn').html('Login');
                             $("#login_btn").prop("disabled", false);
                             formEl.reset();

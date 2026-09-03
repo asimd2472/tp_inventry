@@ -343,14 +343,14 @@
     "src": "resources/front/images/why-pravesh.jpeg"
   },
   "resources/front/js/app.css": {
-    "file": "assets/app-21fdfc57.css",
+    "file": "assets/app-9039b8de.css",
     "src": "resources/front/js/app.css"
   },
   "resources/front/js/app.js": {
     "css": [
-      "assets/app-21fdfc57.css"
+      "assets/app-9039b8de.css"
     ],
-    "file": "assets/app-17600731.js",
+    "file": "assets/app-ba7bc715.js",
     "imports": [
       "_additional-methods.min-6ba532ba.js"
     ],
@@ -358,7 +358,7 @@
     "src": "resources/front/js/app.js"
   },
   "resources/front/scss/style.scss": {
-    "file": "assets/style-84671133.css",
+    "file": "assets/style-dc0de6b1.css",
     "isEntry": true,
     "src": "resources/front/scss/style.scss"
   },

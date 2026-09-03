@@ -37,14 +37,14 @@ window.axios = axios;
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 // Import toastr styles
-// import 'toastr/build/toastr.min.css';
+import 'toastr/build/toastr.min.css';
 
 // Import toastr library
-// import toastr from 'toastr/build/toastr.min.js';
+import toastr from 'toastr/build/toastr.min.js';
 
-// window.toastr = toastr;
+window.toastr = toastr;
 
-import Sortable from 'sortablejs';
+// import Sortable from 'sortablejs';
 
 
 /**
