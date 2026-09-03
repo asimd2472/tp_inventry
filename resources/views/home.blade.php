@@ -8,35 +8,46 @@
                 <div class="col-lg-7 col-md-8 col-ms-12 col-12">
                     <div class="new-login-page g-3">
                         <div class="login-heading mb-2">Tata Pravesh Inventory</div>
-                        <div class="row align-items-center g-3">
-                            <div class="col-md-9 col-12" id="email-input">
+                        {{-- <p class="login-subtitle">Sign in securely with a one-time password</p> --}}
+                        <div class="login-row email-row">
+                            <div class="login-step email-step">
                                 <div class="front-input">
                                     <div class="position-relative add-icon-lft">
                                         <span class="icon-lft"><i class="fa-solid fa-envelope"></i></span>
-                                        <input type="email" name="username" class="form-control front-input-style" placeholder="Email" value="{{@Session::get('remember_me')['username']}}" required>
+                                        <input type="email" id="login-email" name="username" class="form-control front-input-style" placeholder="Email address" value="{{@Session::get('remember_me')['username']}}" required>
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="col-md-3 col-12 otp-input" style="display: none;">
-                                <div class="front-input">
-                                    <div class="position-relative add-icon-lft">
-                                        <span class="icon-lft"><i class="fa-solid fa-key"></i></span>
-                                        <input type="text" name="otp" class="form-control front-input-style" placeholder="Enter OTP">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-3 col-12">
-                                <div class="log-reg-submit-wrap" style="margin-top: -17px;">
+                            <div class="login-submit-row" id="login-action">
+                                <div class="log-reg-submit-wrap" style="margin-top: -16px;">
                                     <button type="submit" class="log-reg-submit-btn" id="login_btn">Login</button>
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="otp-controls" style="display: none; text-align: center; margin-top: 0px;">
-                                <span class="otp-timer text-muted">OTP expires in <span class="timer-value">05:00</span></span>
-                                <button type="button" class="btn btn-link resend-otp" style="display:none;">Resend OTP</button>
+                        <div class="login-row otp-row" style="display: none;">
+                            <div class="login-step otp-step otp-input">
+                                <div class="otp-step-heading">
+                                    <div>
+                                        <label class="login-label" for="otp-digit-1">Enter verification code</label>
+                                        <p>We sent a 6-digit code to your email. <strong id="masked-email"></strong></p>
+                                    </div>
+                                    <button type="button" class="otp-back" aria-label="Back to email"><i class="fa-solid fa-arrow-left"></i></button>
+                                </div>
+                                <div class="otp-boxes" aria-label="Six digit one-time password">
+                                    @for ($digit = 1; $digit <= 6; $digit++)
+                                        <input type="text" id="otp-digit-{{ $digit }}" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="OTP digit {{ $digit }}">
+                                    @endfor
+                                </div>
+                                <input type="hidden" name="otp" id="otp-value">
                             </div>
+                            <div class="otp-submit-slot"></div>
+                        </div>
+
+                        <div class="otp-controls" style="display: none; text-align: center; margin-top: 5px;">
+                            <span class="otp-timer text-muted">OTP expires in <span class="timer-value">05:00</span></span>
+                            <button type="button" class="btn btn-link resend-otp" style="display:none;">Resend OTP</button>
+                        </div>
 
                             <input type="hidden" name="rfc" value="@php if(isset($_GET['rfc'])) { if($_GET['rfc']=='method'){ echo 'method'; } } @endphp">
                             

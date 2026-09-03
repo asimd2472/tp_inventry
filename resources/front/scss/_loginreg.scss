@@ -240,6 +240,56 @@ input{
     box-shadow: 0px 0px 9px rgba($color: $color2, $alpha: 0.2);
 }
 
+.login-subtitle{
+    color:#6b7280;
+    font-size:.875rem;
+    margin:0 0 1.5rem;
+    text-align:center;
+}
+.login-row{align-items:center;display:flex;gap:.75rem;margin:0 auto;max-width:520px;}
+.otp-row{align-items:flex-end;}
+.login-step{flex:1;min-width:0;}
+.login-label{color:#163f77;display:block;font-size:.8rem;font-weight:700;margin-bottom:.5rem;}
+.login-submit-row{display:flex;justify-content:center;}
+.otp-step-heading{align-items:flex-start;display:flex;justify-content:space-between;gap:1rem;}
+.otp-step-heading p{color:#6b7280;font-size:.8rem;margin:0 0 1rem;}
+.otp-back{background:#eef5fb;border:0;border-radius:50%;color:#01478c;height:36px;width:36px;}
+.otp-back:hover{background:#01478c;color:#fff;}
+.otp-boxes{display:flex;gap:.625rem;justify-content:flex-start;margin:1rem 0 0;}
+.otp-digit{border:1px solid #d8e0e8;border-radius:.65rem;color:#163f77;font-size:1.5rem;font-weight:700;height:58px;outline:0;text-align:center;width:52px;}
+.otp-digit:focus{border-color:#01478c;box-shadow:0 0 0 .2rem rgba(1,71,140,.12);}
+.otp-controls{align-items:center;display:flex;flex-direction:column;gap:.25rem;}
+.otp-controls .resend-otp{color:#01478c;font-weight:700;padding:0;}
+
+.otp-row #login-action{flex:0 0 auto;}
+.otp-submit-slot{display:none;}
+.login-step-exit{animation:loginStepExit .22s ease forwards;}
+.login-step-enter{animation:loginStepEnter .35s ease both;}
+@keyframes loginStepExit{to{opacity:0;transform:translateY(-8px);}}
+@keyframes loginStepEnter{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.otp-step-heading strong{color:#163f77;font-weight:700;}
+
+@media only screen and (max-width: 575px) {
+    .login-row {
+        align-items:stretch;
+        flex-direction:column;
+    }
+    .login-submit-row,
+    .login-submit-row .log-reg-submit-wrap,
+    .login-submit-row .log-reg-submit-btn {
+        width:100%;
+        margin-top: 10;
+    }
+    .otp-boxes {
+        gap:.4rem;
+        justify-content:space-between;
+    }
+    .otp-digit {
+        height:50px;
+        width:calc((100% - 2rem) / 6);
+    }
+}
+
 
 
 .new-login-logo{
