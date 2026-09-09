@@ -118,8 +118,10 @@ class AdminCvrController extends Controller
 
                     $conversationText = "Discussion Summary:\n" . $discussionSummary;
 
-                    $geminiResult = $this->analyzeWithGemini($conversationText)
-                        ?? $this->fallbackAnalysis($discussionSummary);
+                    // $geminiResult = $this->analyzeWithGemini($conversationText) ?? $this->fallbackAnalysis($discussionSummary);
+                    $geminiResult = $this->analyzeWithGroq($conversationText) ?? $this->fallbackAnalysis($discussionSummary);
+
+                    
 
                     // dd($geminiResult);
                 }
@@ -660,6 +662,196 @@ class AdminCvrController extends Controller
 
         return ['actionPoints' => $actionPoints, 'complaints' => $complaints];
     }
+
+    private function analyzeWithGroq(string $text, int $retries = 3): ?array
+{
+    $prompt = <<<PROMPT
+You are a sales visit assistant.
+
+Return STRICT JSON only. No explanation.
+
+{
+  "summary": "string",
+  "actionPoints": [
+    {
+      "task": "string",
+      "owner": "string",
+      "deadline": "string",
+      "priority": "High | Medium | Low"
+    }
+  ],
+  "complaints": [
+    {
+      "category": "string",
+      "description": "string",
+      "severity": "Critical | Major | Minor"
+    }
+  ]
+}
+
+IMPORTANT:
+- Always return objects, NOT strings
+- Fill all fields
+- Do not add extra fields
+
+Conversation:
+{$text}
+PROMPT;
+
+    try {
+
+        $response = Http::timeout(30)
+            ->connectTimeout(10)
+            ->withToken(env('GROQ_API_KEY'))
+            ->post(
+                'https://api.groq.com/openai/v1/chat/completions',
+                [
+                    'model' => 'openai/gpt-oss-120b',
+
+                    'messages' => [
+                        [
+                            'role' => 'user',
+                            'content' => $prompt,
+                        ],
+                    ],
+
+                    'temperature' => 0,
+
+                    'response_format' => [
+                        'type' => 'json_object',
+                    ],
+                ]
+            );
+
+        $data = $response->json();
+
+        // Debug if required
+        // dd($data);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Retry on rate limit / temporary error
+        |--------------------------------------------------------------------------
+        */
+        if (
+            in_array($response->status(), [429, 500, 502, 503, 504])
+            && $retries > 0
+        ) {
+
+            $attempt = 4 - $retries;
+
+            Log::warning('Groq temporarily unavailable, retrying', [
+                'status' => $response->status(),
+                'attempt' => $attempt,
+                'retries_left' => $retries,
+            ]);
+
+            sleep($attempt * 2);
+
+            return $this->analyzeWithGroq(
+                $text,
+                $retries - 1
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | API error
+        |--------------------------------------------------------------------------
+        */
+        if (!$response->successful()) {
+
+            Log::error('Groq API error', [
+                'status' => $response->status(),
+                'response' => $data,
+            ]);
+
+            return null;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Get response text
+        |--------------------------------------------------------------------------
+        */
+        $resultText = $data['choices'][0]['message']['content'] ?? '';
+
+        if (empty($resultText)) {
+
+            Log::warning('Groq returned empty response', [
+                'response' => $data,
+            ]);
+
+            return null;
+        }
+
+        $resultText = trim($resultText);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Remove markdown code fences if returned
+        |--------------------------------------------------------------------------
+        */
+        $resultText = preg_replace(
+            '/^```json\s*/i',
+            '',
+            $resultText
+        );
+
+        $resultText = preg_replace(
+            '/\s*```$/',
+            '',
+            $resultText
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Parse JSON
+        |--------------------------------------------------------------------------
+        */
+        $parsed = json_decode($resultText, true);
+
+        if (
+            json_last_error() !== JSON_ERROR_NONE
+            || !is_array($parsed)
+        ) {
+
+            Log::warning('Groq returned invalid JSON', [
+                'response' => $resultText,
+                'json_error' => json_last_error_msg(),
+            ]);
+
+            return null;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Return same structure as your Gemini function
+        |--------------------------------------------------------------------------
+        */
+        return [
+            'summary' => $parsed['summary'] ?? '',
+
+            'actionPoints' => is_array($parsed['actionPoints'] ?? null)
+                ? $parsed['actionPoints']
+                : [],
+
+            'complaints' => is_array($parsed['complaints'] ?? null)
+                ? $parsed['complaints']
+                : [],
+        ];
+
+    } catch (\Throwable $e) {
+
+        Log::error('Groq call failed', [
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+
+        return null;
+    }
+}
 
     private function analyzeWithGemini(string $text, int $retries = 1): ?array
     {   
