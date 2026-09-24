@@ -104,6 +104,8 @@ Route::get('site-visit-record/export', [SiteVisitController::class, 'export'])->
 Route::get('site-visit-record/{id}/revisit', [SiteVisitController::class, 'revisit'])->name('site_visit_record.revisit');
 Route::get('site-visit-record/{id}', [SiteVisitController::class, 'show'])->name('site_visit_record.show');
 
+Route::post('/upload-inventry',[InventryController::class,'upload_inventry'])->name('upload_inventry');
+
 Route::get('/inventry-details',[InventryController::class,'index'])->name('inventry_details');
 Route::get('/inventry-upload',[InventryController::class,'inventry_upload'])->name('inventry_upload');
 
